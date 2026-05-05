@@ -11,4 +11,4 @@ RUN npm install
 COPY . .
 
 EXPOSE 5000
-CMD ["pm2-runtime", "start", "index.js"]
+CMD ["pm2-runtime", "start", "server.js"]
