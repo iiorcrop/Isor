@@ -54,7 +54,7 @@ const QuickLinksSettings = () => {
 
     const fetchLinks = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/quicklinks');
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/quicklinks`);
             setLinks(res.data);
             setLoading(false);
         } catch (err) {
@@ -94,7 +94,7 @@ const QuickLinksSettings = () => {
                 await axios.put(`http://localhost:5000/api/quicklinks/${editingLink._id}`, formData);
                 setMessage('Link updated successfully!');
             } else {
-                await axios.post('http://localhost:5000/api/quicklinks', formData);
+                await axios.post(`${import.meta.env.VITE_API_URL}/quicklinks`, formData);
                 setMessage('Link added successfully!');
             }
             fetchLinks();

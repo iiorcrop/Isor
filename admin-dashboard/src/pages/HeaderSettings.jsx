@@ -34,7 +34,7 @@ const HeaderSettings = () => {
 
     const fetchSettings = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/header');
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/header`);
             setSettings(res.data);
             if (res.data.logoUrl) {
                 setLogoPreview(res.data.logoUrl);
@@ -70,7 +70,7 @@ const HeaderSettings = () => {
         }
 
         try {
-            const res = await axios.post('http://localhost:5000/api/header', formData, {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/header`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             setSettings(res.data);

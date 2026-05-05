@@ -24,7 +24,7 @@ const TopBar = () => {
 
     const fetchSettings = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/topbar');
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/topbar`);
             setSettings(res.data);
         } catch (err) {
             console.error('Failed to fetch topbar settings', err);

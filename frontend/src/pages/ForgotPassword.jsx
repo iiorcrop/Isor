@@ -14,7 +14,7 @@ const ForgotPassword = () => {
         setLoading(true);
         setStatus(null);
         try {
-            const res = await axios.post('http://localhost:5000/api/membership/forgot-password', { email });
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/membership/forgot-password`, { email });
             setStatus('success');
             setMessage(res.data.message);
             setLoading(false);

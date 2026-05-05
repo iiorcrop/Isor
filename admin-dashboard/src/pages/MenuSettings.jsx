@@ -26,7 +26,7 @@ const MenuSettings = () => {
 
     const fetchMenu = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/menu');
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/menu`);
             setMenuItems(res.data.items);
             setLoading(false);
         } catch (err) {
@@ -78,7 +78,7 @@ const MenuSettings = () => {
         setSaving(true);
         setMessage('');
         try {
-            await axios.post('http://localhost:5000/api/menu', { items: menuItems });
+            await axios.post(`${import.meta.env.VITE_API_URL}/menu`, { items: menuItems });
             setMessage('Menu updated successfully!');
             setTimeout(() => setMessage(''), 3000);
         } catch (err) {

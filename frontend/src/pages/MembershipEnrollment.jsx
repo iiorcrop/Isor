@@ -57,7 +57,7 @@ const MembershipEnrollment = () => {
 
     const fetchPaymentSettings = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/admin/payment-settings');
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/payment-settings`);
             setPaymentSettings(res.data);
         } catch (err) {
             console.error('Failed to fetch payment settings', err);
@@ -74,7 +74,7 @@ const MembershipEnrollment = () => {
         data.append('paymentProof', paymentProof);
 
         try {
-            const res = await axios.post('http://localhost:5000/api/membership/enroll', data, {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/membership/enroll`, data, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
             setSuccess(res.data);

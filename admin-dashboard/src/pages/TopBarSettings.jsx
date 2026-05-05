@@ -31,7 +31,7 @@ const TopBarSettings = () => {
 
     const fetchSettings = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/topbar');
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/topbar`);
             setSettings(res.data);
             setLoading(false);
         } catch (err) {
@@ -45,7 +45,7 @@ const TopBarSettings = () => {
         setSaving(true);
         setMessage({ type: '', text: '' });
         try {
-            await axios.post('http://localhost:5000/api/topbar', settings);
+            await axios.post(`${import.meta.env.VITE_API_URL}/topbar`, settings);
             setMessage({ type: 'success', text: 'Settings updated successfully!' });
             setTimeout(() => setMessage({ type: '', text: '' }), 3000);
         } catch (err) {

@@ -35,9 +35,9 @@ const HomeContentSettings = () => {
     const fetchData = async () => {
         try {
             const [aboutRes, statsRes, annRes] = await Promise.all([
-                axios.get('http://localhost:5000/api/home-content/about'),
-                axios.get('http://localhost:5000/api/home-content/stats'),
-                axios.get('http://localhost:5000/api/home-content/announcements')
+                axios.get(`${import.meta.env.VITE_API_URL}/home-content/about`),
+                axios.get(`${import.meta.env.VITE_API_URL}/home-content/stats`),
+                axios.get(`${import.meta.env.VITE_API_URL}/home-content/announcements`)
             ]);
             setAbout(aboutRes.data);
             setStats(statsRes.data);
@@ -52,7 +52,7 @@ const HomeContentSettings = () => {
     const handleSaveAbout = async () => {
         setSaving(true);
         try {
-            await axios.put('http://localhost:5000/api/home-content/about', about);
+            await axios.put(`${import.meta.env.VITE_API_URL}/home-content/about`, about);
             setMessage('About content saved!');
             setTimeout(() => setMessage(''), 3000);
         } catch (err) { console.error(err); }
@@ -61,7 +61,7 @@ const HomeContentSettings = () => {
 
     const addStat = async () => {
         const newStat = { label: 'New Stat', value: '0', order: stats.length };
-        const res = await axios.post('http://localhost:5000/api/home-content/stats', newStat);
+        const res = await axios.post(`${import.meta.env.VITE_API_URL}/home-content/stats`, newStat);
         setStats([...stats, res.data]);
     };
 
@@ -77,7 +77,7 @@ const HomeContentSettings = () => {
 
     const addAnnouncement = async () => {
         const newAnn = { title: 'New Announcement', date: new Date(), badge: 'New', badgeColor: 'success' };
-        const res = await axios.post('http://localhost:5000/api/home-content/announcements', newAnn);
+        const res = await axios.post(`${import.meta.env.VITE_API_URL}/home-content/announcements`, newAnn);
         setAnnouncements([res.data, ...announcements]);
     };
 

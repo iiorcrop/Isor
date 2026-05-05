@@ -15,9 +15,9 @@ const MainContent = () => {
         const fetchData = async () => {
             try {
                 const [aboutRes, statsRes, annRes] = await Promise.all([
-                    axios.get('http://localhost:5000/api/home-content/about'),
-                    axios.get('http://localhost:5000/api/home-content/stats'),
-                    axios.get('http://localhost:5000/api/home-content/announcements')
+                    axios.get(`${import.meta.env.VITE_API_URL}/home-content/about`),
+                    axios.get(`${import.meta.env.VITE_API_URL}/home-content/stats`),
+                    axios.get(`${import.meta.env.VITE_API_URL}/home-content/announcements`)
                 ]);
                 setAbout(aboutRes.data);
                 setStats(statsRes.data);
