@@ -12,7 +12,8 @@ const HomeCommittee = () => {
     useEffect(() => {
         const fetchExecutive = async () => {
             try {
-                const res = await axios.get('/api/committees/Executive');
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/committees/Executive`);
+
                 if (res.data.length > 0) {
                     const periods = [...new Set(res.data.map(m => m.period))].sort().reverse();
                     const latestPeriod = periods[0];
@@ -70,15 +71,16 @@ const HomeCommittee = () => {
                                 <div className="relative mb-6 mx-auto w-32 h-32">
                                     <div className="absolute inset-0 bg-[#b47c1c] rounded-full rotate-6 opacity-20" />
                                     <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-100 flex items-center justify-center">
-                                        {member.photoUrl ? (
+                                        {member.photoUrl && typeof member.photoUrl === 'string' ? (
                                             <img 
-                                                src={member.photoUrl.startsWith('http') ? member.photoUrl : `/${member.photoUrl}`} 
+                                                src={member.photoUrl.startsWith('http') ? member.photoUrl : `${import.meta.env.VITE_API_URL}/../${member.photoUrl}`} 
                                                 alt={member.name}
                                                 className="w-full h-full object-cover"
                                             />
                                         ) : (
                                             <div className="w-full h-full bg-[#064e3b] text-white flex items-center justify-center text-3xl font-bold uppercase">
-                                                {member.name.split(' ').map(n => n[0]).join('')}
+                                                {member.name ? member.name.split(' ').map(n => n[0]).join('') : 'U'}
+
                                             </div>
                                         )}
                                     </div>

@@ -27,7 +27,8 @@ const CommitteePage = () => {
     const fetchMembers = async () => {
         setLoading(true);
         try {
-            const res = await axios.get(`/api/committees/${type || 'Executive'}`);
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/committees/${type || 'Executive'}`);
+
             setMembers(res.data);
             
             // Extract and sort periods (descending)
@@ -139,17 +140,18 @@ const CommitteePage = () => {
                                                     <td className="px-6 py-4">
                                                         <div className="flex justify-center">
                                                             <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden border-2 border-white shadow-md">
-                                                                {member.photoUrl ? (
+                                                                {member.photoUrl && typeof member.photoUrl === 'string' ? (
                                                                     <img 
-                                                                        src={member.photoUrl.startsWith('http') ? member.photoUrl : `/${member.photoUrl}`} 
+                                                                        src={member.photoUrl.startsWith('http') ? member.photoUrl : `${import.meta.env.VITE_API_URL}/../${member.photoUrl}`} 
                                                                         alt={member.name} 
                                                                         className="w-full h-full object-cover"
                                                                     />
                                                                 ) : (
                                                                     <div className="w-full h-full flex items-center justify-center text-lg font-bold text-[#064e3b]/20">
-                                                                        {member.name.charAt(0)}
+                                                                        {member.name ? member.name.charAt(0) : 'U'}
                                                                     </div>
                                                                 )}
+
                                                             </div>
                                                         </div>
                                                     </td>
