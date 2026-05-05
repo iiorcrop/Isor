@@ -1,0 +1,45 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+@theme {
+  --animate-ticker: ticker 30s linear infinite;
+
+  @keyframes ticker {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  --font-outfit: "Outfit", sans-serif;
+  --color-primary: #1e703c;
+  --color-accent: #b47c1c;
+  --color-danger: #ef4444;
+  --color-success: #22c55e;
+}
+
+.pause {
+  animation-play-state: paused;
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hidden-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+:root {
+  font-family: 'Outfit', sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background-color: white;
+}
