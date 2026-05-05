@@ -23,6 +23,7 @@ const TopBar = () => {
     }, []);
 
     const fetchSettings = async () => {
+        console.log(`${import.meta.env.VITE_API_URL}/topbar`);
         try {
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/topbar`);
             setSettings(res.data);
