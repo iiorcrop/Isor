@@ -28,7 +28,7 @@ const QuickLinks = () => {
     useEffect(() => {
         const fetchLinks = async () => {
             try {
-                const res = await axios.get('/api/quicklinks/active');
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/quicklinks/active`);
                 setLinks(res.data);
             } catch (err) {
                 console.error('Failed to fetch quick links', err);

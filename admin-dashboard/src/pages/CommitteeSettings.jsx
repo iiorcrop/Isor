@@ -57,7 +57,7 @@ const CommitteeSettings = () => {
 
     const fetchMembers = async () => {
         try {
-            const res = await axios.get(`/api/committees/${activeTab}`);
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/committees/${activeTab}`);
             setMembers(res.data);
         } catch (err) { console.error(err); }
     };
@@ -93,11 +93,11 @@ const CommitteeSettings = () => {
         try {
             if (editingMember) {
                 if (!editingMember._id) throw new Error('Member ID is missing');
-                await axios.post(`/api/committees/update-member/${editingMember._id}`, formData, {
+                await axios.post(`${import.meta.env.VITE_API_URL}/committees/update-member/${editingMember._id}`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
             } else {
-                await axios.post('/api/committees', formData, {
+                await axios.post(`${import.meta.env.VITE_API_URL}/committees`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
             }
@@ -114,7 +114,7 @@ const CommitteeSettings = () => {
     const handleDelete = async (id) => {
         if (!window.confirm('Remove this member?')) return;
         try {
-            await axios.delete(`/api/committees/${id}`);
+            await axios.delete(`${import.meta.env.VITE_API_URL}/committees/${id}`);
             fetchMembers();
         } catch (err) { alert('Failed to delete'); }
     };

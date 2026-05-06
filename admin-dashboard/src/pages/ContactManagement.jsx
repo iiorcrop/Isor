@@ -20,8 +20,8 @@ const ContactManagement = () => {
     const fetchData = async () => {
         try {
             const [settingsRes, inquiriesRes] = await Promise.all([
-                axios.get('/api/contact/settings'),
-                axios.get('/api/contact/inquiries')
+                axios.get(`${import.meta.env.VITE_API_URL}/contact/settings`),
+                axios.get(`${import.meta.env.VITE_API_URL}/contact/inquiries`)
             ]);
             setSettings(settingsRes.data);
             setInquiries(inquiriesRes.data);
@@ -32,7 +32,7 @@ const ContactManagement = () => {
     const handleSettingsUpdate = async (e) => {
         e.preventDefault();
         try {
-            await axios.patch('/api/contact/settings', settings);
+            await axios.patch(`${import.meta.env.VITE_API_URL}/contact/settings`, settings);
             setMessage('Settings updated successfully!');
             setTimeout(() => setMessage(''), 3000);
         } catch (err) { console.error(err); }
@@ -40,7 +40,7 @@ const ContactManagement = () => {
 
     const updateInquiryStatus = async (id, status) => {
         try {
-            await axios.patch(`/api/contact/inquiry/${id}/status`, { status });
+            await axios.patch(`${import.meta.env.VITE_API_URL}/contact/inquiry/${id}/status`, { status });
             fetchData();
         } catch (err) { console.error(err); }
     };
@@ -48,7 +48,7 @@ const ContactManagement = () => {
     const deleteInquiry = async (id) => {
         if (!window.confirm('Delete this inquiry?')) return;
         try {
-            await axios.delete(`/api/contact/inquiry/${id}`);
+            await axios.delete(`${import.meta.env.VITE_API_URL}/contact/inquiry/${id}`);
             fetchData();
         } catch (err) { console.error(err); }
     };

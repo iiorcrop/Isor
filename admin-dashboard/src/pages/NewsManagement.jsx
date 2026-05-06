@@ -41,7 +41,7 @@ const NewsManagement = () => {
 
     const fetchNews = async () => {
         try {
-            const res = await axios.get('/api/news/admin');
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/news/admin`);
             setNewsItems(res.data);
             setLoading(false);
         } catch (err) {
@@ -97,10 +97,10 @@ const NewsManagement = () => {
 
         try {
             if (editingItem) {
-                await axios.put(`/api/news/${editingItem._id}`, data);
+                await axios.put(`${import.meta.env.VITE_API_URL}/news/${editingItem._id}`, data);
                 setMessage('News updated successfully!');
             } else {
-                await axios.post('/api/news', data);
+                await axios.post(`${import.meta.env.VITE_API_URL}/news`, data);
                 setMessage('News added successfully!');
             }
             fetchNews();
@@ -116,7 +116,7 @@ const NewsManagement = () => {
     const handleDelete = async (id) => {
         if (!window.confirm('Are you sure you want to delete this news item?')) return;
         try {
-            await axios.delete(`/api/news/${id}`);
+            await axios.delete(`${import.meta.env.VITE_API_URL}/news/${id}`);
             fetchNews();
             setMessage('News deleted!');
             setTimeout(() => setMessage(''), 3000);
@@ -127,7 +127,7 @@ const NewsManagement = () => {
 
     const toggleStatus = async (item) => {
         try {
-            await axios.put(`/api/news/${item._id}`, {
+            await axios.put(`${import.meta.env.VITE_API_URL}/news/${item._id}`, {
                 ...item,
                 isActive: !item.isActive
             });

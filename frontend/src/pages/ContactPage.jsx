@@ -10,14 +10,14 @@ const ContactPage = () => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        axios.get('/api/contact/settings').then(res => setSettings(res.data));
+        axios.get(`${import.meta.env.VITE_API_URL}/contact/settings`).then(res => setSettings(res.data));
     }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await axios.post('/api/contact/inquiry', formData);
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/contact/inquiry`, formData);
             setStatus({ type: 'success', msg: res.data.message });
             setFormData({ name: '', email: '', subject: '', message: '' });
         } catch (err) {

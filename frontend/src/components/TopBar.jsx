@@ -47,25 +47,25 @@ const TopBar = () => {
     };
 
     return (
-        <header className="h-10 bg-[#064e3b] flex items-center justify-between px-6 z-10 shrink-0 text-[11px] font-medium text-white/90">
+        <header className="h-auto md:h-10 bg-[#064e3b] flex flex-col md:flex-row items-center justify-between px-4 md:px-6 z-10 shrink-0 text-[10px] md:text-[11px] font-medium text-white/90 py-2 md:py-0 gap-2 md:gap-0">
             {/* Left Section: Time, Location, Phone */}
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 md:gap-4 w-full md:w-auto">
                 <div className="flex items-center gap-1.5">
                     <span className="text-[#fbbf24] font-bold">
                         {formatDateTime(dateTime)}
                     </span>
                 </div>
                 
-                <span className="text-white/20">|</span>
+                <span className="hidden md:inline text-white/20">|</span>
                 
-                <div className="flex items-center gap-1.5 group cursor-default">
+                <div className="hidden lg:flex items-center gap-1.5 group cursor-default">
                     <MapPin size={12} className="text-[#ec4899]" />
                     <span className="hover:text-white transition-colors">
                         {settings?.location || 'Hyderabad, Telangana, India'}
                     </span>
                 </div>
 
-                <span className="text-white/20">|</span>
+                <span className="hidden lg:inline text-white/20">|</span>
 
                 <div className="flex items-center gap-1.5 group cursor-default">
                     <Phone size={12} className="text-[#ec4899]" />
@@ -76,25 +76,26 @@ const TopBar = () => {
             </div>
 
             {/* Right Section: Social, Admin, Contact */}
-            <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center md:justify-end gap-3 md:gap-4 w-full md:w-auto border-t border-white/10 md:border-t-0 pt-2 md:pt-0">
+                <div className="hidden sm:flex items-center gap-2">
                     <SocialIcon icon={FacebookIcon} href={settings?.socialLinks?.facebook} color="#1877F2" />
                     <SocialIcon icon={XIcon} href={settings?.socialLinks?.twitter} color="#ffffff" />
                     <SocialIcon icon={LinkedinIcon} href={settings?.socialLinks?.linkedin} color="#0A66C2" />
                     <SocialIcon icon={PlayIcon} href={settings?.socialLinks?.youtube} color="#FF0000" />
                 </div>
 
-                <span className="text-white/20">|</span>
+                <span className="hidden sm:inline text-white/20">|</span>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 md:gap-4">
                     <a href="/login" className="hover:text-[#fbbf24] transition-colors uppercase tracking-wider font-bold">Member Login</a>
                     <span className="text-white/20">|</span>
-                    <a href="http://localhost:5176" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors uppercase tracking-wider">Admin Dashboard</a>
-                    <span className="text-white/20">|</span>
-                    <a href="#" className="hover:text-white transition-colors uppercase tracking-wider">Contact</a>
+                    <a href="http://localhost:5176" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors uppercase tracking-wider text-[9px] md:text-[11px]">Admin</a>
+                    <span className="hidden xs:inline text-white/20">|</span>
+                    <a href="#" className="hidden xs:inline hover:text-white transition-colors uppercase tracking-wider">Contact</a>
                 </div>
             </div>
         </header>
+
     );
 };
 

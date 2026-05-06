@@ -66,12 +66,12 @@ const HomeContentSettings = () => {
     };
 
     const deleteStat = async (id) => {
-        await axios.delete(`http://localhost:5000/api/home-content/stats/${id}`);
+        await axios.delete(`${import.meta.env.VITE_API_URL}/home-content/stats/${id}`);
         setStats(stats.filter(s => s._id !== id));
     };
 
     const updateStat = async (id, data) => {
-        await axios.put(`http://localhost:5000/api/home-content/stats/${id}`, data);
+        await axios.put(`${import.meta.env.VITE_API_URL}/home-content/stats/${id}`, data);
         fetchData();
     };
 
@@ -82,7 +82,7 @@ const HomeContentSettings = () => {
     };
 
     const deleteAnnouncement = async (id) => {
-        await axios.delete(`http://localhost:5000/api/home-content/announcements/${id}`);
+        await axios.delete(`${import.meta.env.VITE_API_URL}/home-content/announcements/${id}`);
         setAnnouncements(announcements.filter(a => a._id !== id));
     };
 
@@ -218,7 +218,7 @@ const HomeContentSettings = () => {
                                                 newAnn[i].title = e.target.value;
                                                 setAnnouncements(newAnn);
                                             }}
-                                            onBlur={() => axios.put(`http://localhost:5000/api/home-content/announcements/${ann._id}`, ann)}
+                                            onBlur={() => axios.put(`${import.meta.env.VITE_API_URL}/home-content/announcements/${ann._id}`, ann)}
                                             className="w-full bg-transparent text-white font-bold outline-none group-hover:text-primary transition-colors"
                                         />
                                         <div className="flex items-center gap-4">
@@ -229,7 +229,7 @@ const HomeContentSettings = () => {
                                                     const newAnn = [...announcements];
                                                     newAnn[i].date = e.target.value;
                                                     setAnnouncements(newAnn);
-                                                    axios.put(`http://localhost:5000/api/home-content/announcements/${ann._id}`, { date: e.target.value });
+                                                    axios.put(`${import.meta.env.VITE_API_URL}/home-content/announcements/${ann._id}`, { date: e.target.value });
                                                 }}
                                                 className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs text-white/40 outline-none"
                                             />
@@ -239,7 +239,7 @@ const HomeContentSettings = () => {
                                                     const newAnn = [...announcements];
                                                     newAnn[i].badge = e.target.value;
                                                     setAnnouncements(newAnn);
-                                                    axios.put(`http://localhost:5000/api/home-content/announcements/${ann._id}`, { badge: e.target.value });
+                                                    axios.put(`${import.meta.env.VITE_API_URL}/home-content/announcements/${ann._id}`, { badge: e.target.value });
                                                 }}
                                                 className="bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-xs text-white/40 outline-none"
                                             >

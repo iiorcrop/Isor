@@ -42,10 +42,10 @@ const Dashboard = () => {
     const fetchStats = async () => {
         try {
             const [membersRes, journalsRes, contactRes, newsRes] = await Promise.allSettled([
-                axios.get('/api/admin/members'),
-                axios.get('/api/journal/admin'),
-                axios.get('/api/contact'),
-                axios.get('/api/news/admin'),
+                axios.get(`${import.meta.env.VITE_API_URL}/admin/members`),
+                axios.get(`${import.meta.env.VITE_API_URL}/journal/admin`),
+                axios.get(`${import.meta.env.VITE_API_URL}/contact`),
+                axios.get(`${import.meta.env.VITE_API_URL}/news/admin`),
             ]);
 
             const members = membersRes.status === 'fulfilled' ? membersRes.value.data : [];

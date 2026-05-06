@@ -29,7 +29,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         // Poll for pending approvals every 30s
         const fetchPending = async () => {
             try {
-                const res = await axios.get('/api/admin/members');
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/members`);
                 const pending = res.data.filter(m =>
                     (!m.approvalStatus || m.approvalStatus === 'Pending') &&
                     m.paymentStatus === 'Completed'

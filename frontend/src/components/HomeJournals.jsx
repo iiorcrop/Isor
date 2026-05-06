@@ -11,7 +11,7 @@ const HomeJournals = () => {
     useEffect(() => {
         const fetchJournals = async () => {
             try {
-                const res = await axios.get('/api/journal');
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/journal`);
                 setJournals(res.data);
                 setLoading(false);
             } catch (err) {

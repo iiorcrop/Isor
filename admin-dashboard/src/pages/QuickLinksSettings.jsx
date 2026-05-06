@@ -91,7 +91,7 @@ const QuickLinksSettings = () => {
         setSaving(true);
         try {
             if (editingLink) {
-                await axios.put(`http://localhost:5000/api/quicklinks/${editingLink._id}`, formData);
+                await axios.put(`${import.meta.env.VITE_API_URL}/quicklinks/${editingLink._id}`, formData);
                 setMessage('Link updated successfully!');
             } else {
                 await axios.post(`${import.meta.env.VITE_API_URL}/quicklinks`, formData);
@@ -110,7 +110,7 @@ const QuickLinksSettings = () => {
     const handleDelete = async (id) => {
         if (!window.confirm('Delete this quick link?')) return;
         try {
-            await axios.delete(`http://localhost:5000/api/quicklinks/${id}`);
+            await axios.delete(`${import.meta.env.VITE_API_URL}/quicklinks/${id}`);
             fetchLinks();
             setMessage('Link deleted.');
             setTimeout(() => setMessage(''), 3000);
@@ -121,7 +121,7 @@ const QuickLinksSettings = () => {
 
     const toggleStatus = async (link) => {
         try {
-            await axios.put(`http://localhost:5000/api/quicklinks/${link._id}`, {
+            await axios.put(`${import.meta.env.VITE_API_URL}/quicklinks/${link._id}`, {
                 ...link,
                 isActive: !link.isActive
             });

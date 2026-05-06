@@ -20,7 +20,7 @@ const PaymentSettings = () => {
 
     const fetchSettings = async () => {
         try {
-            const res = await axios.get('/api/admin/payment-settings');
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/payment-settings`);
             setSettings(res.data);
         } catch (err) { 
             console.error('Fetch error:', err);
@@ -32,7 +32,7 @@ const PaymentSettings = () => {
         try {
             // Strip internal fields to avoid MongoDB errors
             const { _id, __v, createdAt, updatedAt, ...payload } = settings;
-            const res = await axios.post('/api/admin/payment-settings', payload);
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/admin/payment-settings`, payload);
             alert('Payment settings updated successfully!');
             setLoading(false);
         } catch (err) {

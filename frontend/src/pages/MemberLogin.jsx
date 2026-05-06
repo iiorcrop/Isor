@@ -16,7 +16,7 @@ const MemberLogin = () => {
         setLoading(true);
         setError('');
         try {
-            const res = await axios.post('/api/membership/login', credentials);
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/membership/login`, credentials);
             const { member } = res.data;
             
             if (member.approvalStatus === 'Approved') {
@@ -41,7 +41,7 @@ const MemberLogin = () => {
         formData.append('paymentProof', resubmitFile);
 
         try {
-            await axios.post('/api/membership/resubmit-proof', formData);
+            await axios.post(`${import.meta.env.VITE_API_URL}/membership/resubmit-proof`, formData);
             alert('Proof resubmitted! Our team will review it.');
             setStatusData(null);
         } catch (err) {

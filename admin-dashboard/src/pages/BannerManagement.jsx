@@ -41,7 +41,7 @@ const BannerManagement = () => {
 
     const fetchBanners = async () => {
         try {
-            const res = await axios.get('/api/banner');
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/banner`);
             setBanners(res.data);
             setLoading(false);
         } catch (err) {
@@ -98,10 +98,10 @@ const BannerManagement = () => {
 
         try {
             if (editingBanner) {
-                await axios.put(`/api/banner/${editingBanner._id}`, data);
+                await axios.put(`${import.meta.env.VITE_API_URL}/banner/${editingBanner._id}`, data);
                 setMessage('Banner updated successfully!');
             } else {
-                await axios.post('/api/banner', data);
+                await axios.post(`${import.meta.env.VITE_API_URL}/banner`, data);
                 setMessage('Banner added successfully!');
             }
             fetchBanners();
@@ -117,7 +117,7 @@ const BannerManagement = () => {
     const handleDelete = async (id) => {
         if (!window.confirm('Delete this banner?')) return;
         try {
-            await axios.delete(`/api/banner/${id}`);
+            await axios.delete(`${import.meta.env.VITE_API_URL}/banner/${id}`);
             fetchBanners();
             setMessage('Banner deleted.');
             setTimeout(() => setMessage(''), 3000);

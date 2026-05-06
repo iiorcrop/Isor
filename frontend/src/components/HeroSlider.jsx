@@ -11,7 +11,7 @@ const HeroSlider = () => {
     useEffect(() => {
         const fetchBanners = async () => {
             try {
-                const res = await axios.get('/api/banner/active');
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/banner/active`);
                 setBanners(res.data);
                 setLoading(false);
             } catch (err) {
@@ -54,28 +54,28 @@ const HeroSlider = () => {
                     <img 
                         src={banners[currentIndex].imageUrl.startsWith('http') 
                             ? banners[currentIndex].imageUrl 
-                            : `/${banners[currentIndex].imageUrl}`} 
+                            : `${import.meta.env.VITE_API_URL}/../${banners[currentIndex].imageUrl}`} 
                         alt={banners[currentIndex].title}
                         className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/20 to-transparent md:from-black/60 md:via-transparent" />
                     
                     {/* Content Overlay */}
                     <div className="absolute inset-0 flex items-center">
-                        <div className="max-w-7xl mx-auto px-12 w-full">
+                        <div className="max-w-7xl mx-auto px-6 md:px-12 w-full">
                             <motion.div 
                                 initial={{ x: -100, opacity: 0 }}
                                 animate={{ x: 0, opacity: 1 }}
                                 transition={{ delay: 0.3, duration: 0.6 }}
-                                className="max-w-2xl space-y-6"
+                                className="max-w-2xl space-y-4 md:space-y-6 text-center md:text-left"
                             >
                                 {banners[currentIndex].title && (
-                                    <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight drop-shadow-2xl">
+                                    <h1 className="text-3xl md:text-6xl font-bold text-white leading-tight drop-shadow-2xl">
                                         {banners[currentIndex].title}
                                     </h1>
                                 )}
                                 {banners[currentIndex].subtitle && (
-                                    <p className="text-lg md:text-xl text-white/80 leading-relaxed drop-shadow-lg">
+                                    <p className="text-base md:text-xl text-white/80 leading-relaxed drop-shadow-lg max-w-lg mx-auto md:mx-0">
                                         {banners[currentIndex].subtitle}
                                     </p>
                                 )}
@@ -84,7 +84,7 @@ const HeroSlider = () => {
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
                                         href={banners[currentIndex].link}
-                                        className="inline-block bg-[#b47c1c] hover:bg-[#9a6a18] text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl transition-all"
+                                        className="inline-block bg-[#b47c1c] hover:bg-[#9a6a18] text-white px-6 py-3 md:px-8 md:py-4 rounded-xl font-bold text-base md:text-lg shadow-xl transition-all"
                                     >
                                         Explore More
                                     </motion.a>
@@ -92,6 +92,7 @@ const HeroSlider = () => {
                             </motion.div>
                         </div>
                     </div>
+
                 </motion.div>
             </AnimatePresence>
 

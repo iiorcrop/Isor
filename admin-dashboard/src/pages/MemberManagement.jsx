@@ -34,7 +34,7 @@ const MemberManagement = () => {
 
     const fetchMembers = async () => {
         try {
-            const res = await axios.get('/api/admin/members', {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/admin/members`, {
                 params: filter
             });
             setMembers(res.data);
@@ -48,7 +48,7 @@ const MemberManagement = () => {
     const updateStatus = async (id, updates) => {
         setUpdatingId(id);
         try {
-            const res = await axios.patch(`/api/admin/members/${id}/status`, updates);
+            const res = await axios.patch(`${import.meta.env.VITE_API_URL}/admin/members/${id}/status`, updates);
             // Immediately update local state from API response for instant UI feedback
             setMembers(prev => prev.map(m => m._id === id ? { ...m, ...res.data } : m));
         } catch (err) {

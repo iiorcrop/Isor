@@ -18,7 +18,7 @@ const JournalManagement = () => {
 
     const fetchJournals = async () => {
         try {
-            const res = await axios.get('/api/journal/admin');
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/journal/admin`);
             setJournals(res.data);
             setLoading(false);
         } catch (err) { console.error(err); }
@@ -34,9 +34,9 @@ const JournalManagement = () => {
 
         try {
             if (editing) {
-                await axios.patch(`/api/journal/${editing._id}`, data);
+                await axios.patch(`${import.meta.env.VITE_API_URL}/journal/${editing._id}`, data);
             } else {
-                await axios.post('/api/journal', data);
+                await axios.post(`${import.meta.env.VITE_API_URL}/journal`, data);
             }
             fetchJournals();
             setShowForm(false);
@@ -49,7 +49,7 @@ const JournalManagement = () => {
     const deleteJournal = async (id) => {
         if (!window.confirm('Delete this volume?')) return;
         try {
-            await axios.delete(`/api/journal/${id}`);
+            await axios.delete(`${import.meta.env.VITE_API_URL}/journal/${id}`);
             fetchJournals();
         } catch (err) { console.error(err); }
     };
