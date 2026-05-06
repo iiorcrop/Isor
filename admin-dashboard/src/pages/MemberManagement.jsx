@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getServerUrl } from '../utils/urlHelper';
+
 import { 
     Users, 
     Search, 
@@ -330,7 +332,7 @@ const MemberManagement = () => {
                                                     </div>
                                                     <p className="text-white font-bold">PDF Document Uploaded</p>
                                                     <a 
-                                                        href={`/${selectedMember.paymentProofUrl}`}
+                                                        href={getServerUrl(selectedMember.paymentProofUrl)}
                                                         target="_blank"
                                                         className="inline-block bg-primary text-white px-6 py-3 rounded-xl font-bold hover:scale-105 transition-all"
                                                     >
@@ -339,7 +341,7 @@ const MemberManagement = () => {
                                                 </div>
                                             ) : (
                                                     <img 
-                                                        src={`/${selectedMember.paymentProofUrl}`} 
+                                                        src={getServerUrl(selectedMember.paymentProofUrl)} 
                                                     alt="Payment Proof" 
                                                     className="max-w-full max-h-full object-contain"
                                                 />

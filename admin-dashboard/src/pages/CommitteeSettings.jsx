@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getServerUrl } from '../utils/urlHelper';
+
 import { Users, Plus, Trash2, Award, BookOpen, Shield, History, Pencil, Eye, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -317,7 +319,7 @@ const CommitteeSettings = () => {
                                 <div className="flex items-center gap-5">
                                     <div className="w-16 h-16 rounded-2xl bg-primary/10 overflow-hidden border border-white/5 shadow-lg">
                                         {member.photoUrl ? (
-                                            <img src={`/${member.photoUrl}`} alt={member.name} className="w-full h-full object-cover" />
+                                            <img src={getServerUrl(member.photoUrl)} alt={member.name} className="w-full h-full object-cover" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-primary font-bold text-xl bg-primary/5">
                                                 {member.name.charAt(0)}
@@ -402,7 +404,7 @@ const CommitteeSettings = () => {
                                     <div className="w-32 h-32 rounded-[2rem] bg-[#0f172a] p-1 shadow-2xl">
                                         <div className="w-full h-full rounded-[1.8rem] bg-white/5 overflow-hidden border border-white/10">
                                             {viewingMember.photoUrl ? (
-                                                <img src={`/${viewingMember.photoUrl}`} className="w-full h-full object-cover" />
+                                                <img src={getServerUrl(viewingMember.photoUrl)} className="w-full h-full object-cover" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-4xl text-primary font-bold">
                                                     {viewingMember.name.charAt(0)}

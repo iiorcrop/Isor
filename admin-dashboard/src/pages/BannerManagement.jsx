@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getServerUrl } from '../utils/urlHelper';
+
 import { 
     Plus, 
     Trash2, 
@@ -59,7 +61,7 @@ const BannerManagement = () => {
                 link: banner.link || '',
                 isActive: banner.isActive,
                 image: null,
-                preview: banner.imageUrl.startsWith('http') ? banner.imageUrl : `/${banner.imageUrl}`
+                preview: getServerUrl(banner.imageUrl)
             });
         } else {
             setEditingBanner(null);
@@ -158,7 +160,7 @@ const BannerManagement = () => {
                         className="bg-[#0f172a] rounded-3xl overflow-hidden border border-white/5 shadow-2xl flex flex-col group"
                     >
                         <div className="relative aspect-video overflow-hidden">
-                            <img src={banner.imageUrl.startsWith('http') ? banner.imageUrl : `/${banner.imageUrl}`} alt={banner.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                            <img src={getServerUrl(banner.imageUrl)} alt={banner.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
                                 <div className="flex gap-2 w-full">
                                     <button onClick={() => handleOpenModal(banner)} className="flex-1 bg-white/20 backdrop-blur-md hover:bg-white/30 text-white py-2 rounded-lg font-bold transition-all">Edit</button>

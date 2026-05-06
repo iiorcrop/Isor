@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getServerUrl } from '../utils/urlHelper';
 import { Plus, Trash2, Edit, FileText, ImageIcon, CheckCircle, XCircle, Save, Loader2 } from 'lucide-react';
 
 const JournalManagement = () => {
@@ -135,7 +136,7 @@ const JournalManagement = () => {
                         </div>
                         <div className="w-full aspect-[3/4] bg-black/20 rounded-2xl mb-6 flex items-center justify-center overflow-hidden border border-white/5">
                             {journal.coverImageUrl ? (
-                                <img src={`/${journal.coverImageUrl}`} alt="" className="w-full h-full object-cover" />
+                                <img src={getServerUrl(journal.coverImageUrl)} alt="" className="w-full h-full object-cover" />
                             ) : (
                                 <ImageIcon size={48} className="text-white/10" />
                             )}

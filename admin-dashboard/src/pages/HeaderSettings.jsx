@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getServerUrl } from '../utils/urlHelper';
+
 import { 
     Save, 
     Type, 
@@ -37,7 +39,7 @@ const HeaderSettings = () => {
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/header`);
             setSettings(res.data);
             if (res.data.logoUrl) {
-                setLogoPreview(res.data.logoUrl);
+                setLogoPreview(getServerUrl(res.data.logoUrl));
             }
             setLoading(false);
         } catch (err) {
