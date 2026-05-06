@@ -27,7 +27,7 @@ const HomeJournals = () => {
     const doubledJournals = [...journals, ...journals, ...journals];
 
     return (
-        <section className="bg-[#fff9f0] py-24 overflow-hidden border-t border-[#064e3b]/5">
+        <section className="bg-[#fff9f0] pt-12 pb-10 overflow-hidden border-t border-[#064e3b]/5">
             <div className="max-w-7xl mx-auto px-6 mb-12">
                 <div className="flex items-center gap-3">
                     <div className="w-1.5 h-8 bg-[#b47c1c] rounded-full" />
@@ -103,7 +103,7 @@ const HomeJournals = () => {
                 </motion.div>
             </div>
 
-            <div className="mt-16 text-center">
+            <div className="mt-6 text-center">
                 <a 
                     href="/archives" 
                     className="inline-flex items-center gap-2 text-[#064e3b] font-bold text-sm hover:text-[#b47c1c] transition-colors group"

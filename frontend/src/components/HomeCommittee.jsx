@@ -35,7 +35,7 @@ const HomeCommittee = () => {
 
     return (
         <>
-            <section className="bg-white py-20 border-t border-gray-50 overflow-hidden">
+            <section className="bg-white pt-12 pb-10 border-t border-gray-50 overflow-hidden">
                 <div className="max-w-7xl mx-auto px-6 mb-12">
                     <div className="flex items-center gap-3">
                         <div className="w-1.5 h-8 bg-[#b47c1c] rounded-full" />
@@ -103,7 +103,7 @@ const HomeCommittee = () => {
                     </motion.div>
                 </div>
 
-                <div className="mt-16 text-center">
+                <div className="mt-6 text-center">
                     <a 
                         href="/committee/Executive" 
                         className="inline-flex items-center gap-2 text-[#064e3b] font-bold text-sm hover:text-[#b47c1c] transition-colors group"
