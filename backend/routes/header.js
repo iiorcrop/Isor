@@ -39,7 +39,7 @@ router.post('/', upload.single('logo'), async (req, res) => {
     try {
         const updateData = { ...req.body };
         if (req.file) {
-            updateData.logoUrl = `http://localhost:5000/uploads/logos/${req.file.filename}`;
+            updateData.logoUrl = `/uploads/logos/${req.file.filename}`;
         }
 
         let settings = await HeaderSettings.findOne();
