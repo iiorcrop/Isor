@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getServerUrl } from '../utils/urlHelper';
+
 
 const NewsTicker = () => {
     const [news, setNews] = useState([]);
@@ -43,7 +45,7 @@ const NewsTicker = () => {
 
                             {/* News Text with Link */}
                             <a 
-                                href={item.isPdf ? `${import.meta.env.VITE_API_URL.replace('/api', '')}${item.pdfUrl}` : item.link} 
+                                href={item.isPdf ? getServerUrl(item.pdfUrl) : item.link} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 className="text-[#374151] hover:text-[#1e703c] transition-colors text-[14px] font-medium"

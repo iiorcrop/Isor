@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getServerUrl } from '../utils/urlHelper';
+
 import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 
@@ -73,7 +75,7 @@ const HomeCommittee = () => {
                                     <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-100 flex items-center justify-center">
                                         {member.photoUrl && typeof member.photoUrl === 'string' ? (
                                             <img 
-                                                src={member.photoUrl.startsWith('http') ? member.photoUrl : `${import.meta.env.VITE_API_URL}/../${member.photoUrl}`} 
+                                                src={getServerUrl(member.photoUrl)} 
                                                 alt={member.name}
                                                 className="w-full h-full object-cover"
                                             />

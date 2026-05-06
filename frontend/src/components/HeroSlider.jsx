@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getServerUrl } from '../utils/urlHelper';
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -52,9 +54,7 @@ const HeroSlider = () => {
                     className="absolute inset-0"
                 >
                     <img 
-                        src={banners[currentIndex].imageUrl.startsWith('http') 
-                            ? banners[currentIndex].imageUrl 
-                            : `${import.meta.env.VITE_API_URL}/../${banners[currentIndex].imageUrl}`} 
+                        src={getServerUrl(banners[currentIndex].imageUrl)} 
                         alt={banners[currentIndex].title}
                         className="w-full h-full object-cover"
                     />

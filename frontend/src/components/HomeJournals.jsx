@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getServerUrl } from '../utils/urlHelper';
+
 import { motion } from 'framer-motion';
 import { Download, ChevronRight, BookOpen } from 'lucide-react';
 
@@ -64,7 +66,7 @@ const HomeJournals = () => {
                             <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-6 bg-gray-50 group-hover:shadow-2xl transition-all">
                                 {journal.coverImageUrl ? (
                                     <img 
-                                        src={`/${journal.coverImageUrl}`} 
+                                        src={getServerUrl(journal.coverImageUrl)} 
                                         alt={journal.title}
                                         className="w-full h-full object-cover"
                                     />
@@ -91,7 +93,7 @@ const HomeJournals = () => {
                             </div>
 
                             <a 
-                                href={journal.pdfUrl ? `/${journal.pdfUrl}` : '#'} 
+                                href={journal.pdfUrl ? getServerUrl(journal.pdfUrl) : '#'} 
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-full py-3 rounded-xl border-2 border-[#1e703c]/20 text-[#1e703c] font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#1e703c] hover:text-white transition-all"

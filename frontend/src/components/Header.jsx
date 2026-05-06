@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getServerUrl } from '../utils/urlHelper';
+
 
 const Header = () => {
     const [settings, setSettings] = useState(null);
@@ -34,7 +36,7 @@ const Header = () => {
                 <div className="relative shrink-0">
                     <div className="w-28 h-28 rounded-full border-4 border-[#b47c1c] overflow-hidden shadow-md bg-white">
                         <img 
-                            src={data.logoUrl || '/logo.png'} 
+                            src={data.logoUrl ? getServerUrl(data.logoUrl) : '/logo.png'} 
                             alt="ISOR Logo" 
                             className="w-full h-full object-cover"
                         />
