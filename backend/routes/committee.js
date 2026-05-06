@@ -27,7 +27,7 @@ router.post('/update-member/:id', upload.single('photo'), async (req, res) => {
             updateData.photoUrl = req.file.path.replace(/\\/g, '/');
         }
         
-        const member = await Committee.findByIdAndUpdate(id, updateData, { new: true });
+        const member = await Committee.findByIdAndUpdate(req.params.id, updateData, { new: true });
         if (!member) {
             return res.status(404).json({ message: 'Member not found' });
         }

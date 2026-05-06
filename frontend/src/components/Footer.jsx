@@ -104,7 +104,7 @@ const Footer = () => {
               <li><FooterLink to="/awards">Awards & Honours</FooterLink></li>
               <li><FooterLink to="/annual-reports">Annual Reports</FooterLink></li>
               <li><FooterLink to="/constitution">Constitution & Bylaws</FooterLink></li>
-              <li><a href="http://localhost:5176" className="hover:text-[#4ade80] transition-colors font-semibold mt-2 block">Admin Login</a></li>
+              <li><a href="https://admin.isor.in/" className="hover:text-[#4ade80] transition-colors font-semibold mt-2 block">Admin Login</a></li>
             </ul>
           </div>
 

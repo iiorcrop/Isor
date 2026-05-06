@@ -43,7 +43,7 @@ const NewsTicker = () => {
 
                             {/* News Text with Link */}
                             <a 
-                                href={item.isPdf ? `http://localhost:5000${item.pdfUrl}` : item.link} 
+                                href={item.isPdf ? `${import.meta.env.VITE_API_URL.replace('/api', '')}${item.pdfUrl}` : item.link} 
                                 target="_blank" 
                                 rel="noopener noreferrer"
                                 className="text-[#374151] hover:text-[#1e703c] transition-colors text-[14px] font-medium"
