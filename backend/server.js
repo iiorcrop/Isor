@@ -8,6 +8,12 @@ dotenv.config();
 
 const app = express();
 
+// Global Request Logger for Debugging (Moved to top)
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+});
+
 // Middleware
 app.use(cors({
     origin: '*',
@@ -16,12 +22,6 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '1gb' }));
 app.use(express.urlencoded({ limit: '1gb', extended: true }));
-
-// Global Request Logger for Debugging
-app.use((req, res, next) => {
-    console.log(`${req.method} ${req.url}`);
-    next();
-});
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -56,8 +56,11 @@ app.get('/api/ping', (req, res) => res.json({ status: 'ok', message: 'Backend is
 
 // Error handler
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ message: err.message || 'Internal Server Error' });
+    console.error('Error:', err.message);
+    if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({ message: 'File too large. Maximum limit is 1GB.' });
+    }
+    res.status(err.status || 500).json({ message: err.message || 'Internal Server Error' });
 });
 
 const PORT = process.env.PORT || 5000;
