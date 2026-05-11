@@ -17,7 +17,10 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage });
+const upload = multer({ 
+    storage,
+    limits: { fileSize: 1024 * 1024 * 1024 } // 1GB limit
+});
 
 // GET all active journals
 router.get('/', async (req, res) => {

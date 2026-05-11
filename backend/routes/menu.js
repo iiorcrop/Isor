@@ -11,17 +11,17 @@ router.get('/', async (req, res) => {
             menu = await MenuSettings.create({
                 items: [
                     { label: 'Home', link: '/', isDropdown: false },
-                    { label: 'About ISOR', link: '#', isDropdown: true, children: [{ label: 'Overview', link: '/overview' }] },
-                    { label: 'Journal', link: '#', isDropdown: true, children: [{ label: 'Current Issue', link: '/journal/current' }] },
+                    { label: 'About ISOR', link: '#', isDropdown: true, children: [{ label: 'Overview', link: '/page/overview' }] },
+                    { label: 'Journal', link: '#', isDropdown: true, children: [{ label: 'Current Issue', link: '/page/current-issue' }] },
                     { label: 'Membership', link: '#', isDropdown: true, children: [{ label: 'Online Enrollment', link: '/membership' }] },
                     { label: 'Committees', link: '#', isDropdown: true, children: [
-                        { label: 'Executive Committee', link: '/committees/Executive' },
-                        { label: 'Editorial Committee', link: '/committees/Editorial' },
-                        { label: 'Advisory Board', link: '/committees/Advisory' },
-                        { label: 'Past Presidents', link: '/committees/PastPresidents' }
+                        { label: 'Executive Committee', link: '/committee/Executive' },
+                        { label: 'Editorial Committee', link: '/committee/Editorial' },
+                        { label: 'Advisory Board', link: '/committee/Advisory' },
+                        { label: 'Past Presidents', link: '/committee/PastPresidents' }
                     ] },
-                    { label: 'Events', link: '#', isDropdown: true, children: [{ label: 'Conferences', link: '/events/conferences' }] },
-                    { label: 'Downloads', link: '/downloads', isDropdown: false },
+                    { label: 'Events', link: '/events', isDropdown: false },
+                    { label: 'Downloads', link: '/page/downloads', isDropdown: false },
                     { label: 'Contact', link: '/contact', isDropdown: false }
                 ]
             });

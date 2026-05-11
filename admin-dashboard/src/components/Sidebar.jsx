@@ -14,7 +14,8 @@ import {
     BookOpen,
     CreditCard,
     Shield,
-    Mail
+    Mail,
+    Calendar
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
@@ -46,15 +47,18 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
         { icon: Globe, label: 'Top Bar', path: '/topbar' },
         { icon: FileText, label: 'Header', path: '/header' },
-        { icon: Layout, label: 'Menu Bar', path: '/menu' },
+        { icon: LayoutDashboard, label: 'Menu Bar', path: '/menu' },
         { icon: Bell, label: 'Flash News', path: '/news' },
         { icon: Image, label: 'Banners', path: '/banners' },
-        { icon: Layout, label: 'Quick Links', path: '/quicklinks' },
+        { icon: LayoutDashboard, label: 'Quick Links', path: '/quicklinks' },
         { icon: BookOpen, label: 'Home Content', path: '/home-content' },
         { icon: Users, label: 'Member List', path: '/members', badge: pendingCount || null },
         { icon: Shield, label: 'Committees', path: '/committees' },
         { icon: BookOpen, label: 'Journal Volumes', path: '/journals' },
+        { icon: Calendar, label: 'Events', path: '/events' },
         { icon: Mail, label: 'Contact Inbox', path: '/contact' },
+        { icon: LayoutDashboard, label: 'Footer Settings', path: '/footer' },
+        { icon: FileText, label: 'Dynamic Pages', path: '/pages' },
         { icon: CreditCard, label: 'Payment Settings', path: '/payment-settings' },
     ];
 

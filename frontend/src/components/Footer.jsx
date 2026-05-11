@@ -1,8 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Mail, Phone, Globe, Facebook, Linkedin, Youtube } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    const fetchFooter = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/footer`);
+        setSettings(res.data);
+      } catch (err) { console.error('Footer fetch failed', err); }
+    };
+    fetchFooter();
+  }, []);
+
+  if (!settings) return null;
+
   return (
     <footer className="bg-[#154728] text-white pt-12 pb-6 mt-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -12,7 +27,7 @@ const Footer = () => {
           <div className="space-y-6">
             <div>
               <h2 className="text-4xl font-bold tracking-tight font-serif mb-1">ISOR</h2>
-              <p className="text-xs font-medium text-gray-200">Indian Society of Oilseeds Research</p>
+              <p className="text-xs font-medium text-gray-200">{settings.aboutShort}</p>
             </div>
             
             <div className="space-y-3 text-gray-300 text-[13px] leading-relaxed">
@@ -20,10 +35,8 @@ const Footer = () => {
                 <div className="mt-1 shrink-0">
                   <div className="w-1 h-full bg-[#4ade80]/30 rounded-full"></div>
                 </div>
-                <p>
-                  ICAR-Directorate of Oilseeds Research,<br />
-                  Rajendranagar, Hyderabad – 500 030<br />
-                  Telangana, India
+                <p className="whitespace-pre-line">
+                  {settings.address}
                 </p>
               </div>
               
@@ -32,28 +45,28 @@ const Footer = () => {
                   <div className="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#4ade80]/20 transition-colors">
                     <Mail size={13} className="text-[#4ade80]" />
                   </div>
-                  <a href="mailto:isor.hyderabad@gmail.com" className="hover:text-white transition-colors">isor.hyderabad@gmail.com</a>
+                  <a href={`mailto:${settings.email}`} className="hover:text-white transition-colors">{settings.email}</a>
                 </div>
                 <div className="flex items-center gap-3 group">
                   <div className="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#4ade80]/20 transition-colors">
                     <Phone size={13} className="text-[#4ade80]" />
                   </div>
-                  <a href="tel:+914023015291" className="hover:text-white transition-colors">+91-40-2301-5291</a>
+                  <a href={`tel:${settings.phone}`} className="hover:text-white transition-colors">{settings.phone}</a>
                 </div>
                 <div className="flex items-center gap-3 group">
                   <div className="w-7 h-7 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#4ade80]/20 transition-colors">
                     <Globe size={13} className="text-[#4ade80]" />
                   </div>
-                  <a href="https://www.isor.org.in" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">www.isor.org.in</a>
+                  <a href={`https://${settings.website}`} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">{settings.website}</a>
                 </div>
               </div>
             </div>
 
             <div className="flex gap-3 pt-1">
-              <SocialIcon icon={<Facebook size={16} fill="currentColor" />} />
-              <SocialIcon icon={<XIcon />} />
-              <SocialIcon icon={<Linkedin size={16} fill="currentColor" />} />
-              <SocialIcon icon={<Youtube size={16} fill="currentColor" />} />
+              <SocialIcon link={settings.socialLinks.facebook} icon={<Facebook size={16} fill="currentColor" />} />
+              <SocialIcon link={settings.socialLinks.twitter} icon={<XIcon />} />
+              <SocialIcon link={settings.socialLinks.linkedin} icon={<Linkedin size={16} fill="currentColor" />} />
+              <SocialIcon link={settings.socialLinks.youtube} icon={<Youtube size={16} fill="currentColor" />} />
             </div>
           </div>
 
@@ -116,7 +129,7 @@ const Footer = () => {
       <div className="mt-12 bg-black/20 py-4 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-gray-300 text-[10px] tracking-widest uppercase">
-            © {new Date().getFullYear()} Indian Society of Oilseeds Research. All Rights Reserved.
+            © {new Date().getFullYear()} {settings.copyrightText}
           </p>
         </div>
       </div>
@@ -130,8 +143,8 @@ const FooterLink = ({ to, children }) => (
   </Link>
 );
 
-const SocialIcon = ({ icon }) => (
-  <a href="#" className="w-9 h-9 bg-white/10 rounded flex items-center justify-center hover:bg-[#4ade80] hover:text-[#1a4d2e] transition-all duration-300">
+const SocialIcon = ({ icon, link }) => (
+  <a href={link || '#'} target="_blank" rel="noopener noreferrer" className="w-9 h-9 bg-white/10 rounded flex items-center justify-center hover:bg-[#4ade80] hover:text-[#1a4d2e] transition-all duration-300">
     {icon}
   </a>
 );

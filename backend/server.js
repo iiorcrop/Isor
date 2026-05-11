@@ -14,7 +14,8 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json());
+app.use(express.json({ limit: '1gb' }));
+app.use(express.urlencoded({ limit: '1gb', extended: true }));
 
 // Global Request Logger for Debugging
 app.use((req, res, next) => {
@@ -47,6 +48,9 @@ app.use('/api/admin/payment-settings', require('./routes/paymentSettings'));
 app.use('/api/committees', require('./routes/committee'));
 app.use('/api/journal', require('./routes/journal'));
 app.use('/api/contact', require('./routes/contact'));
+app.use('/api/events', require('./routes/event'));
+app.use('/api/footer', require('./routes/footer'));
+app.use('/api/pages', require('./routes/page'));
 
 app.get('/api/ping', (req, res) => res.json({ status: 'ok', message: 'Backend is reachable' }));
 

@@ -14,6 +14,9 @@ import MemberManagement from './pages/MemberManagement';
 import PaymentSettings from './pages/PaymentSettings';
 import CommitteeSettings from './pages/CommitteeSettings';
 import JournalManagement from './pages/JournalManagement';
+import EventManagement from './pages/EventManagement';
+import FooterSettings from './pages/FooterSettings';
+import PageManagement from './pages/PageManagement';
 import ContactManagement from './pages/ContactManagement';
 import Sidebar from './components/Sidebar';
 
@@ -127,6 +130,24 @@ function App() {
                     <Route path="/contact" element={
                         <PrivateRoute>
                             <DashboardLayout><ContactManagement /></DashboardLayout>
+                        </PrivateRoute>
+                    } />
+
+                    <Route path="/events" element={
+                        <PrivateRoute>
+                            <DashboardLayout><EventManagement /></DashboardLayout>
+                        </PrivateRoute>
+                    } />
+
+                    <Route path="/footer" element={
+                        <PrivateRoute>
+                            <DashboardLayout><FooterSettings /></DashboardLayout>
+                        </PrivateRoute>
+                    } />
+
+                    <Route path="/pages" element={
+                        <PrivateRoute>
+                            <DashboardLayout><PageManagement /></DashboardLayout>
                         </PrivateRoute>
                     } />
                     
