@@ -22,6 +22,9 @@ const PageManagement = () => {
     const pdfInputRef = useRef(null);
     // Menu-linked missing pages
     const [menuItems, setMenuItems] = useState([]);
+    // Menu placement for new page
+    const [menuPlacement, setMenuPlacement] = useState('none'); // 'none' | 'top' | 'child-N'
+    const [menuSaving, setMenuSaving] = useState(false);
 
     useEffect(() => {
         fetchPages();
@@ -124,6 +127,25 @@ const PageManagement = () => {
         } catch (err) { console.error(err); }
     };
 
+    const addExistingPageToMenu = async (page, placement) => {
+        const cleanSlug = page.slug.replace(/^\/+/, '');
+        const pageLink = `/page/${cleanSlug}`;
+        const updatedItems = [...menuItems];
+        if (placement === 'top') {
+            updatedItems.push({ label: page.title, link: pageLink, isDropdown: false, children: [] });
+        } else if (placement.startsWith('child-')) {
+            const parentIdx = parseInt(placement.replace('child-', ''), 10);
+            if (!updatedItems[parentIdx].children) updatedItems[parentIdx].children = [];
+            updatedItems[parentIdx].children.push({ label: page.title, link: pageLink });
+            updatedItems[parentIdx].isDropdown = true;
+        }
+        try {
+            await axios.post(`${import.meta.env.VITE_API_URL}/menu`, { items: updatedItems });
+            await fetchMenu();
+            alert(`"${page.title}" added to menu successfully!`);
+        } catch (err) { alert('Failed to update menu'); }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSaving(true);
@@ -131,7 +153,30 @@ const PageManagement = () => {
         try {
             await axios.post(`${import.meta.env.VITE_API_URL}/pages`, formData);
             await fetchPages();
+
+            // Also update menu if placement selected
+            if (menuPlacement !== 'none' && editingPage?.isNew) {
+                setMenuSaving(true);
+                const pageLink = `/page/${formData.slug}`;
+                const pageLabel = formData.title;
+                const updatedItems = [...menuItems];
+
+                if (menuPlacement === 'top') {
+                    updatedItems.push({ label: pageLabel, link: pageLink, isDropdown: false, children: [] });
+                } else if (menuPlacement.startsWith('child-')) {
+                    const parentIdx = parseInt(menuPlacement.replace('child-', ''), 10);
+                    if (!updatedItems[parentIdx].children) updatedItems[parentIdx].children = [];
+                    updatedItems[parentIdx].children.push({ label: pageLabel, link: pageLink });
+                    updatedItems[parentIdx].isDropdown = true;
+                }
+
+                await axios.post(`${import.meta.env.VITE_API_URL}/menu`, { items: updatedItems });
+                await fetchMenu();
+                setMenuSaving(false);
+            }
+
             setSuccess(true);
+            setMenuPlacement('none');
             setTimeout(() => {
                 setSuccess(false);
                 setEditingPage(null);
@@ -321,6 +366,67 @@ const PageManagement = () => {
                             </div>
                         </div>
 
+                        {/* Menu Placement — only shown for new pages */}
+                        {editingPage?.isNew && (
+                            <div className="bg-white/3 border border-white/10 rounded-2xl p-5 space-y-3">
+                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-2">
+                                    <Globe size={12} /> Add to Navigation Menu
+                                </label>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    {/* None */}
+                                    <label className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all ${
+                                        menuPlacement === 'none' ? 'border-primary bg-primary/10 text-white' : 'border-white/10 text-white/40 hover:border-white/20'
+                                    }`}>
+                                        <input type="radio" name="menuPlacement" value="none" className="hidden"
+                                            checked={menuPlacement === 'none'}
+                                            onChange={() => setMenuPlacement('none')} />
+                                        <span className="w-3 h-3 rounded-full border-2 flex-shrink-0" style={{ borderColor: menuPlacement === 'none' ? '#6366f1' : 'rgba(255,255,255,0.2)', background: menuPlacement === 'none' ? '#6366f1' : 'transparent' }} />
+                                        <div>
+                                            <p className="text-xs font-bold">Don&apos;t add to menu</p>
+                                            <p className="text-[10px] text-white/30">Page content only</p>
+                                        </div>
+                                    </label>
+                                    {/* Top-level */}
+                                    <label className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all ${
+                                        menuPlacement === 'top' ? 'border-primary bg-primary/10 text-white' : 'border-white/10 text-white/40 hover:border-white/20'
+                                    }`}>
+                                        <input type="radio" name="menuPlacement" value="top" className="hidden"
+                                            checked={menuPlacement === 'top'}
+                                            onChange={() => setMenuPlacement('top')} />
+                                        <span className="w-3 h-3 rounded-full border-2 flex-shrink-0" style={{ borderColor: menuPlacement === 'top' ? '#6366f1' : 'rgba(255,255,255,0.2)', background: menuPlacement === 'top' ? '#6366f1' : 'transparent' }} />
+                                        <div>
+                                            <p className="text-xs font-bold">Top-level menu item</p>
+                                            <p className="text-[10px] text-white/30">Appears in main navbar</p>
+                                        </div>
+                                    </label>
+                                    {/* Under a dropdown */}
+                                    {menuItems.filter(m => m.isDropdown).map((item) => {
+                                        const idx = menuItems.indexOf(item);
+                                        const val = `child-${idx}`;
+                                        return (
+                                            <label key={idx} className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all ${
+                                                menuPlacement === val ? 'border-primary bg-primary/10 text-white' : 'border-white/10 text-white/40 hover:border-white/20'
+                                            }`}>
+                                                <input type="radio" name="menuPlacement" value={val} className="hidden"
+                                                    checked={menuPlacement === val}
+                                                    onChange={() => setMenuPlacement(val)} />
+                                                <span className="w-3 h-3 rounded-full border-2 flex-shrink-0" style={{ borderColor: menuPlacement === val ? '#6366f1' : 'rgba(255,255,255,0.2)', background: menuPlacement === val ? '#6366f1' : 'transparent' }} />
+                                                <div>
+                                                    <p className="text-xs font-bold">Under &ldquo;{item.label}&rdquo;</p>
+                                                    <p className="text-[10px] text-white/30">Added as a dropdown sub-item</p>
+                                                </div>
+                                            </label>
+                                        );
+                                    })}
+                                </div>
+                                {menuPlacement !== 'none' && (
+                                    <p className="text-[10px] text-primary/80 bg-primary/5 border border-primary/20 rounded-lg px-3 py-2">
+                                        ✓ This page will be added to the menu automatically when you save.
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
                         {!previewMode ? (
                             <div className="space-y-2">
                                 <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Page Content</label>
@@ -496,8 +602,28 @@ const PageManagement = () => {
                                 <span className="text-[10px] text-white/20 uppercase tracking-widest">
                                     Updated: {new Date(page.updatedAt).toLocaleDateString()}
                                 </span>
-                                <div className="flex items-center gap-1 text-primary text-xs">
-                                    Active <Globe size={12} />
+                                {/* Add to Menu quick dropdown */}
+                                <div className="relative group/menu">
+                                    <button className="flex items-center gap-1 text-white/30 hover:text-primary text-xs transition-all">
+                                        <Plus size={12} /> Menu
+                                    </button>
+                                    <div className="absolute bottom-full right-0 mb-2 w-52 bg-[#0f172a] border border-white/10 rounded-xl shadow-2xl py-2 hidden group-hover/menu:block z-50">
+                                        <p className="text-[10px] text-white/30 px-3 py-1 uppercase tracking-widest">Add to menu under:</p>
+                                        <button
+                                            onClick={() => addExistingPageToMenu(page, 'top')}
+                                            className="w-full text-left px-3 py-2 text-xs text-white/60 hover:text-white hover:bg-white/5 transition-all"
+                                        >📌 Top-level item</button>
+                                        {menuItems.filter(m => m.isDropdown).map((item) => {
+                                            const idx = menuItems.indexOf(item);
+                                            return (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => addExistingPageToMenu(page, `child-${idx}`)}
+                                                    className="w-full text-left px-3 py-2 text-xs text-white/60 hover:text-white hover:bg-white/5 transition-all"
+                                                >↳ Under &ldquo;{item.label}&rdquo;</button>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
                             </div>
                         </div>
