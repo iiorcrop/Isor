@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Save, Loader2, FileText, Globe, Search, Plus, Eye, Edit, Trash2, CheckCircle } from 'lucide-react';
+import { Save, Loader2, FileText, Globe, Search, Plus, Eye, Edit, Trash2, CheckCircle, Upload, Link2, X, FilePlus } from 'lucide-react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
@@ -13,9 +13,17 @@ const PageManagement = () => {
     const [formData, setFormData] = useState({ slug: '', title: '', content: '' });
     const [previewMode, setPreviewMode] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    // PDF states
+    const [pdfs, setPdfs] = useState([]);
+    const [uploadingPdf, setUploadingPdf] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [dragOver, setDragOver] = useState(false);
+    const [copiedUrl, setCopiedUrl] = useState('');
+    const pdfInputRef = useRef(null);
 
     useEffect(() => {
         fetchPages();
+        fetchPdfs();
     }, []);
 
     const fetchPages = async () => {
@@ -27,6 +35,61 @@ const PageManagement = () => {
             console.error(err); 
             setLoading(false);
         }
+    };
+
+    const fetchPdfs = async () => {
+        try {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/pages/list-pdfs`);
+            setPdfs(res.data || []);
+        } catch (err) { console.error(err); }
+    };
+
+    const uploadPdf = async (file) => {
+        if (!file || file.type !== 'application/pdf') {
+            alert('Please select a valid PDF file.');
+            return;
+        }
+        const formPayload = new FormData();
+        formPayload.append('pdf', file);
+        setUploadingPdf(true);
+        setUploadProgress(0);
+        try {
+            await axios.post(`${import.meta.env.VITE_API_URL}/pages/upload-pdf`, formPayload, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+                onUploadProgress: (e) => {
+                    setUploadProgress(Math.round((e.loaded * 100) / e.total));
+                }
+            });
+            await fetchPdfs();
+        } catch (err) {
+            alert(err.response?.data?.message || 'Upload failed');
+        } finally {
+            setUploadingPdf(false);
+            setUploadProgress(0);
+        }
+    };
+
+    const deletePdf = async (filename) => {
+        if (!window.confirm('Delete this PDF?')) return;
+        try {
+            await axios.delete(`${import.meta.env.VITE_API_URL}/pages/delete-pdf/${encodeURIComponent(filename)}`);
+            fetchPdfs();
+        } catch (err) { console.error(err); }
+    };
+
+    const copyUrl = (url) => {
+        const fullUrl = `${import.meta.env.VITE_API_URL.replace('/api', '')}/${url}`;
+        navigator.clipboard.writeText(fullUrl);
+        setCopiedUrl(url);
+        setTimeout(() => setCopiedUrl(''), 2000);
+    };
+
+    const insertPdfLink = (pdf) => {
+        const baseUrl = import.meta.env.VITE_API_URL.replace('/api', '');
+        const fullUrl = `${baseUrl}/${pdf.url}`;
+        const displayName = pdf.filename.replace(/^\d+-/, '').replace(/_/g, ' ');
+        const linkHtml = `<p><a href="${fullUrl}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#064e3b;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">📄 ${displayName}</a></p>`;
+        setFormData(prev => ({ ...prev, content: prev.content + linkHtml }));
     };
 
     const handleEdit = async (page) => {
@@ -223,6 +286,105 @@ const PageManagement = () => {
                                 </div>
                             </div>
                         )}
+
+                        {/* PDF Upload Panel */}
+                        <div className="border border-white/10 rounded-2xl overflow-hidden">
+                            <div className="flex items-center justify-between px-6 py-4 bg-white/5 border-b border-white/10">
+                                <div className="flex items-center gap-3">
+                                    <FilePlus size={18} className="text-primary" />
+                                    <span className="text-sm font-bold text-white/80">PDF Attachments</span>
+                                    <span className="text-xs text-white/30 bg-white/5 px-2 py-0.5 rounded-full">{pdfs.length} files</span>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => pdfInputRef.current?.click()}
+                                    disabled={uploadingPdf}
+                                    className="flex items-center gap-2 bg-primary/20 hover:bg-primary/30 text-primary px-4 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+                                >
+                                    {uploadingPdf ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                                    {uploadingPdf ? `Uploading ${uploadProgress}%` : 'Upload PDF'}
+                                </button>
+                                <input
+                                    ref={pdfInputRef}
+                                    type="file"
+                                    accept="application/pdf"
+                                    className="hidden"
+                                    onChange={e => e.target.files[0] && uploadPdf(e.target.files[0])}
+                                />
+                            </div>
+
+                            {/* Drag & Drop Zone */}
+                            <div
+                                onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                                onDragLeave={() => setDragOver(false)}
+                                onDrop={e => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) uploadPdf(f); }}
+                                className={`mx-4 my-3 border-2 border-dashed rounded-xl p-5 text-center transition-all cursor-pointer ${
+                                    dragOver ? 'border-primary bg-primary/10 scale-[1.01]' : 'border-white/10 hover:border-primary/40 hover:bg-white/3'
+                                }`}
+                                onClick={() => pdfInputRef.current?.click()}
+                            >
+                                <Upload size={20} className={`mx-auto mb-2 ${dragOver ? 'text-primary' : 'text-white/20'}`} />
+                                <p className="text-xs text-white/30">Drag & drop a PDF here or <span className="text-primary font-semibold">click to browse</span></p>
+                                <p className="text-[10px] text-white/20 mt-1">Max 100 MB · PDF only</p>
+                            </div>
+
+                            {/* Upload Progress Bar */}
+                            {uploadingPdf && (
+                                <div className="mx-4 mb-3">
+                                    <div className="w-full bg-white/10 rounded-full h-1.5">
+                                        <div
+                                            className="bg-primary h-1.5 rounded-full transition-all duration-300"
+                                            style={{ width: `${uploadProgress}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* PDF List */}
+                            {pdfs.length > 0 && (
+                                <div className="mx-4 mb-4 space-y-2 max-h-52 overflow-y-auto pr-1">
+                                    {pdfs.map(pdf => (
+                                        <div key={pdf.filename} className="flex items-center gap-3 bg-white/5 hover:bg-white/8 rounded-xl px-4 py-3 group transition-all">
+                                            <FileText size={16} className="text-primary shrink-0" />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs font-medium text-white truncate">
+                                                    {pdf.filename.replace(/^\d+-/, '')}
+                                                </p>
+                                                <p className="text-[10px] text-white/30">{(pdf.size / 1024).toFixed(0)} KB</p>
+                                            </div>
+                                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => insertPdfLink(pdf)}
+                                                    title="Insert link into content"
+                                                    className="p-1.5 rounded-lg bg-primary/10 hover:bg-primary/30 text-primary transition-all text-[10px] font-bold"
+                                                >
+                                                    Insert
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => copyUrl(pdf.url)}
+                                                    title="Copy URL"
+                                                    className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-all"
+                                                >
+                                                    {copiedUrl === pdf.url
+                                                        ? <CheckCircle size={14} className="text-green-400" />
+                                                        : <Link2 size={14} className="text-white/40" />}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => deletePdf(pdf.filename)}
+                                                    title="Delete PDF"
+                                                    className="p-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 text-white/30 hover:text-red-400 transition-all"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
 
                         <div className="flex justify-end gap-4 pt-6">
                             <button 
