@@ -13,6 +13,7 @@ const PageManagement = () => {
     const [formData, setFormData] = useState({ slug: '', title: '', content: '' });
     const [previewMode, setPreviewMode] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const quillRef = useRef(null);
     // PDF states
     const [pdfs, setPdfs] = useState([]);
     const [uploadingPdf, setUploadingPdf] = useState(false);
@@ -189,17 +190,50 @@ const PageManagement = () => {
         finally { setSaving(false); }
     };
 
-    const quillModules = {
-        toolbar: [
-            [{ 'header': [1, 2, 3, false] }],
-            ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-            [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-            ['link', 'image', 'video'],
-            ['clean'],
-            [{ 'color': [] }, { 'background': [] }],
-            [{ 'align': [] }]
-        ],
+    const imageHandler = () => {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
+
+        input.onchange = async () => {
+            const file = input.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('image', file);
+                try {
+                    const res = await axios.post(`${import.meta.env.VITE_API_URL}/pages/upload-image`, formData, {
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    });
+                    const url = import.meta.env.VITE_API_URL.replace('/api', '') + '/' + res.data.url;
+                    const quill = quillRef.current.getEditor();
+                    const range = quill.getSelection(true);
+                    quill.insertEmbed(range.index, 'image', url);
+                    quill.setSelection(range.index + 1);
+                } catch (err) {
+                    console.error(err);
+                    alert('Image upload failed');
+                }
+            }
+        };
     };
+
+    const quillModules = React.useMemo(() => ({
+        toolbar: {
+            container: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+                ['link', 'image', 'video'],
+                ['clean'],
+                [{ 'color': [] }, { 'background': [] }],
+                [{ 'align': [] }]
+            ],
+            handlers: {
+                image: imageHandler
+            }
+        }
+    }), []);
 
     const quillFormats = [
         'header',
@@ -431,11 +465,13 @@ const PageManagement = () => {
                             <div className="space-y-2">
                                 <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Page Content</label>
                                 <ReactQuill 
+                                    ref={quillRef}
                                     theme="snow"
                                     value={formData.content}
                                     onChange={(content) => setFormData({...formData, content})}
                                     modules={quillModules}
                                     formats={quillFormats}
+                                    placeholder="Write your page content here..."
                                 />
                             </div>
                         ) : (

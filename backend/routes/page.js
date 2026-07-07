@@ -26,6 +26,27 @@ const pdfUpload = multer({
     }
 });
 
+// Multer config for editor images
+const imageStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const dir = 'uploads/pages';
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+        cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+        const safe = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+        cb(null, `img-${Date.now()}-${safe}`);
+    }
+});
+const imageUpload = multer({
+    storage: imageStorage,
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB limit for images
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) cb(null, true);
+        else cb(new Error('Only image files are allowed'));
+    }
+});
+
 // GET all pages (summary)
 router.get('/', async (req, res) => {
     try {
@@ -40,6 +61,15 @@ router.post('/upload-pdf', pdfUpload.single('pdf'), (req, res) => {
         if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
         const url = req.file.path.replace(/\\/g, '/');
         res.json({ url, filename: req.file.originalname, size: req.file.size });
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+// UPLOAD Image from Rich Text Editor
+router.post('/upload-image', imageUpload.single('image'), (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ message: 'No image uploaded' });
+        const url = req.file.path.replace(/\\/g, '/');
+        res.json({ url });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
