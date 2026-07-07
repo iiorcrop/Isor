@@ -68,6 +68,37 @@ const DynamicPage = () => {
                     className="prose prose-lg max-w-none prose-slate prose-headings:text-[#064e3b] prose-headings:font-serif prose-p:text-gray-700 prose-p:leading-relaxed prose-p:text-justify prose-img:rounded-2xl prose-img:shadow-xl"
                     dangerouslySetInnerHTML={{ __html: page.content }} 
                 />
+
+                {/* PDF Downloads */}
+                {page.pdfs && page.pdfs.length > 0 && (
+                    <div className="mt-12 border-t pt-8">
+                        <h3 className="text-2xl font-serif font-bold text-[#064e3b] mb-6">📄 Downloads</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {page.pdfs.map((pdf, idx) => {
+                                const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
+                                const pdfUrl = `${baseUrl}/${pdf.url}`;
+                                const displayName = (pdf.filename || pdf.url.split('/').pop()).replace(/^\d+-/, '').replace(/_/g, ' ');
+                                return (
+                                    <a
+                                        key={idx}
+                                        href={pdfUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-4 p-4 bg-[#f0fdf4] border border-[#064e3b]/10 rounded-2xl hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group"
+                                    >
+                                        <div className="w-12 h-12 bg-[#064e3b] rounded-xl flex items-center justify-center text-white font-bold text-xs shrink-0">
+                                            PDF
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-semibold text-[#064e3b] truncate group-hover:text-[#1e703c]">{displayName}</p>
+                                            <p className="text-xs text-gray-400">Click to download</p>
+                                        </div>
+                                    </a>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

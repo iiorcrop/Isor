@@ -112,16 +112,17 @@ router.get(/^\/(.*)/, async (req, res) => {
 
 // CREATE or UPDATE page
 router.post('/', async (req, res) => {
-    const { slug, title, content } = req.body;
+    const { slug, title, content, pdfs } = req.body;
     try {
         let page = await PageContent.findOne({ slug });
         if (page) {
             page.title = title;
             page.content = content;
+            if (pdfs !== undefined) page.pdfs = pdfs;
             page.updatedAt = Date.now();
             await page.save();
         } else {
-            page = new PageContent({ slug, title, content });
+            page = new PageContent({ slug, title, content, pdfs: pdfs || [] });
             await page.save();
         }
         res.json(page);

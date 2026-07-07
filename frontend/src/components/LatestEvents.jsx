@@ -48,7 +48,7 @@ const LatestEvents = () => {
                                     <img 
                                         src={getImageUrl(event.images[0])} 
                                         alt={event.title}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 border-4 border-red-500"
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                     />
                                 ) : (
                                     <div className="w-full h-full bg-gray-100 flex items-center justify-center">

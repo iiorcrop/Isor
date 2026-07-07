@@ -10,7 +10,7 @@ const PageManagement = () => {
     const [saving, setSaving] = useState(false);
     const [success, setSuccess] = useState(false);
     const [editingPage, setEditingPage] = useState(null);
-    const [formData, setFormData] = useState({ slug: '', title: '', content: '' });
+    const [formData, setFormData] = useState({ slug: '', title: '', content: '', pdfs: [] });
     const [previewMode, setPreviewMode] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const quillRef = useRef(null);
@@ -68,12 +68,15 @@ const PageManagement = () => {
         setUploadingPdf(true);
         setUploadProgress(0);
         try {
-            await axios.post(`${import.meta.env.VITE_API_URL}/pages/upload-pdf`, formPayload, {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/pages/upload-pdf`, formPayload, {
                 headers: { 'Content-Type': 'multipart/form-data' },
                 onUploadProgress: (e) => {
                     setUploadProgress(Math.round((e.loaded * 100) / e.total));
                 }
             });
+            // Add the uploaded PDF to formData.pdfs
+            const newPdf = { url: res.data.url, filename: res.data.filename || file.name };
+            setFormData(prev => ({ ...prev, pdfs: [...(prev.pdfs || []), newPdf] }));
             await fetchPdfs();
         } catch (err) {
             alert(err.response?.data?.message || 'Upload failed');
@@ -112,7 +115,7 @@ const PageManagement = () => {
             const cleanSlug = page.slug.replace(/^\/+/, '');
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/pages/${cleanSlug}`);
             setEditingPage(res.data);
-            setFormData(res.data);
+            setFormData({ ...res.data, pdfs: res.data.pdfs || [] });
             setLoading(false);
         } catch (err) { 
             console.error(err); 
