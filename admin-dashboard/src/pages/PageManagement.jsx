@@ -574,16 +574,15 @@ const PageManagement = () => {
                                     <FileText size={24} />
                                 </div>
                                 <div className="flex gap-2">
-                                    <a 
-                                        href={`/page/${page.slug.replace(/^\/+/, '')}`} 
-                                        target="_blank" 
-                                        rel="noreferrer"
+                                    <button 
+                                        onClick={() => { handleEdit(page); setPreviewMode(true); }}
                                         className="p-2 bg-white/5 hover:bg-accent rounded-lg transition-all text-white/70 hover:text-white"
-                                        title="View Page"
+                                        title="Preview Page"
                                     >
                                         <Eye size={16} />
-                                    </a>
+                                    </button>
                                     <button 
+
                                         onClick={() => handleEdit(page)}
                                         className="p-2 bg-white/5 hover:bg-primary rounded-lg transition-all text-white/70 hover:text-white"
                                         title="Edit Page"
