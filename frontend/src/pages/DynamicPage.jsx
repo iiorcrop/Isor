@@ -67,7 +67,9 @@ const DynamicPage = () => {
             <div className="max-w-7xl mx-auto px-4 py-16">
                 <div 
                     className="prose prose-lg max-w-none prose-slate prose-headings:text-[#064e3b] prose-headings:font-serif prose-p:text-gray-700 prose-p:leading-relaxed prose-p:text-justify prose-img:rounded-2xl prose-img:shadow-xl"
+                >
                     <ReadMore limit={800}>{page.content}</ReadMore>
+                </div>
 
                 {/* PDF Downloads */}
                 {page.pdfs && page.pdfs.length > 0 && (
