@@ -98,7 +98,7 @@ router.delete('/delete-pdf/:filename', (req, res) => {
 
 
 // GET specific page by slug (supports nested slugs with slashes)
-router.get('/*', async (req, res) => {
+router.get(/^\/(.*)/, async (req, res) => {
     try {
         const slug = req.params[0].replace(/^\/+/, '');
         const page = await PageContent.findOne({ slug });
