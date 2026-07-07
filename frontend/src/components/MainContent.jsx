@@ -10,6 +10,7 @@ const MainContent = () => {
     const [loading, setLoading] = useState(true);
     const scrollRef = React.useRef(null);
     const [isPaused, setIsPaused] = useState(false);
+    const [isAboutExpanded, setIsAboutExpanded] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -69,17 +70,40 @@ const MainContent = () => {
                             </div>
                             
                             <div className="space-y-6 text-[#374151] leading-relaxed text-lg">
-                                {about.content.map((paragraph, index) => (
-                                    <motion.p 
-                                        key={index}
-                                        initial={{ opacity: 0, x: -20 }}
-                                        whileInView={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        viewport={{ once: true }}
-                                    >
-                                        {paragraph}
-                                    </motion.p>
-                                ))}
+                                {about.content.length > 0 && (() => {
+                                    const fullText = about.content.join('\n\n');
+                                    const isLong = fullText.length > 600;
+                                    const displayText = (!isLong || isAboutExpanded) 
+                                        ? fullText 
+                                        : fullText.slice(0, 600) + '...';
+                                        
+                                    // Split back into paragraphs for rendering
+                                    const displayParagraphs = displayText.split('\n\n');
+
+                                    return (
+                                        <>
+                                            {displayParagraphs.map((paragraph, index) => (
+                                                <motion.p 
+                                                    key={index}
+                                                    initial={{ opacity: 0, x: -20 }}
+                                                    whileInView={{ opacity: 1, x: 0 }}
+                                                    transition={{ delay: index * 0.1 }}
+                                                    viewport={{ once: true }}
+                                                >
+                                                    {paragraph}
+                                                </motion.p>
+                                            ))}
+                                            {isLong && (
+                                                <button 
+                                                    onClick={() => setIsAboutExpanded(!isAboutExpanded)}
+                                                    className="text-[#1e703c] font-bold text-sm hover:underline mt-2 flex items-center gap-1"
+                                                >
+                                                    {isAboutExpanded ? 'Show Less' : 'Read More'}
+                                                </button>
+                                            )}
+                                        </>
+                                    );
+                                })()}
                             </div>
                         </div>
 
