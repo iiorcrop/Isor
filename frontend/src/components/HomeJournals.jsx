@@ -26,7 +26,8 @@ const HomeJournals = () => {
 
     if (loading || journals.length === 0) return null;
 
-    const doubledJournals = [...journals, ...journals, ...journals];
+    const useMarquee = journals.length > 4;
+    const displayJournals = useMarquee ? [...journals, ...journals, ...journals] : journals;
 
     return (
         <section className="bg-[#fff9f0] pt-12 pb-10 overflow-hidden border-t border-[#064e3b]/5">
@@ -43,21 +44,21 @@ const HomeJournals = () => {
             </div>
 
             <div 
-                className="relative group"
+                className="relative group w-full"
                 onMouseEnter={() => setIsPaused(true)}
                 onMouseLeave={() => setIsPaused(false)}
             >
                 <motion.div 
-                    className="flex gap-8"
-                    animate={{ x: isPaused ? undefined : [0, -1 * (280 + 32) * journals.length] }}
-                    transition={{ 
+                    className={`flex gap-8 ${useMarquee ? '' : 'justify-center flex-wrap max-w-7xl mx-auto px-6'}`}
+                    animate={useMarquee ? { x: isPaused ? undefined : [0, -1 * (280 + 32) * journals.length] } : undefined}
+                    transition={useMarquee ? { 
                         duration: journals.length * 10, 
                         repeat: Infinity, 
                         ease: "linear" 
-                    }}
-                    style={{ width: "fit-content" }}
+                    } : undefined}
+                    style={{ width: useMarquee ? "fit-content" : "100%" }}
                 >
-                    {doubledJournals.map((journal, index) => (
+                    {displayJournals.map((journal, index) => (
                         <div
                             key={`${journal._id}-${index}`}
                             className="w-[280px] bg-white rounded-[2.5rem] shadow-xl shadow-[#064e3b]/5 border border-black/5 p-6 flex flex-col hover:-translate-y-2 transition-all duration-500"
