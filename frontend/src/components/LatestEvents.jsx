@@ -21,7 +21,8 @@ const LatestEvents = () => {
     const getImageUrl = (path) => {
         if (!path) return '';
         if (path.startsWith('http')) return path;
-        return `${import.meta.env.VITE_API_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+        const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
+        return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
     };
 
     if (!loading && events.length === 0) return null;
