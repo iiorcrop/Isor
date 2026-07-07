@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Loader2, Calendar, User } from 'lucide-react';
+import ReadMore from '../components/ReadMore';
 
 const DynamicPage = () => {
     const params = useParams();
@@ -66,8 +67,7 @@ const DynamicPage = () => {
             <div className="max-w-7xl mx-auto px-4 py-16">
                 <div 
                     className="prose prose-lg max-w-none prose-slate prose-headings:text-[#064e3b] prose-headings:font-serif prose-p:text-gray-700 prose-p:leading-relaxed prose-p:text-justify prose-img:rounded-2xl prose-img:shadow-xl"
-                    dangerouslySetInnerHTML={{ __html: page.content }} 
-                />
+                    <ReadMore limit={800}>{page.content}</ReadMore>
 
                 {/* PDF Downloads */}
                 {page.pdfs && page.pdfs.length > 0 && (
