@@ -20,10 +20,13 @@ const PageManagement = () => {
     const [dragOver, setDragOver] = useState(false);
     const [copiedUrl, setCopiedUrl] = useState('');
     const pdfInputRef = useRef(null);
+    // Menu-linked missing pages
+    const [menuItems, setMenuItems] = useState([]);
 
     useEffect(() => {
         fetchPages();
         fetchPdfs();
+        fetchMenu();
     }, []);
 
     const fetchPages = async () => {
@@ -35,6 +38,13 @@ const PageManagement = () => {
             console.error(err); 
             setLoading(false);
         }
+    };
+
+    const fetchMenu = async () => {
+        try {
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/menu`);
+            setMenuItems(res.data.items || []);
+        } catch (err) { console.error(err); }
     };
 
     const fetchPdfs = async () => {
@@ -159,6 +169,19 @@ const PageManagement = () => {
         p.slug.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    // Extract all /page/* links from menu that don't have content yet
+    const allMenuPageLinks = [];
+    menuItems.forEach(item => {
+        const checkLink = (link, label) => {
+            const match = link?.match(/^\/page\/(.+)/);
+            if (match) allMenuPageLinks.push({ slug: match[1].replace(/^\/+/, ''), label });
+        };
+        checkLink(item.link, item.label);
+        (item.children || []).forEach(child => checkLink(child.link, child.label));
+    });
+    const existingSlugs = new Set(pages.map(p => p.slug.replace(/^\/+/, '')));
+    const missingPages = allMenuPageLinks.filter(mp => !existingSlugs.has(mp.slug));
+
     if (loading && !editingPage) return (
         <div className="flex items-center justify-center min-h-screen bg-[#0a0f1d]">
             <Loader2 className="w-12 h-12 text-primary animate-spin" />
@@ -202,7 +225,42 @@ const PageManagement = () => {
                 </div>
             </div>
 
+            {/* Missing Pages Alert */}
+            {!editingPage && missingPages.length > 0 && (
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-6">
+                    <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center shrink-0">
+                            <FileText size={20} className="text-amber-400" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="font-bold text-amber-400 mb-1">Pages Linked in Menu but Not Created Yet</h3>
+                            <p className="text-xs text-white/40 mb-4">The following menu items point to dynamic pages that have no content. Click "Create Now" to build them.</p>
+                            <div className="flex flex-wrap gap-3">
+                                {missingPages.map((mp, i) => (
+                                    <div key={i} className="flex items-center gap-2 bg-black/30 border border-amber-500/20 rounded-xl px-4 py-2">
+                                        <div>
+                                            <p className="text-sm font-bold text-white">{mp.label}</p>
+                                            <p className="text-[10px] text-white/30 font-mono">/page/{mp.slug}</p>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                setEditingPage({ isNew: true });
+                                                setFormData({ slug: mp.slug, title: mp.label, content: '' });
+                                            }}
+                                            className="ml-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
+                                        >
+                                            Create Now
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {editingPage ? (
+
                 <div className="bg-[#1e293b] p-8 rounded-[2rem] border border-white/10 shadow-2xl space-y-6">
                     <div className="flex justify-between items-center pb-6 border-b border-white/5">
                         <div className="flex items-center gap-4">
