@@ -358,7 +358,7 @@ const PageManagement = () => {
                                         className="flex-1 bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-primary"
                                         placeholder="about-isor"
                                         value={formData.slug}
-                                        onChange={e => setFormData({...formData, slug: e.target.value.toLowerCase().replace(/ /g, '-')})}
+                                        onChange={e => setFormData({...formData, slug: e.target.value.toLowerCase().replace(/ /g, '-').replace(/^\/+/, '')})}
                                         disabled={!editingPage.isNew}
                                         required
                                     />
@@ -573,24 +573,27 @@ const PageManagement = () => {
                                 <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary">
                                     <FileText size={24} />
                                 </div>
-                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                                <div className="flex gap-2">
                                     <a 
                                         href={`/page/${page.slug.replace(/^\/+/, '')}`} 
                                         target="_blank" 
                                         rel="noreferrer"
-                                        className="p-2 bg-white/5 hover:bg-accent rounded-lg transition-all text-white"
+                                        className="p-2 bg-white/5 hover:bg-accent rounded-lg transition-all text-white/70 hover:text-white"
+                                        title="View Page"
                                     >
                                         <Eye size={16} />
                                     </a>
                                     <button 
                                         onClick={() => handleEdit(page)}
-                                        className="p-2 bg-white/5 hover:bg-primary rounded-lg transition-all text-white"
+                                        className="p-2 bg-white/5 hover:bg-primary rounded-lg transition-all text-white/70 hover:text-white"
+                                        title="Edit Page"
                                     >
                                         <Edit size={16} />
                                     </button>
                                     <button 
                                         onClick={() => deletePage(page._id)}
-                                        className="p-2 bg-white/5 hover:bg-error rounded-lg transition-all text-white"
+                                        className="p-2 bg-white/5 hover:bg-error rounded-lg transition-all text-white/70 hover:text-white"
+                                        title="Delete Page"
                                     >
                                         <Trash2 size={16} />
                                     </button>
