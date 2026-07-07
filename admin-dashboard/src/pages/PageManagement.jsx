@@ -32,7 +32,8 @@ const PageManagement = () => {
     const handleEdit = async (page) => {
         setLoading(true);
         try {
-            const res = await axios.get(`${import.meta.env.VITE_API_URL}/pages/${page.slug}`);
+            const cleanSlug = page.slug.replace(/^\/+/, '');
+            const res = await axios.get(`${import.meta.env.VITE_API_URL}/pages/${cleanSlug}`);
             setEditingPage(res.data);
             setFormData(res.data);
             setLoading(false);
