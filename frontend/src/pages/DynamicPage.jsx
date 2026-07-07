@@ -4,7 +4,8 @@ import axios from 'axios';
 import { Loader2, Calendar, User } from 'lucide-react';
 
 const DynamicPage = () => {
-    const { slug } = useParams();
+    const params = useParams();
+    const slug = (params['*'] || '').replace(/^\/+/, '');
     const [page, setPage] = useState(null);
     const [loading, setLoading] = useState(true);
 

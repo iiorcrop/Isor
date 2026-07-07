@@ -10,13 +10,14 @@ router.get('/', async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// GET specific page by slug
-router.get('/:slug', async (req, res) => {
+// GET specific page by slug (supports nested slugs with slashes)
+router.get('/*', async (req, res) => {
     try {
-        const page = await PageContent.findOne({ slug: req.params.slug });
+        const slug = req.params[0].replace(/^\/+/, '');
+        const page = await PageContent.findOne({ slug });
         if (!page) {
             // Return empty if not found, frontend will handle "not created yet"
-            return res.json({ slug: req.params.slug, title: req.params.slug, content: '' });
+            return res.json({ slug, title: slug, content: '' });
         }
         res.json(page);
     } catch (err) { res.status(500).json({ message: err.message }); }

@@ -248,7 +248,7 @@ const PageManagement = () => {
                                 </div>
                                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
                                     <a 
-                                        href={`/page/${page.slug}`} 
+                                        href={`/page/${page.slug.replace(/^\/+/, '')}`} 
                                         target="_blank" 
                                         rel="noreferrer"
                                         className="p-2 bg-white/5 hover:bg-accent rounded-lg transition-all text-white"
@@ -270,7 +270,7 @@ const PageManagement = () => {
                                 </div>
                             </div>
                             <h4 className="text-xl font-bold mb-1">{page.title}</h4>
-                            <p className="text-white/20 text-xs font-mono mb-4">/page/{page.slug}</p>
+                            <p className="text-white/20 text-xs font-mono mb-4">/page/{page.slug.replace(/^\/+/, '')}</p>
                             <div className="flex items-center justify-between pt-4 border-t border-white/5">
                                 <span className="text-[10px] text-white/20 uppercase tracking-widest">
                                     Updated: {new Date(page.updatedAt).toLocaleDateString()}

@@ -48,7 +48,7 @@ function App() {
           <Route path="/committee/:type" element={<CommitteePage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/member-dashboard" element={<MemberDashboard />} />
-          <Route path="/page/:slug" element={<DynamicPage />} />
+          <Route path="/page/*" element={<DynamicPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
 
