@@ -5,6 +5,8 @@ services:
     build: ./backend
     ports:
       - "7180:5000"
+    volumes:
+      - backend-uploads:/app/uploads
     networks:
       - app-network
 
@@ -29,3 +31,6 @@ services:
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  backend-uploads:
