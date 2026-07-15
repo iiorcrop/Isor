@@ -1,26 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const { upload, uploadToStorageServer } = require('../utils/fileUploader');
 const Banner = require('../models/Banner');
-
-// Multer Config for Banner Images
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = 'uploads/banners';
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
-});
-
-const upload = multer({ 
-    storage,
-    limits: { fileSize: 1024 * 1024 * 1024 } // 1GB limit
-});
 
 // GET all banners
 router.get('/', async (req, res) => {
@@ -78,7 +59,7 @@ router.post('/', upload.single('image'), async (req, res) => {
         };
 
         if (req.file) {
-            bannerData.imageUrl = `/uploads/banners/${req.file.filename}`;
+            bannerData.imageUrl = await uploadToStorageServer(req.file);
         } else {
             return res.status(400).json({ message: 'Image is required' });
         }
@@ -103,8 +84,7 @@ router.put('/:id', upload.single('image'), async (req, res) => {
         };
 
         if (req.file) {
-            bannerData.imageUrl = `/uploads/banners/${req.file.filename}`;
-            // Optional: delete old image file
+            bannerData.imageUrl = await uploadToStorageServer(req.file);
         }
 
         const banner = await Banner.findByIdAndUpdate(req.params.id, bannerData, { new: true });
@@ -117,11 +97,7 @@ router.put('/:id', upload.single('image'), async (req, res) => {
 // DELETE banner
 router.delete('/:id', async (req, res) => {
     try {
-        const banner = await Banner.findById(req.params.id);
-        if (banner && banner.imageUrl) {
-            const filePath = path.join(__dirname, '..', banner.imageUrl);
-            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-        }
+        // Since files are stored on remote server, we don't delete them from local filesystem.
         await Banner.findByIdAndDelete(req.params.id);
         res.json({ message: 'Banner deleted' });
     } catch (err) {

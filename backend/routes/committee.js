@@ -1,30 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const Committee = require('../models/Committee');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-
-// Multer Config
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const type = (req.body.committeeType || 'misc').toLowerCase();
-        const dir = `uploads/committees/${type}`;
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        cb(null, `member-${Date.now()}${path.extname(file.originalname)}`);
-    }
-});
-const upload = multer({ storage });
+const { upload, uploadToStorageServer } = require('../utils/fileUploader');
 
 // DEDICATED UPDATE ROUTE (Using POST for maximum compatibility)
 router.post('/update-member/:id', upload.single('photo'), async (req, res) => {
     try {
         const updateData = { ...req.body };
         if (req.file) {
-            updateData.photoUrl = req.file.path.replace(/\\/g, '/');
+            updateData.photoUrl = await uploadToStorageServer(req.file);
         }
         
         const member = await Committee.findByIdAndUpdate(req.params.id, updateData, { new: true });
@@ -59,7 +43,7 @@ router.post('/', upload.single('photo'), async (req, res) => {
         
         const memberData = {
             ...req.body,
-            photoUrl: req.file ? req.file.path.replace(/\\/g, '/') : null
+            photoUrl: req.file ? await uploadToStorageServer(req.file) : null
         };
         const member = new Committee(memberData);
         await member.save();

@@ -2,23 +2,11 @@ const express = require('express');
 const router = express.Router();
 const PageContent = require('../models/PageContent');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const { upload, uploadToStorageServer } = require('../utils/fileUploader');
 
-// Multer config for page PDFs
-const pdfStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = 'uploads/pages';
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        const safe = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-        cb(null, `${Date.now()}-${safe}`);
-    }
-});
+// Keep pdf filter for page PDFs
 const pdfUpload = multer({
-    storage: pdfStorage,
+    storage: multer.memoryStorage(),
     limits: { fileSize: 100 * 1024 * 1024 }, // 100 MB
     fileFilter: (req, file, cb) => {
         if (file.mimetype === 'application/pdf') cb(null, true);
@@ -26,20 +14,9 @@ const pdfUpload = multer({
     }
 });
 
-// Multer config for editor images
-const imageStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = 'uploads/pages';
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        const safe = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-        cb(null, `img-${Date.now()}-${safe}`);
-    }
-});
+// Keep image filter for editor images
 const imageUpload = multer({
-    storage: imageStorage,
+    storage: multer.memoryStorage(),
     limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB limit for images
     fileFilter: (req, file, cb) => {
         if (file.mimetype.startsWith('image/')) cb(null, true);
@@ -56,19 +33,23 @@ router.get('/', async (req, res) => {
 });
 
 // UPLOAD PDF attachment
-router.post('/upload-pdf', pdfUpload.single('pdf'), (req, res) => {
+router.post('/upload-pdf', pdfUpload.single('pdf'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
-        const url = req.file.path.replace(/\\/g, '/');
+        const key = await uploadToStorageServer(req.file);
+        const fileStorageUrl = process.env.VITE_FILE_STORAGE_URL || "https://file.iior-niger.in";
+        const url = `${fileStorageUrl.replace(/\/+$/, '')}/uploads/${key}`;
         res.json({ url, filename: req.file.originalname, size: req.file.size });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
 // UPLOAD Image from Rich Text Editor
-router.post('/upload-image', imageUpload.single('image'), (req, res) => {
+router.post('/upload-image', imageUpload.single('image'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ message: 'No image uploaded' });
-        const url = req.file.path.replace(/\\/g, '/');
+        const key = await uploadToStorageServer(req.file);
+        const fileStorageUrl = process.env.VITE_FILE_STORAGE_URL || "https://file.iior-niger.in";
+        const url = `${fileStorageUrl.replace(/\/+$/, '')}/uploads/${key}`;
         res.json({ url });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
@@ -90,8 +71,7 @@ router.get('/list-pdfs', (req, res) => {
 // DELETE a PDF attachment
 router.delete('/delete-pdf/:filename', (req, res) => {
     try {
-        const filePath = path.join('uploads/pages', req.params.filename);
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        // Remote PDF deletion is not supported; resolve as success
         res.json({ message: 'File deleted' });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });

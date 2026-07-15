@@ -5,22 +5,10 @@ const Member = require('../models/Member');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
-
-// Multer Config for Payment Proofs
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = 'uploads/payments';
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        cb(null, `proof-${Date.now()}${path.extname(file.originalname)}`);
-    }
-});
+const { uploadToStorageServer } = require('../utils/fileUploader');
 
 const upload = multer({ 
-    storage,
+    storage: multer.memoryStorage(),
     limits: { fileSize: 1024 * 1024 * 1024 }, // 1GB limit
     fileFilter: (req, file, cb) => {
         const allowedTypes = ['.jpg', '.jpeg', '.png', '.pdf'];
@@ -56,7 +44,7 @@ router.post('/enroll', upload.single('paymentProof'), async (req, res) => {
             ...req.body,
             membershipId,
             password: hashedPassword,
-            paymentProofUrl: req.file ? req.file.path.replace(/\\/g, '/') : null
+            paymentProofUrl: req.file ? await uploadToStorageServer(req.file) : null
         });
 
         await newMember.save();

@@ -1,24 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const { uploadToStorageServer } = require('../utils/fileUploader');
 const NewsTicker = require('../models/NewsTicker');
 
-// Multer Config for PDF Uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = 'uploads/news';
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
-});
-
 const upload = multer({ 
-    storage,
+    storage: multer.memoryStorage(),
     fileFilter: (req, file, cb) => {
         if (file.mimetype === 'application/pdf') {
             cb(null, true);
@@ -71,7 +58,7 @@ router.post('/', upload.single('pdf'), async (req, res) => {
         };
 
         if (req.file) {
-            newsData.pdfUrl = `/uploads/news/${req.file.filename}`;
+            newsData.pdfUrl = await uploadToStorageServer(req.file);
             newsData.isPdf = true;
         }
 
@@ -96,7 +83,7 @@ router.put('/:id', upload.single('pdf'), async (req, res) => {
         };
 
         if (req.file) {
-            newsData.pdfUrl = `/uploads/news/${req.file.filename}`;
+            newsData.pdfUrl = await uploadToStorageServer(req.file);
             newsData.isPdf = true;
         }
 
@@ -110,11 +97,7 @@ router.put('/:id', upload.single('pdf'), async (req, res) => {
 // DELETE news
 router.delete('/:id', async (req, res) => {
     try {
-        const news = await NewsTicker.findById(req.params.id);
-        if (news && news.pdfUrl) {
-            const filePath = path.join(__dirname, '..', news.pdfUrl);
-            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-        }
+        // Since files are stored on remote server, we don't delete them from local filesystem.
         await NewsTicker.findByIdAndDelete(req.params.id);
         res.json({ message: 'News deleted' });
     } catch (err) {

@@ -1,25 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const { upload, uploadToStorageServer } = require('../utils/fileUploader');
 const HeaderSettings = require('../models/HeaderSettings');
-
-// Multer Config
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const uploadDir = 'uploads/logos';
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-        cb(null, `logo-${Date.now()}${path.extname(file.originalname)}`);
-    }
-});
-
-const upload = multer({ storage });
 
 // GET settings
 router.get('/', async (req, res) => {
@@ -39,7 +21,7 @@ router.post('/', upload.single('logo'), async (req, res) => {
     try {
         const updateData = { ...req.body };
         if (req.file) {
-            updateData.logoUrl = `/uploads/logos/${req.file.filename}`;
+            updateData.logoUrl = await uploadToStorageServer(req.file);
         }
 
         let settings = await HeaderSettings.findOne();

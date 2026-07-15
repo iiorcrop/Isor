@@ -1,26 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Event = require('../models/Event');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-
-// Multer Config for Event Images
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = 'uploads/events';
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
-    }
-});
-
-const upload = multer({ 
-    storage,
-    limits: { fileSize: 1024 * 1024 * 1024 } // 1GB limit
-});
+const { upload, uploadMultipleToStorageServer } = require('../utils/fileUploader');
 
 // GET all events
 router.get('/', async (req, res) => {
@@ -41,7 +22,7 @@ router.get('/latest', async (req, res) => {
 // CREATE event
 router.post('/', upload.array('images', 20), async (req, res) => {
     try {
-        const imagePaths = req.files.map(file => `/uploads/events/${file.filename}`);
+        const imagePaths = await uploadMultipleToStorageServer(req.files);
         const event = new Event({
             ...req.body,
             images: imagePaths
@@ -56,7 +37,7 @@ router.patch('/:id', upload.array('images', 20), async (req, res) => {
     try {
         const updateData = { ...req.body };
         if (req.files && req.files.length > 0) {
-            const newImagePaths = req.files.map(file => `/uploads/events/${file.filename}`);
+            const newImagePaths = await uploadMultipleToStorageServer(req.files);
             // Option: append or replace? Let's replace if new images provided, 
             // or we could add logic to manage existing images.
             // For simplicity, we'll replace the gallery if new images are uploaded.
@@ -71,13 +52,7 @@ router.patch('/:id', upload.array('images', 20), async (req, res) => {
 // DELETE event
 router.delete('/:id', async (req, res) => {
     try {
-        const event = await Event.findById(req.params.id);
-        if (event && event.images) {
-            event.images.forEach(img => {
-                const filePath = path.join(__dirname, '..', img);
-                if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-            });
-        }
+        // Since files are stored on remote server, we don't delete them from local filesystem.
         await Event.findByIdAndDelete(req.params.id);
         res.json({ message: 'Event deleted' });
     } catch (err) { res.status(500).json({ message: err.message }); }

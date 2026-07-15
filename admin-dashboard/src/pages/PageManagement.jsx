@@ -95,7 +95,7 @@ const PageManagement = () => {
     };
 
     const copyUrl = (url) => {
-        const fullUrl = `${import.meta.env.VITE_API_URL.replace('/api', '')}/${url}`;
+        const fullUrl = url.startsWith('http') ? url : `${import.meta.env.VITE_API_URL.replace('/api', '')}/${url}`;
         navigator.clipboard.writeText(fullUrl);
         setCopiedUrl(url);
         setTimeout(() => setCopiedUrl(''), 2000);
@@ -103,7 +103,7 @@ const PageManagement = () => {
 
     const insertPdfLink = (pdf) => {
         const baseUrl = import.meta.env.VITE_API_URL.replace('/api', '');
-        const fullUrl = `${baseUrl}/${pdf.url}`;
+        const fullUrl = pdf.url.startsWith('http') ? pdf.url : `${baseUrl}/${pdf.url}`;
         const displayName = pdf.filename.replace(/^\d+-/, '').replace(/_/g, ' ');
         const linkHtml = `<p><a href="${fullUrl}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#064e3b;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">📄 ${displayName}</a></p>`;
         setFormData(prev => ({ ...prev, content: prev.content + linkHtml }));
@@ -208,7 +208,7 @@ const PageManagement = () => {
                     const res = await axios.post(`${import.meta.env.VITE_API_URL}/pages/upload-image`, formData, {
                         headers: { 'Content-Type': 'multipart/form-data' }
                     });
-                    const url = import.meta.env.VITE_API_URL.replace('/api', '') + '/' + res.data.url;
+                    const url = res.data.url.startsWith('http') ? res.data.url : (import.meta.env.VITE_API_URL.replace('/api', '') + '/' + res.data.url);
                     const quill = quillRef.current.getEditor();
                     const range = quill.getSelection(true);
                     quill.insertEmbed(range.index, 'image', url);

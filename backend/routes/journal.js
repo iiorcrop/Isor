@@ -1,26 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Journal = require('../models/Journal');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-
-// Multer Config for Journals
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dir = file.fieldname === 'pdf' ? 'uploads/journals/pdfs' : 'uploads/journals/covers';
-        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-        cb(null, dir);
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`);
-    }
-});
-
-const upload = multer({ 
-    storage,
-    limits: { fileSize: 1024 * 1024 * 1024 } // 1GB limit
-});
+const { upload, uploadToStorageServer } = require('../utils/fileUploader');
 
 // GET all active journals
 router.get('/', async (req, res) => {
@@ -43,8 +24,8 @@ router.post('/', upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'pdf', m
     try {
         const journalData = {
             ...req.body,
-            coverImageUrl: req.files['cover'] ? req.files['cover'][0].path.replace(/\\/g, '/') : null,
-            pdfUrl: req.files['pdf'] ? req.files['pdf'][0].path.replace(/\\/g, '/') : null
+            coverImageUrl: req.files['cover'] ? await uploadToStorageServer(req.files['cover'][0]) : null,
+            pdfUrl: req.files['pdf'] ? await uploadToStorageServer(req.files['pdf'][0]) : null
         };
         const journal = new Journal(journalData);
         await journal.save();
@@ -56,8 +37,8 @@ router.post('/', upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'pdf', m
 router.patch('/:id', upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]), async (req, res) => {
     try {
         const updateData = { ...req.body };
-        if (req.files['cover']) updateData.coverImageUrl = req.files['cover'][0].path.replace(/\\/g, '/');
-        if (req.files['pdf']) updateData.pdfUrl = req.files['pdf'][0].path.replace(/\\/g, '/');
+        if (req.files['cover']) updateData.coverImageUrl = await uploadToStorageServer(req.files['cover'][0]);
+        if (req.files['pdf']) updateData.pdfUrl = await uploadToStorageServer(req.files['pdf'][0]);
 
         const journal = await Journal.findByIdAndUpdate(req.params.id, updateData, { new: true });
         res.json(journal);
