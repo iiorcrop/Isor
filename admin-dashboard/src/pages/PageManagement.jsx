@@ -198,7 +198,27 @@ const PageManagement = () => {
         minHeight: 400,
         enableDragAndDropFileToEditor: true,
         uploader: {
-            insertImageAsBase64URI: true
+            url: `${import.meta.env.VITE_API_URL}/pages/upload-image`,
+            format: 'json',
+            method: 'POST',
+            prepareData: function (data) {
+                const file = data.get('files[0]');
+                if (file) {
+                    data.append('image', file);
+                    data.delete('files[0]');
+                }
+                return data;
+            },
+            isSuccess: function(resp) { return !resp.error; },
+            process: function (resp) {
+                return {
+                    files: [resp.url],
+                    path: import.meta.env.VITE_API_URL.replace('/api', '') + '/',
+                    baseurl: import.meta.env.VITE_API_URL.replace('/api', '') + '/',
+                    error: 0,
+                    msg: 'Uploaded'
+                };
+            }
         }
     }), []);
 
