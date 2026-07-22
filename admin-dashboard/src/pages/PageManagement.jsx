@@ -213,11 +213,27 @@ const PageManagement = () => {
             process: function (resp) {
                 return {
                     files: [resp.url],
+                    isPdf: resp.isPdf,
                     path: import.meta.env.VITE_API_URL.replace('/api', '') + '/',
                     baseurl: import.meta.env.VITE_API_URL.replace('/api', '') + '/',
                     error: 0,
                     msg: 'Uploaded'
                 };
+            },
+            defaultHandlerSuccess: function (data, resp) {
+                if (data.files && data.files.length) {
+                    const url = data.files[0];
+                    if (data.isPdf) {
+                        const sel = this.s.sel;
+                        let linkText = 'View PDF';
+                        if (sel && sel.toString().trim() !== '') {
+                            linkText = sel.toString();
+                        }
+                        this.s.insertHTML(`<a href="${url}" target="_blank" rel="noopener noreferrer">${linkText}</a>`);
+                    } else {
+                        this.s.insertImage(url);
+                    }
+                }
             }
         }
     }), []);

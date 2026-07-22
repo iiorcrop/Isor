@@ -44,14 +44,23 @@ router.post('/upload-pdf', pdfUpload.single('pdf'), async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-// UPLOAD Image from Rich Text Editor
-router.post('/upload-image', imageUpload.single('image'), async (req, res) => {
+// UPLOAD File from Rich Text Editor (Images + PDFs)
+const editorUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 100 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') cb(null, true);
+        else cb(new Error('Only images and PDF files are allowed'));
+    }
+});
+
+router.post('/upload-image', editorUpload.single('image'), async (req, res) => {
     try {
-        if (!req.file) return res.status(400).json({ message: 'No image uploaded' });
+        if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
         const key = await uploadToStorageServer(req.file);
         const fileStorageUrl = process.env.VITE_FILE_STORAGE_URL || "https://file.iior-niger.in";
         const url = `${fileStorageUrl.replace(/\/+$/, '')}/uploads/${key}`;
-        res.json({ url });
+        res.json({ url, isPdf: req.file.mimetype === 'application/pdf' });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
