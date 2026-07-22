@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Save, Loader2, FileText, Globe, Search, Plus, Eye, Edit, Trash2, CheckCircle, Upload, Link2, X, FilePlus } from 'lucide-react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import JoditEditor from 'jodit-react';
 
 const PageManagement = () => {
     const [pages, setPages] = useState([]);
@@ -13,7 +12,7 @@ const PageManagement = () => {
     const [formData, setFormData] = useState({ slug: '', title: '', content: '', pdfs: [] });
     const [previewMode, setPreviewMode] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const quillRef = useRef(null);
+    const editorRef = useRef(null);
     // PDF states
     const [pdfs, setPdfs] = useState([]);
     const [uploadingPdf, setUploadingPdf] = useState(false);
@@ -193,58 +192,15 @@ const PageManagement = () => {
         finally { setSaving(false); }
     };
 
-    const imageHandler = () => {
-        const input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.setAttribute('accept', 'image/*');
-        input.click();
-
-        input.onchange = async () => {
-            const file = input.files[0];
-            if (file) {
-                const formData = new FormData();
-                formData.append('image', file);
-                try {
-                    const res = await axios.post(`${import.meta.env.VITE_API_URL}/pages/upload-image`, formData, {
-                        headers: { 'Content-Type': 'multipart/form-data' }
-                    });
-                    const url = res.data.url.startsWith('http') ? res.data.url : (import.meta.env.VITE_API_URL.replace('/api', '') + '/' + res.data.url);
-                    const quill = quillRef.current.getEditor();
-                    const range = quill.getSelection(true);
-                    quill.insertEmbed(range.index, 'image', url);
-                    quill.setSelection(range.index + 1);
-                } catch (err) {
-                    console.error(err);
-                    alert('Image upload failed');
-                }
-            }
-        };
-    };
-
-    const quillModules = React.useMemo(() => ({
-        toolbar: {
-            container: [
-                [{ 'header': [1, 2, 3, false] }],
-                ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-                [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-                ['link', 'image', 'video'],
-                ['clean'],
-                [{ 'color': [] }, { 'background': [] }],
-                [{ 'align': [] }]
-            ],
-            handlers: {
-                image: imageHandler
-            }
+    const editorConfig = React.useMemo(() => ({
+        readonly: false,
+        theme: 'dark',
+        minHeight: 400,
+        enableDragAndDropFileToEditor: true,
+        uploader: {
+            insertImageAsBase64URI: true
         }
     }), []);
-
-    const quillFormats = [
-        'header',
-        'bold', 'italic', 'underline', 'strike', 'blockquote',
-        'list', 'bullet', 'indent',
-        'link', 'image', 'video',
-        'color', 'background', 'align'
-    ];
 
     const filteredPages = pages.filter(p => 
         p.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -273,14 +229,8 @@ const PageManagement = () => {
     return (
         <div className="p-8 space-y-8 bg-[#0a0f1d] min-h-screen text-white">
             <style>{`
-                .ql-container { font-size: 16px; min-height: 400px; border-bottom-left-radius: 1.5rem; border-bottom-right-radius: 1.5rem; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1) !important; }
-                .ql-toolbar { background: #1e293b; border-top-left-radius: 1.5rem; border-top-right-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.1) !important; }
-                .ql-editor { min-height: 400px; }
-                .ql-snow.ql-toolbar button { color: #fff !important; }
-                .ql-snow .ql-stroke { stroke: #fff !important; }
-                .ql-snow .ql-fill { fill: #fff !important; }
-                .ql-snow .ql-picker { color: #fff !important; }
-                .ql-snow .ql-picker-options { background-color: #1e293b !important; color: #fff !important; }
+                .jodit-container { border-radius: 1.5rem !important; overflow: hidden; border: 1px solid rgba(255,255,255,0.1) !important; }
+                .jodit-workplace { min-height: 400px !important; }
             `}</style>
 
             <div className="flex justify-between items-center bg-[#1e293b] p-8 rounded-[2rem] border border-white/5 shadow-2xl">
@@ -464,34 +414,8 @@ const PageManagement = () => {
                             </div>
                         )}
 
-                        {!previewMode ? (
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Page Content</label>
-                                <ReactQuill 
-                                    ref={quillRef}
-                                    theme="snow"
-                                    value={formData.content}
-                                    onChange={(content) => setFormData({...formData, content})}
-                                    modules={quillModules}
-                                    formats={quillFormats}
-                                    placeholder="Write your page content here..."
-                                />
-                            </div>
-                        ) : (
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Live Preview</label>
-                                <div className="w-full bg-white p-12 rounded-[2.5rem] text-gray-800 min-h-[500px] overflow-y-auto">
-                                    <h1 className="text-4xl font-serif font-bold text-[#1a4d2e] mb-8 pb-4 border-b border-gray-100">{formData.title}</h1>
-                                    <div 
-                                        className="prose prose-lg max-w-none prose-slate prose-headings:text-[#1a4d2e] prose-p:text-gray-700 prose-p:leading-relaxed"
-                                        dangerouslySetInnerHTML={{ __html: formData.content }} 
-                                    />
-                                </div>
-                            </div>
-                        )}
-
                         {/* PDF Upload Panel */}
-                        <div className="border border-white/10 rounded-2xl overflow-hidden">
+                        <div className="border border-white/10 rounded-2xl overflow-hidden mb-6">
                             <div className="flex items-center justify-between px-6 py-4 bg-white/5 border-b border-white/10">
                                 <div className="flex items-center gap-3">
                                     <FilePlus size={18} className="text-primary" />
@@ -588,6 +512,31 @@ const PageManagement = () => {
                                 </div>
                             )}
                         </div>
+
+                        {!previewMode ? (
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Page Content</label>
+                                <div className="rounded-xl overflow-hidden text-black">
+                                    <JoditEditor
+                                        ref={editorRef}
+                                        value={formData.content}
+                                        config={editorConfig}
+                                        onBlur={newContent => setFormData({...formData, content: newContent})}
+                                    />
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Live Preview</label>
+                                <div className="w-full bg-white p-12 rounded-[2.5rem] text-gray-800 min-h-[500px] overflow-y-auto">
+                                    <h1 className="text-4xl font-serif font-bold text-[#1a4d2e] mb-8 pb-4 border-b border-gray-100">{formData.title}</h1>
+                                    <div 
+                                        className="prose prose-lg max-w-none prose-slate prose-headings:text-[#1a4d2e] prose-p:text-gray-700 prose-p:leading-relaxed"
+                                        dangerouslySetInnerHTML={{ __html: formData.content }} 
+                                    />
+                                </div>
+                            </div>
+                        )}
 
                         <div className="flex justify-end gap-4 pt-6">
                             <button 
