@@ -3,6 +3,7 @@ const router = express.Router();
 const PageContent = require('../models/PageContent');
 const multer = require('multer');
 const { upload, uploadToStorageServer } = require('../utils/fileUploader');
+const fs = require('fs');
 
 // Keep pdf filter for page PDFs
 const pdfUpload = multer({
