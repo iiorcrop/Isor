@@ -209,13 +209,13 @@ const PageManagement = () => {
                 }
                 return data;
             },
-            isSuccess: function(resp) { return resp && !resp.error && !resp.message; },
+            isSuccess: function(resp) { return resp && (resp.url !== undefined || (typeof resp === 'object' && !resp.error)); },
             process: function (resp) {
-                if (resp.message || resp.error) {
-                    return { error: 1, msg: resp.message || 'Error uploading file' };
+                if (!resp || typeof resp !== 'object' || (!resp.url && !resp.isPdf)) {
+                    return { error: 1, msg: (resp && resp.message) ? resp.message : 'Error uploading file (Server Error)' };
                 }
                 return {
-                    files: [resp.url],
+                    files: resp.url ? [resp.url] : [],
                     isPdf: resp.isPdf,
                     path: import.meta.env.VITE_API_URL.replace('/api', '') + '/',
                     baseurl: import.meta.env.VITE_API_URL.replace('/api', '') + '/',
