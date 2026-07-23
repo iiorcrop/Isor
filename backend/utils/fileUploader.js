@@ -26,11 +26,14 @@ async function uploadToStorageServer(file) {
     try {
         const baseUrl = process.env.VITE_FILE_STORAGE_URL || 'https://file.iior-niger.in';
         const uploadUrl = `${baseUrl.replace(/\/+$/, '')}/upload`;
+        
+        console.log(`Attempting remote upload to: ${uploadUrl}`);
         const response = await axios.post(uploadUrl, form, {
             headers: {
                 ...form.getHeaders()
             },
-            adapter: 'http' // Force http adapter instead of fetch in Node 22+
+            adapter: 'http', // Force http adapter instead of fetch in Node 22+
+            timeout: 8000 // 8 second timeout to prevent 504 Gateway Timeout hanging
         });
 
         if (!response.data.filename) {
@@ -39,7 +42,29 @@ async function uploadToStorageServer(file) {
 
         return response.data.filename;
     } catch (err) {
-        throw new Error(`Remote upload failed: ${err.response ? err.response.statusText : err.message}`);
+        console.warn(`Remote upload failed: ${err.message}. Falling back to local storage...`);
+        
+        try {
+            const fs = require('fs');
+            const path = require('path');
+            const crypto = require('crypto');
+            
+            const ext = path.extname(file.originalname) || '.png';
+            const filename = crypto.randomUUID() + ext;
+            const uploadDir = path.join(__dirname, '..', 'uploads');
+            
+            if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir, { recursive: true });
+            }
+            
+            fs.writeFileSync(path.join(uploadDir, filename), file.buffer);
+            console.log(`Successfully saved file locally as: ${filename}`);
+            
+            // Return with /uploads/ prefix so frontend uses backend URL instead of remote storage URL
+            return `/uploads/${filename}`;
+        } catch (localErr) {
+            throw new Error(`Remote and local upload both failed. Local Error: ${localErr.message}`);
+        }
     }
 }
 
