@@ -209,8 +209,11 @@ const PageManagement = () => {
                 }
                 return data;
             },
-            isSuccess: function(resp) { return !resp.error; },
+            isSuccess: function(resp) { return resp && !resp.error && !resp.message; },
             process: function (resp) {
+                if (resp.message || resp.error) {
+                    return { error: 1, msg: resp.message || 'Error uploading file' };
+                }
                 return {
                     files: [resp.url],
                     isPdf: resp.isPdf,
@@ -221,13 +224,18 @@ const PageManagement = () => {
                 };
             },
             defaultHandlerSuccess: function (data, resp) {
+                if (data.error) {
+                    this.events.fire('errorMessage', data.msg);
+                    return;
+                }
                 if (data.files && data.files.length) {
                     const url = data.files[0];
                     if (data.isPdf) {
-                        const sel = this.s.sel;
                         let linkText = 'View PDF';
-                        if (sel && sel.toString().trim() !== '') {
-                            linkText = sel.toString();
+                        if (this.s.sel && this.s.sel.toString().trim() !== '') {
+                            linkText = this.s.sel.toString();
+                        } else if (this.s.html && this.s.html.trim() !== '') {
+                            linkText = this.s.html;
                         }
                         this.s.insertHTML(`<a href="${url}" target="_blank" rel="noopener noreferrer">${linkText}</a>`);
                     } else {

@@ -15,15 +15,7 @@ const pdfUpload = multer({
     }
 });
 
-// Keep image filter for editor images
-const imageUpload = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB limit for images
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/')) cb(null, true);
-        else cb(new Error('Only image files are allowed'));
-    }
-});
+// Keep image filter for editor images (Removed duplicate)
 
 // GET all pages (summary)
 router.get('/', async (req, res) => {
@@ -49,8 +41,13 @@ const editorUpload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 100 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') cb(null, true);
-        else cb(new Error('Only images and PDF files are allowed'));
+        if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf' || file.originalname.toLowerCase().endsWith('.pdf')) {
+            cb(null, true);
+        } else {
+            const err = new Error('Only images and PDF files are allowed');
+            err.status = 400;
+            cb(err);
+        }
     }
 });
 
