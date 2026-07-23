@@ -6,6 +6,9 @@ const upload = multer({
     limits: { fileSize: 1024 * 1024 * 1024 } // 1GB limit
 });
 
+const FormData = require('form-data');
+const axios = require('axios');
+
 /**
  * Uploads a single file buffer to the remote storage server.
  * @param {Object} file - Multer file object from memory storage
@@ -14,25 +17,30 @@ const upload = multer({
 async function uploadToStorageServer(file) {
     if (!file || !file.buffer) return null;
 
-    const blob = new Blob([file.buffer], { type: file.mimetype });
-    const formData = new FormData();
-    formData.append('file', blob, file.originalname);
-
-    const response = await fetch('https://file.iior-niger.in/upload', {
-        method: 'POST',
-        body: formData
+    const form = new FormData();
+    form.append('file', file.buffer, {
+        filename: file.originalname,
+        contentType: file.mimetype
     });
 
-    if (!response.ok) {
-        throw new Error(`Remote upload failed: ${response.statusText}`);
-    }
+    try {
+        const baseUrl = process.env.VITE_FILE_STORAGE_URL || 'https://file.iior-niger.in';
+        const uploadUrl = `${baseUrl.replace(/\/+$/, '')}/upload`;
+        const response = await axios.post(uploadUrl, form, {
+            headers: {
+                ...form.getHeaders()
+            },
+            adapter: 'http' // Force http adapter instead of fetch in Node 22+
+        });
 
-    const data = await response.json();
-    if (!data.filename) {
-        throw new Error('Remote upload response missing filename');
-    }
+        if (!response.data.filename) {
+            throw new Error('Remote upload response missing filename');
+        }
 
-    return data.filename;
+        return response.data.filename;
+    } catch (err) {
+        throw new Error(`Remote upload failed: ${err.response ? err.response.statusText : err.message}`);
+    }
 }
 
 /**
