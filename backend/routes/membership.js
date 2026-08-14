@@ -30,7 +30,11 @@ const generateMembershipId = async (type) => {
 // 1. ENROLLMENT (Registration)
 router.post('/enroll', upload.single('paymentProof'), async (req, res) => {
     try {
-        const { email, password, membershipType } = req.body;
+        const { firstName, lastName, email, mobileNumber, address, password, membershipType } = req.body;
+
+        if (!firstName || !lastName || !email || !mobileNumber || !address) {
+            return res.status(400).json({ message: 'First Name, Last Name, Email, Mobile Number, and Communication Address are mandatory.' });
+        }
 
         // Check if exists
         const existingMember = await Member.findOne({ email });
@@ -117,7 +121,7 @@ router.post('/resubmit-proof', upload.single('paymentProof'), async (req, res) =
         const member = await Member.findById(memberId);
         if (!member) return res.status(404).json({ message: 'Member not found' });
 
-        member.paymentProofUrl = req.file.path.replace(/\\/g, '/');
+        member.paymentProofUrl = await uploadToStorageServer(req.file);
         member.paymentStatus = 'Pending';
         member.approvalStatus = 'Pending'; // Reset to pending for re-review
         await member.save();
@@ -146,6 +150,47 @@ router.post('/forgot-password', async (req, res) => {
         console.log(`Reset password for ${email}: ${tempPassword}`);
 
         res.json({ message: 'A temporary password has been sent to your email.' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
+// 5. UPDATE MEMBER PROFILE
+router.put('/profile', async (req, res) => {
+    try {
+        const { memberId, designation, organization, address, qualification, specialization, mobileNumber } = req.body;
+        const member = await Member.findById(memberId);
+        if (!member) return res.status(404).json({ message: 'Member not found' });
+
+        if (designation !== undefined) member.designation = designation;
+        if (organization !== undefined) member.organization = organization;
+        if (address !== undefined) member.address = address;
+        if (qualification !== undefined) member.qualification = qualification;
+        if (specialization !== undefined) member.specialization = specialization;
+        if (mobileNumber !== undefined) member.mobileNumber = mobileNumber;
+
+        await member.save();
+
+        const updatedMemberData = {
+            _id: member._id,
+            membershipId: member.membershipId,
+            title: member.title,
+            firstName: member.firstName,
+            lastName: member.lastName,
+            email: member.email,
+            mobileNumber: member.mobileNumber,
+            designation: member.designation,
+            organization: member.organization,
+            qualification: member.qualification,
+            specialization: member.specialization,
+            address: member.address,
+            membershipType: member.membershipType,
+            approvalStatus: member.approvalStatus,
+            paymentStatus: member.paymentStatus,
+            createdAt: member.createdAt
+        };
+
+        res.json({ message: 'Profile updated successfully!', member: updatedMemberData });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

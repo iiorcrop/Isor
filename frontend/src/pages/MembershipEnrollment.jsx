@@ -152,7 +152,7 @@ const MembershipEnrollment = () => {
                                     </select>
                                 </div>
                                 <div className="md:col-span-2 space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">First Name</label>
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">First Name <span className="text-red-500">*</span></label>
                                     <input 
                                         required
                                         type="text" 
@@ -162,7 +162,7 @@ const MembershipEnrollment = () => {
                                     />
                                 </div>
                                 <div className="md:col-span-3 space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Last Name</label>
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Last Name <span className="text-red-500">*</span></label>
                                     <input 
                                         required
                                         type="text" 
@@ -172,7 +172,7 @@ const MembershipEnrollment = () => {
                                     />
                                 </div>
                                 <div className="md:col-span-3 space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Email Address</label>
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Email Address <span className="text-red-500">*</span></label>
                                     <input 
                                         required
                                         type="email" 
@@ -182,7 +182,7 @@ const MembershipEnrollment = () => {
                                     />
                                 </div>
                                 <div className="md:col-span-3 space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Mobile Number</label>
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Mobile Number <span className="text-red-500">*</span></label>
                                     <div className="relative">
                                         <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                         <input 
@@ -223,8 +223,9 @@ const MembershipEnrollment = () => {
                                     />
                                 </div>
                                 <div className="md:col-span-2 space-y-2">
-                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Mailing Address</label>
+                                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Communication Address <span className="text-red-500">*</span></label>
                                     <textarea 
+                                        required
                                         className="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 focus:outline-none focus:border-[#1e703c] min-h-[100px]"
                                         placeholder="Complete postal address for official communication"
                                         onChange={e => setFormData({...formData, address: e.target.value})}

@@ -87,7 +87,7 @@ const TopBar = () => {
                 <span className="hidden sm:inline text-white/20">|</span>
 
                 <div className="flex items-center gap-3 md:gap-4">
-                    <a href="/login" className="hover:text-[#fbbf24] transition-colors uppercase tracking-wider font-bold">Member Login</a>
+                    <a href="/membership/login" className="hover:text-[#fbbf24] transition-colors uppercase tracking-wider font-bold">Member Login</a>
                     <span className="text-white/20">|</span>
                     <a href="https://admin.isor.in/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors uppercase tracking-wider text-[9px] md:text-[11px]">Admin</a>
                     <span className="hidden xs:inline text-white/20">|</span>

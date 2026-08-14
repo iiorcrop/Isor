@@ -51,7 +51,7 @@ const ForgotPassword = () => {
                                 <p className="text-gray-500 text-sm">{message}</p>
                             </div>
                             <button 
-                                onClick={() => window.location.href = '/login'}
+                                onClick={() => window.location.href = '/membership/login'}
                                 className="w-full bg-[#064e3b] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#04392b] transition-all"
                             >
                                 Back to Login
@@ -90,7 +90,7 @@ const ForgotPassword = () => {
 
                             <button 
                                 type="button"
-                                onClick={() => window.location.href = '/login'}
+                                onClick={() => window.location.href = '/membership/login'}
                                 className="w-full flex items-center justify-center gap-2 text-xs font-bold text-gray-400 hover:text-[#064e3b] transition-all"
                             >
                                 <ArrowLeft size={14} /> Back to Login

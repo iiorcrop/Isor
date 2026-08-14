@@ -43,6 +43,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/membership" element={<MembershipEnrollment />} />
           <Route path="/membership/login" element={<MemberLogin />} />
+          <Route path="/login" element={<MemberLogin />} />
           <Route path="/events" element={<Events />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/committee/:type" element={<CommitteePage />} />

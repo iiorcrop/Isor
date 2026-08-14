@@ -8,7 +8,7 @@ const memberSchema = new mongoose.Schema({
     password: { type: String, required: true },
     designation: { type: String },
     organization: { type: String },
-    address: { type: String },
+    address: { type: String, required: true },
     qualification: { type: String },
     specialization: { type: String },
     membershipType: { 
