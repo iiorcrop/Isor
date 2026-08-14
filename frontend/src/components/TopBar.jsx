@@ -4,7 +4,8 @@ import {
     MapPin, 
     Phone, 
     Globe,
-    ChevronRight
+    ChevronRight,
+    User
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -13,6 +14,7 @@ import { Link } from 'react-router-dom';
 const TopBar = () => {
     const [dateTime, setDateTime] = useState(new Date());
     const [settings, setSettings] = useState(null);
+    const [loggedInMember, setLoggedInMember] = useState(null);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -21,7 +23,27 @@ const TopBar = () => {
 
         fetchSettings();
 
-        return () => clearInterval(timer);
+        const checkAuth = () => {
+            const token = localStorage.getItem('memberToken');
+            const memberDataStr = localStorage.getItem('memberData');
+            if (token && memberDataStr) {
+                try {
+                    setLoggedInMember(JSON.parse(memberDataStr));
+                } catch (e) {
+                    setLoggedInMember(null);
+                }
+            } else {
+                setLoggedInMember(null);
+            }
+        };
+
+        checkAuth();
+        window.addEventListener('storage', checkAuth);
+
+        return () => {
+            clearInterval(timer);
+            window.removeEventListener('storage', checkAuth);
+        };
     }, []);
 
     const fetchSettings = async () => {
@@ -91,7 +113,18 @@ const TopBar = () => {
                 <div className="flex items-center gap-3 md:gap-4">
                     <Link to="/verify-certificate" className="hover:text-white text-[#fbbf24] transition-colors uppercase tracking-wider font-bold">Verify Certificate</Link>
                     <span className="text-white/20">|</span>
-                    <Link to="/membership/login" className="hover:text-[#fbbf24] transition-colors uppercase tracking-wider font-bold">Member Login</Link>
+                    {loggedInMember ? (
+                        <Link 
+                            to="/member-dashboard" 
+                            className="hover:text-[#fbbf24] text-[#fbbf24] transition-colors uppercase tracking-wider font-bold flex items-center gap-1"
+                            title="View Member Dashboard"
+                        >
+                            <User size={13} />
+                            <span className="capitalize">{loggedInMember.firstName || 'Profile'}</span>
+                        </Link>
+                    ) : (
+                        <Link to="/membership/login" className="hover:text-[#fbbf24] transition-colors uppercase tracking-wider font-bold">Member Login</Link>
+                    )}
                     <span className="text-white/20">|</span>
                     <a href="https://admin.isor.in/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors uppercase tracking-wider text-[9px] md:text-[11px]">Admin</a>
                 </div>
