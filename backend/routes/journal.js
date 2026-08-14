@@ -27,7 +27,7 @@ const isActiveMemberRequest = async (req) => {
         if (!member) return false;
 
         // Auto expire check
-        if ((member.membershipType === 'Annual' || member.membershipType === 'Yearly') && member.subscriptionEndDate) {
+        if (member.membershipType?.toLowerCase() === 'yearly' && member.subscriptionEndDate) {
             if (new Date() > new Date(member.subscriptionEndDate)) {
                 return false;
             }

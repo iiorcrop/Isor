@@ -45,8 +45,8 @@ router.patch('/:id/status', async (req, res) => {
             updateFields.subscriptionStatus = 'Active';
             updateFields.subscriptionStartDate = new Date();
 
-            const memType = (updateFields.membershipType || memberToApprove.membershipType || 'Yearly');
-            if (memType === 'Annual' || memType === 'Yearly') {
+            const memType = (updateFields.membershipType || memberToApprove.membershipType || 'yearly').toString().toLowerCase();
+            if (memType === 'yearly' || memType === 'annual') {
                 // 1 Year subscription expiry
                 updateFields.subscriptionEndDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
             } else {

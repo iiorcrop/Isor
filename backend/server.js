@@ -53,7 +53,7 @@ app.get('/uploads/*path', async (req, res, next) => {
                 const decoded = jwt.verify(token, 'isor_secret_key_2026');
                 const member = await Member.findById(decoded.id);
                 if (member && member.approvalStatus === 'Approved') {
-                    if (member.membershipType === 'Annual' || member.membershipType === 'Yearly') {
+                    if (member.membershipType?.toLowerCase() === 'yearly') {
                         if (member.subscriptionEndDate && new Date() <= new Date(member.subscriptionEndDate)) {
                             isActiveMember = true;
                         }

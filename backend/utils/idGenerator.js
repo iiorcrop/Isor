@@ -7,7 +7,7 @@ const Member = require('../models/Member');
  */
 const generateMembershipId = async (type) => {
     const year = new Date().getFullYear();
-    const prefix = (type === 'Life' || type === 'Lifetime') ? 'L' : ((type === 'Student') ? 'S' : 'A');
+    const prefix = (type && type.toString().toLowerCase() === 'lifetime') ? 'L' : 'A';
 
     const members = await Member.find({ membershipId: { $exists: true, $ne: '' } }, 'membershipId');
     let maxSeq = 0;

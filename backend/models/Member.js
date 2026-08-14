@@ -14,7 +14,14 @@ const memberSchema = new mongoose.Schema({
     specialization: { type: String },
     membershipType: { 
         type: String, 
-        enum: ['Annual', 'Life', 'Lifetime', 'Yearly', 'Student'],
+        enum: ['yearly', 'lifetime'],
+        set: (v) => {
+            if (!v) return 'yearly';
+            const str = v.toString().toLowerCase();
+            if (str === 'annual' || str === 'yearly') return 'yearly';
+            if (str === 'life' || str === 'lifetime') return 'lifetime';
+            return str;
+        },
         required: true 
     },
     membershipYear: { type: String },

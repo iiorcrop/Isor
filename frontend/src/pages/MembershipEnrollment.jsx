@@ -36,7 +36,7 @@ const MembershipEnrollment = () => {
         specialization: '',
         membershipYear: new Date().getFullYear().toString(),
         password: '',
-        membershipType: 'Yearly',
+        membershipType: 'yearly',
         transactionId: ''
     });
     
@@ -113,7 +113,7 @@ const MembershipEnrollment = () => {
         }
     };
 
-    const currentFee = formData.membershipType === 'Lifetime' || formData.membershipType === 'Life'
+    const currentFee = formData.membershipType?.toLowerCase() === 'lifetime'
         ? (paymentSettings.lifetimeFee || 5000)
         : (paymentSettings.yearlyFee || 1000);
 
@@ -360,9 +360,9 @@ const MembershipEnrollment = () => {
                                 <label className="text-xs font-bold text-[#064e3b] uppercase tracking-widest">Choose Subscription Plan</label>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div 
-                                        onClick={() => setFormData({...formData, membershipType: 'Yearly'})}
+                                        onClick={() => setFormData({...formData, membershipType: 'yearly'})}
                                         className={`p-6 rounded-3xl border-2 cursor-pointer transition-all space-y-3 ${
-                                            formData.membershipType === 'Yearly' || formData.membershipType === 'Annual'
+                                            formData.membershipType?.toLowerCase() === 'yearly'
                                             ? 'border-[#064e3b] bg-[#064e3b]/5 shadow-lg'
                                             : 'border-gray-200 bg-gray-50 hover:border-gray-300'
                                         }`}
@@ -380,9 +380,9 @@ const MembershipEnrollment = () => {
                                     </div>
 
                                     <div 
-                                        onClick={() => setFormData({...formData, membershipType: 'Lifetime'})}
+                                        onClick={() => setFormData({...formData, membershipType: 'lifetime'})}
                                         className={`p-6 rounded-3xl border-2 cursor-pointer transition-all space-y-3 ${
-                                            formData.membershipType === 'Lifetime' || formData.membershipType === 'Life'
+                                            formData.membershipType?.toLowerCase() === 'lifetime'
                                             ? 'border-[#064e3b] bg-[#064e3b]/5 shadow-lg'
                                             : 'border-gray-200 bg-gray-50 hover:border-gray-300'
                                         }`}
@@ -512,7 +512,7 @@ const MembershipEnrollment = () => {
                                     </div>
                                     <div className="flex justify-between text-xs">
                                         <span className="text-gray-400 uppercase font-bold">Subscription Plan</span>
-                                        <span className="text-[#b47c1c] font-bold">{formData.membershipType} (₹{currentFee})</span>
+                                        <span className="text-[#b47c1c] font-bold capitalize">{formData.membershipType} (₹{currentFee})</span>
                                     </div>
                                     <div className="flex justify-between text-xs">
                                         <span className="text-gray-400 uppercase font-bold">Status</span>

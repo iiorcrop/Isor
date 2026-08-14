@@ -21,7 +21,7 @@ const upload = multer({
 
 // Helper: Check and auto-expire subscription if past end date
 const checkSubscriptionExpiry = async (member) => {
-    if (member && (member.membershipType === 'Annual' || member.membershipType === 'Yearly') && member.subscriptionEndDate) {
+    if (member && member.membershipType?.toLowerCase() === 'yearly' && member.subscriptionEndDate) {
         if (new Date() > new Date(member.subscriptionEndDate) && member.subscriptionStatus === 'Active') {
             member.subscriptionStatus = 'Expired';
             await member.save();
@@ -129,7 +129,7 @@ router.post('/enroll', upload.single('paymentProof'), async (req, res) => {
         const existingMember = await Member.findOne({ email: email.toLowerCase() });
         if (existingMember) return res.status(400).json({ message: 'Email already registered' });
 
-        const typeToUse = membershipType || 'Annual';
+        const typeToUse = (membershipType || 'yearly').toString().toLowerCase();
         const membershipId = await generateMembershipId(typeToUse);
         const enrollmentId = await generateEnrollmentId();
         const hashedPassword = await bcrypt.hash(password || 'Isor@2026', 10);
