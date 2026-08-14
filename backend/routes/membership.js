@@ -168,6 +168,11 @@ router.post('/enroll', upload.single('paymentProof'), async (req, res) => {
             member: formatMemberData(newMember)
         });
     } catch (err) {
+        console.error('Enrollment error:', err);
+        if (err.code === 11000) {
+            const field = Object.keys(err.keyPattern || {})[0] || 'record';
+            return res.status(400).json({ message: `A member with this ${field} already exists.` });
+        }
         res.status(500).json({ message: err.message });
     }
 });

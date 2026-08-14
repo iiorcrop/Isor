@@ -14,7 +14,7 @@ const memberSchema = new mongoose.Schema({
     specialization: { type: String },
     membershipType: { 
         type: String, 
-        enum: ['Annual', 'Life', 'Student'],
+        enum: ['Annual', 'Life', 'Lifetime', 'Yearly', 'Student'],
         required: true 
     },
     membershipYear: { type: String },
