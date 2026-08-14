@@ -33,25 +33,39 @@ router.patch('/:id/status', async (req, res) => {
         const updateFields = { ...req.body };
         const memberId = req.params.id;
 
-        // If approved, generate membershipId if not exists
+        // If approved, set subscription dates, payment completed, and generate membershipId if not exists
         if (updateFields.approvalStatus === 'Approved') {
             const memberToApprove = await Member.findById(memberId);
             if (!memberToApprove) {
                 return res.status(404).json({ message: 'Member not found' });
             }
 
+            updateFields.paymentStatus = 'Completed';
+            updateFields.subscriptionStatus = 'Active';
+            updateFields.subscriptionStartDate = new Date();
+
+            const memType = (updateFields.membershipType || memberToApprove.membershipType || 'Yearly');
+            if (memType === 'Annual' || memType === 'Yearly') {
+                // 1 Year subscription expiry
+                updateFields.subscriptionEndDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+            } else {
+                // Lifetime subscription - no expiration
+                updateFields.subscriptionEndDate = null;
+            }
+
             if (!memberToApprove.membershipId) {
                 const year = new Date().getFullYear();
-                const type = (memberToApprove.membershipType || 'LIFE').toUpperCase();
-                
-                // Get count for this type and year
-                const count = await Member.countDocuments({ 
-                    membershipType: memberToApprove.membershipType,
-                    membershipId: { $regex: `ISOR/${type}/${year}/` }
-                });
-                
-                const nextId = (count + 1).toString().padStart(3, '0');
-                updateFields.membershipId = `ISOR/${type}/${year}/${nextId}`;
+                const typeCode = (memType === 'Life' || memType === 'Lifetime') ? 'L' : 'A';
+                const count = await Member.countDocuments({ membershipId: { $exists: true, $ne: '' } });
+                const sequence = (count + 1).toString().padStart(4, '0');
+                updateFields.membershipId = `ISOR-${year}-${typeCode}${sequence}`;
+            }
+
+            if (!memberToApprove.enrollmentId) {
+                const year = new Date().getFullYear();
+                const enrCount = await Member.countDocuments({ enrollmentId: { $exists: true, $ne: '' } });
+                const sequence = (enrCount + 1).toString().padStart(4, '0');
+                updateFields.enrollmentId = `ENR-${year}-${sequence}`;
             }
         }
 

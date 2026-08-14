@@ -3,6 +3,8 @@ import axios from 'axios';
 import { getServerUrl } from '../utils/urlHelper';
 
 
+import { Link } from 'react-router-dom';
+
 const NewsTicker = () => {
     const [news, setNews] = useState([]);
 
@@ -44,14 +46,23 @@ const NewsTicker = () => {
                             </svg>
 
                             {/* News Text with Link */}
-                            <a 
-                                href={item.isPdf ? getServerUrl(item.pdfUrl) : item.link} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-[#374151] hover:text-[#1e703c] transition-colors text-[14px] font-medium"
-                            >
-                                {item.text}
-                            </a>
+                            {item.isPdf || (item.link && (item.link.startsWith('http') || item.link.startsWith('www'))) ? (
+                                <a 
+                                    href={item.isPdf ? getServerUrl(item.pdfUrl) : item.link} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="text-[#374151] hover:text-[#1e703c] transition-colors text-[14px] font-medium"
+                                >
+                                    {item.text}
+                                </a>
+                            ) : (
+                                <Link 
+                                    to={item.link || '#'} 
+                                    className="text-[#374151] hover:text-[#1e703c] transition-colors text-[14px] font-medium"
+                                >
+                                    {item.text}
+                                </Link>
+                            )}
 
                             {/* New Badge */}
                             {item.isNewItem && (

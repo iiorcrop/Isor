@@ -106,9 +106,18 @@ const MemberCertificate = ({ member, onClose }) => {
                             </div>
                         </div>
 
-                        <div className="absolute bottom-20 flex justify-between w-[calc(100%-160px)] text-[10px] font-bold text-[#b47c1c] uppercase tracking-widest">
-                            <p>Membership ID: {member.membershipId}</p>
-                            <p>Issued Date: {new Date().toLocaleDateString('en-GB')}</p>
+                        <div className="absolute bottom-16 flex justify-between items-center w-[calc(100%-160px)] text-[10px] font-bold text-[#b47c1c] uppercase tracking-widest border-t border-[#b47c1c]/20 pt-3">
+                            <p>Enrollment ID: <span className="text-[#064e3b] font-mono">{member.enrollmentId || member.membershipId}</span></p>
+                            <p>Membership ID: <span className="text-[#064e3b] font-mono">{member.membershipId}</span></p>
+                            <p>
+                                Certificate Expiry: <span className="text-[#064e3b]">
+                                    {(member.membershipType === 'Lifetime' || member.membershipType === 'Life') 
+                                        ? 'Lifetime Member (Permanent)' 
+                                        : member.subscriptionEndDate 
+                                            ? new Date(member.subscriptionEndDate).toLocaleDateString('en-GB')
+                                            : '1 Year from Issue'}
+                                </span>
+                            </p>
                         </div>
                     </div>
 

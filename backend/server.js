@@ -23,6 +23,70 @@ app.use(cors({
 app.use(express.json({ limit: '1gb' }));
 app.use(express.urlencoded({ limit: '1gb', extended: true }));
 
+const fs = require('fs');
+const { PDFDocument } = require('pdf-lib');
+const jwt = require('jsonwebtoken');
+const Member = require('./models/Member');
+
+// PDF protection middleware for static uploads
+app.get('/uploads/*.pdf', async (req, res, next) => {
+    try {
+        const reqPath = req.path.replace(/^\/uploads[/\\]+/, '');
+        const fullFilePath = path.join(__dirname, 'uploads', reqPath);
+
+        if (!fs.existsSync(fullFilePath)) {
+            return next();
+        }
+
+        let token = null;
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            token = authHeader.split(' ')[1];
+        } else if (req.query && req.query.token) {
+            token = req.query.token;
+        }
+
+        let isActiveMember = false;
+        if (token) {
+            try {
+                const decoded = jwt.verify(token, 'isor_secret_key_2026');
+                const member = await Member.findById(decoded.id);
+                if (member && member.approvalStatus === 'Approved') {
+                    if (member.membershipType === 'Annual' || member.membershipType === 'Yearly') {
+                        if (member.subscriptionEndDate && new Date() <= new Date(member.subscriptionEndDate)) {
+                            isActiveMember = true;
+                        }
+                    } else {
+                        isActiveMember = true;
+                    }
+                }
+            } catch (e) {
+                isActiveMember = false;
+            }
+        }
+
+        res.setHeader('Content-Type', 'application/pdf');
+
+        if (isActiveMember) {
+            return res.sendFile(fullFilePath);
+        } else {
+            // Sliced 2 pages for public & inactive users
+            const fileBytes = fs.readFileSync(fullFilePath);
+            const pdfDoc = await PDFDocument.load(fileBytes);
+            if (pdfDoc.getPageCount() <= 2) {
+                return res.sendFile(fullFilePath);
+            }
+            const previewDoc = await PDFDocument.create();
+            const copiedPages = await previewDoc.copyPages(pdfDoc, [0, 1]);
+            copiedPages.forEach((page) => previewDoc.addPage(page));
+            const previewBytes = await previewDoc.save();
+            return res.send(Buffer.from(previewBytes));
+        }
+    } catch (err) {
+        next();
+    }
+});
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // MongoDB Connection

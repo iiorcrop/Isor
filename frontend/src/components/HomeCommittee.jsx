@@ -5,6 +5,8 @@ import { getServerUrl } from '../utils/urlHelper';
 import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 
+import { Link } from 'react-router-dom';
+
 const HomeCommittee = () => {
     const [members, setMembers] = useState([]);
     const [period, setPeriod] = useState('');
@@ -106,13 +108,13 @@ const HomeCommittee = () => {
                 </div>
 
                 <div className="mt-6 text-center">
-                    <a 
-                        href="/committee/Executive" 
+                    <Link 
+                        to="/committee/Executive" 
                         className="inline-flex items-center gap-2 text-[#064e3b] font-bold text-sm hover:text-[#b47c1c] transition-colors group"
                     >
                         View Full Committee Details
                         <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                    </a>
+                    </Link>
                 </div>
             </section>
 

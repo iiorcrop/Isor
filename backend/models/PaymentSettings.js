@@ -7,6 +7,8 @@ const paymentSettingsSchema = new mongoose.Schema({
     branchName: { type: String, default: 'RAJENDRANAGAR BRANCH' },
     upiId: { type: String },
     qrCodeUrl: { type: String },
+    yearlyFee: { type: Number, default: 1000 },
+    lifetimeFee: { type: Number, default: 5000 },
     activeGateway: { type: String, enum: ['BankTransfer', 'Razorpay', 'Stripe'], default: 'BankTransfer' },
     razorpayKey: { type: String },
 }, { timestamps: true });

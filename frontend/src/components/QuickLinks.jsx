@@ -22,6 +22,10 @@ const ICON_MAP = {
     Layout: Layout,
 };
 
+import { Link } from 'react-router-dom';
+
+const MotionLink = motion.create(Link);
+
 const QuickLinks = () => {
     const [links, setLinks] = useState([]);
 
@@ -48,6 +52,30 @@ const QuickLinks = () => {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-0">
                     {links.map((item, index) => {
                         const IconComp = ICON_MAP[item.icon] || FileText;
+                        const isInternal = item.link && item.link.startsWith('/');
+                        
+                        if (isInternal) {
+                            return (
+                                <MotionLink
+                                    key={item._id}
+                                    to={item.link}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    viewport={{ once: true }}
+                                    className="group flex flex-col items-center justify-center py-4 px-2 text-center hover:bg-white/5 transition-all duration-300 relative border-r border-white/5 last:border-r-0"
+                                >
+                                    <div className="mb-3 p-3 rounded-xl bg-white/5 text-white/70 group-hover:bg-[#fbbf24] group-hover:text-[#14532d] group-hover:scale-110 transition-all duration-500 shadow-md">
+                                        <IconComp size={24} strokeWidth={2} />
+                                    </div>
+                                    <h3 className="text-white/90 font-bold text-xs md:text-sm tracking-wider uppercase transition-all group-hover:text-white">
+                                        {item.title}
+                                    </h3>
+                                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#fbbf24] group-hover:w-1/2 transition-all duration-500" />
+                                </MotionLink>
+                            );
+                        }
+
                         return (
                             <motion.a
                                 key={item._id}
@@ -64,8 +92,6 @@ const QuickLinks = () => {
                                 <h3 className="text-white/90 font-bold text-xs md:text-sm tracking-wider uppercase transition-all group-hover:text-white">
                                     {item.title}
                                 </h3>
-                                
-                                {/* Active Underline */}
                                 <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-[#fbbf24] group-hover:w-1/2 transition-all duration-500" />
                             </motion.a>
                         );

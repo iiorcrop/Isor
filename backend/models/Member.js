@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 
 const memberSchema = new mongoose.Schema({
-    membershipId: { type: String, unique: true },
+    membershipId: { type: String, unique: true, sparse: true },
+    enrollmentId: { type: String, unique: true, sparse: true },
     title: { type: String, enum: ['Dr.', 'Mr.', 'Ms.', 'Prof.'], required: true },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
@@ -39,6 +40,15 @@ const memberSchema = new mongoose.Schema({
 
     role: { type: String, default: 'member' },
     isVerified: { type: Boolean, default: false },
+    profileCompleted: { type: Boolean, default: false },
+    subscriptionStatus: { 
+        type: String, 
+        enum: ['Pending', 'Active', 'Expired', 'Rejected'], 
+        default: 'Pending' 
+    },
+    subscriptionStartDate: { type: Date },
+    subscriptionEndDate: { type: Date },
+    amountPaid: { type: Number },
     approvalStatus: { 
         type: String, 
         enum: ['Pending', 'Approved', 'Rejected'], 

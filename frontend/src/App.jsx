@@ -17,7 +17,7 @@ import CommitteePage from './pages/CommitteePage'
 import ContactPage from './pages/ContactPage'
 import ForgotPassword from './pages/ForgotPassword'
 import MemberDashboard from './pages/MemberDashboard'
-import DynamicPage from './pages/DynamicPage'
+import VerifyCertificate from './pages/VerifyCertificate'
 
 const Home = () => (
   <>
@@ -49,6 +49,8 @@ function App() {
           <Route path="/committee/:type" element={<CommitteePage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/member-dashboard" element={<MemberDashboard />} />
+          <Route path="/verify-certificate" element={<VerifyCertificate />} />
+          <Route path="/verify-certificate/:enrollmentId" element={<VerifyCertificate />} />
           <Route path="/page/*" element={<DynamicPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

@@ -3,6 +3,8 @@ import axios from 'axios';
 import { ChevronDown, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { Link } from 'react-router-dom';
+
 const MenuBar = () => {
     const [menuItems, setMenuItems] = useState([]);
     const [activeItem, setActiveItem] = useState('Home');
@@ -26,54 +28,66 @@ const MenuBar = () => {
             <div className="max-w-7xl mx-auto px-4 md:px-0 flex items-center justify-between md:justify-start h-[54px]">
                 {/* Desktop Menu */}
                 <div className="hidden md:flex items-center h-full">
-                    {menuItems.map((item, index) => (
-                        <div 
-                            key={index} 
-                            className="relative h-full"
-                            onMouseEnter={() => item.isDropdown && setOpenDropdown(index)}
-                            onMouseLeave={() => setOpenDropdown(null)}
-                        >
-                            <a
-                                href={item.link}
-                                onClick={(e) => {
-                                    if (item.isDropdown) e.preventDefault();
-                                    setActiveItem(item.label);
-                                }}
-                                className={`h-full flex items-center px-5 text-[15px] font-bold transition-all duration-200 group ${
-                                    activeItem === item.label 
-                                    ? 'bg-[#b47c1c] text-white' 
-                                    : 'text-white hover:bg-[#b47c1c]/10'
-                                }`}
-                            >
-                                {item.label}
-                                {item.isDropdown && (
-                                    <span className="ml-1 text-[10px] opacity-80 group-hover:rotate-180 transition-transform">▼</span>
-                                )}
-                            </a>
+                    {menuItems.map((item, index) => {
+                        const isInternal = item.link && item.link.startsWith('/');
+                        const Component = isInternal ? Link : 'a';
+                        const linkProps = isInternal ? { to: item.link } : { href: item.link };
 
-                            {/* Dropdown Menu */}
-                            <AnimatePresence>
-                                {item.isDropdown && openDropdown === index && (
-                                    <motion.div 
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: 10 }}
-                                        className="absolute top-full left-0 w-64 bg-white shadow-2xl border-t-2 border-[#b47c1c] py-2 z-[100]"
-                                    >
-                                        {item.children.map((child, cIndex) => (
-                                            <a
-                                                key={cIndex}
-                                                href={child.link}
-                                                className="block px-6 py-3 text-[14px] text-gray-700 hover:bg-[#064e3b] hover:text-white transition-colors font-semibold"
-                                            >
-                                                {child.label}
-                                            </a>
-                                        ))}
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-                    ))}
+                        return (
+                            <div 
+                                key={index} 
+                                className="relative h-full"
+                                onMouseEnter={() => item.isDropdown && setOpenDropdown(index)}
+                                onMouseLeave={() => setOpenDropdown(null)}
+                            >
+                                <Component
+                                    {...linkProps}
+                                    onClick={(e) => {
+                                        if (item.isDropdown) e.preventDefault();
+                                        setActiveItem(item.label);
+                                    }}
+                                    className={`h-full flex items-center px-5 text-[15px] font-bold transition-all duration-200 group ${
+                                        activeItem === item.label 
+                                        ? 'bg-[#b47c1c] text-[#ffffff]' 
+                                        : 'text-[#ffffff] hover:bg-[#b47c1c]/10'
+                                    }`}
+                                >
+                                    {item.label}
+                                    {item.isDropdown && (
+                                        <span className="ml-1 text-[10px] opacity-80 group-hover:rotate-180 transition-transform">▼</span>
+                                    )}
+                                </Component>
+
+                                {/* Dropdown Menu */}
+                                <AnimatePresence>
+                                    {item.isDropdown && openDropdown === index && (
+                                        <motion.div 
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            className="absolute top-full left-0 w-64 bg-white shadow-2xl border-t-2 border-[#b47c1c] py-2 z-[100]"
+                                        >
+                                            {item.children.map((child, cIndex) => {
+                                                const childInternal = child.link && child.link.startsWith('/');
+                                                const ChildComponent = childInternal ? Link : 'a';
+                                                const childProps = childInternal ? { to: child.link } : { href: child.link };
+
+                                                return (
+                                                    <ChildComponent
+                                                        key={cIndex}
+                                                        {...childProps}
+                                                        className="block px-6 py-3 text-[14px] text-gray-700 hover:bg-[#064e3b] hover:text-white transition-colors font-semibold"
+                                                    >
+                                                        {child.label}
+                                                    </ChildComponent>
+                                                );
+                                            })}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        );
+                    })}
                 </div>
 
                 {/* Mobile Menu Button */}

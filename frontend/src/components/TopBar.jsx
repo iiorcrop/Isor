@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+import { Link } from 'react-router-dom';
+
 const TopBar = () => {
     const [dateTime, setDateTime] = useState(new Date());
     const [settings, setSettings] = useState(null);
@@ -87,11 +89,11 @@ const TopBar = () => {
                 <span className="hidden sm:inline text-white/20">|</span>
 
                 <div className="flex items-center gap-3 md:gap-4">
-                    <a href="/membership/login" className="hover:text-[#fbbf24] transition-colors uppercase tracking-wider font-bold">Member Login</a>
+                    <Link to="/verify-certificate" className="hover:text-white text-[#fbbf24] transition-colors uppercase tracking-wider font-bold">Verify Certificate</Link>
+                    <span className="text-white/20">|</span>
+                    <Link to="/membership/login" className="hover:text-[#fbbf24] transition-colors uppercase tracking-wider font-bold">Member Login</Link>
                     <span className="text-white/20">|</span>
                     <a href="https://admin.isor.in/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors uppercase tracking-wider text-[9px] md:text-[11px]">Admin</a>
-                    <span className="hidden xs:inline text-white/20">|</span>
-                    <a href="#" className="hidden xs:inline hover:text-white transition-colors uppercase tracking-wider">Contact</a>
                 </div>
             </div>
         </header>

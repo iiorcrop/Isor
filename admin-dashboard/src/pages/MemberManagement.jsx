@@ -175,10 +175,10 @@ const MemberManagement = () => {
                                     </td>
                                     <td className="p-6 text-right">
                                         <div className="flex items-center justify-end gap-2">
-                                            {(!member.approvalStatus || member.approvalStatus === 'Pending') && member.paymentStatus === 'Completed' && (
+                                            {member.approvalStatus !== 'Approved' && (
                                                 <button 
                                                     disabled={updatingId === member._id}
-                                                    onClick={() => updateStatus(member._id, { approvalStatus: 'Approved' })}
+                                                    onClick={() => updateStatus(member._id, { approvalStatus: 'Approved', paymentStatus: 'Completed' })}
                                                     className={`px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs font-bold hover:scale-105 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2 ${updatingId === member._id ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                 >
                                                     {updatingId === member._id ? (
@@ -186,7 +186,7 @@ const MemberManagement = () => {
                                                             <Loader2 size={14} className="animate-spin" />
                                                             Processing...
                                                         </>
-                                                    ) : 'Approve Member'}
+                                                    ) : 'Approve Form & Payment'}
                                                 </button>
                                             )}
                                             <button 

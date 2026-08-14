@@ -12,6 +12,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import MemberCertificate from '../components/MemberCertificate';
 import { getServerUrl } from '../utils/urlHelper';
 
+import { Link } from 'react-router-dom';
+
 const MemberDashboard = () => {
     const navigate = useNavigate();
     const [member, setMember] = useState(null);
@@ -117,11 +119,16 @@ const MemberDashboard = () => {
                                     {member.title} {member.firstName} {member.lastName}
                                 </h1>
                                 <span className="bg-[#fbbf24] text-[#064e3b] text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
-                                    {member.membershipType} Member
+                                    {member.membershipType || 'Yearly'} Member
                                 </span>
                                 <span className="bg-emerald-800 text-emerald-100 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-emerald-600">
-                                    Status: {member.approvalStatus}
+                                    Status: {member.subscriptionStatus || member.approvalStatus || 'Active'}
                                 </span>
+                                {member.subscriptionEndDate && (
+                                    <span className="bg-amber-900/60 text-amber-200 text-[10px] font-bold px-3 py-1 rounded-full border border-amber-500/30">
+                                        Valid Until: {new Date(member.subscriptionEndDate).toLocaleDateString()}
+                                    </span>
+                                )}
                             </div>
                             <p className="text-white/70 font-mono text-sm tracking-widest">{member.membershipId}</p>
                         </div>
@@ -216,7 +223,7 @@ const MemberDashboard = () => {
                             <p className="text-white/60 text-sm leading-relaxed mb-6">
                                 Need assistance with journal submissions or membership verification? Reach out directly to ISOR headquarters.
                             </p>
-                            <a href="/contact" className="text-[#fbbf24] font-bold text-sm hover:underline">Contact ISOR Support &rarr;</a>
+                            <Link to="/contact" className="text-[#fbbf24] font-bold text-sm hover:underline">Contact ISOR Support &rarr;</Link>
                         </div>
                     </div>
 
@@ -366,7 +373,7 @@ const MemberDashboard = () => {
                                                 </div>
 
                                                 <a 
-                                                    href={journal.pdfUrl ? getServerUrl(journal.pdfUrl) : '#'}
+                                                    href={journal.pdfUrl ? `${getServerUrl(journal.pdfUrl)}?token=${localStorage.getItem('memberToken') || ''}` : '#'}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="w-full bg-[#064e3b] text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#b47c1c] transition-all shadow-md"

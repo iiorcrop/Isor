@@ -5,6 +5,8 @@ import { getServerUrl } from '../utils/urlHelper';
 import { motion } from 'framer-motion';
 import { Download, ChevronRight, BookOpen } from 'lucide-react';
 
+import { Link } from 'react-router-dom';
+
 const HomeJournals = () => {
     const [journals, setJournals] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -93,8 +95,16 @@ const HomeJournals = () => {
                                 </p>
                             </div>
 
+                            <div className="text-[#064e3b] text-[10px] font-bold text-center mb-2">
+                                {localStorage.getItem('memberToken') ? (
+                                    <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">Full Access Member</span>
+                                ) : (
+                                    <span className="text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">First 2 Pages Preview</span>
+                                )}
+                            </div>
+
                             <a 
-                                href={journal.pdfUrl ? getServerUrl(journal.pdfUrl) : '#'} 
+                                href={journal.pdfUrl ? `${getServerUrl(journal.pdfUrl)}${localStorage.getItem('memberToken') ? '?token=' + localStorage.getItem('memberToken') : ''}` : '#'} 
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="w-full py-3 rounded-xl border-2 border-[#1e703c]/20 text-[#1e703c] font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#1e703c] hover:text-white transition-all"
@@ -107,13 +117,13 @@ const HomeJournals = () => {
             </div>
 
             <div className="mt-6 text-center">
-                <a 
-                    href="/archives" 
+                <Link 
+                    to="/archives" 
                     className="inline-flex items-center gap-2 text-[#064e3b] font-bold text-sm hover:text-[#b47c1c] transition-colors group"
                 >
                     Explore Complete Journal Archives
                     <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                </a>
+                </Link>
             </div>
         </section>
     );

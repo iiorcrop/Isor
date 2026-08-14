@@ -117,6 +117,34 @@ const PaymentSettings = () => {
                         </div>
                     </div>
                 </motion.div>
+
+                {/* Subscription Plan Pricing */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 }}
+                    className="bg-[#0f172a] border border-white/5 p-8 rounded-[2rem] space-y-6 md:col-span-2"
+                >
+                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                        <ShieldCheck size={20} className="text-primary" /> Subscription Plan Pricing (Admin Defined)
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <SettingInput 
+                            label="Yearly Subscription Fee (₹)" 
+                            type="number"
+                            placeholder="1000"
+                            value={settings.yearlyFee} 
+                            onChange={val => setSettings({...settings, yearlyFee: val})} 
+                        />
+                        <SettingInput 
+                            label="Lifetime Subscription Fee (₹)" 
+                            type="number"
+                            placeholder="5000"
+                            value={settings.lifetimeFee} 
+                            onChange={val => setSettings({...settings, lifetimeFee: val})} 
+                        />
+                    </div>
+                </motion.div>
             </div>
 
             <button 
@@ -131,14 +159,14 @@ const PaymentSettings = () => {
     );
 };
 
-const SettingInput = ({ label, value, onChange, placeholder }) => (
+const SettingInput = ({ label, value, onChange, placeholder, type = 'text' }) => (
     <div className="space-y-1.5">
         <label className="block text-xs font-bold text-white/40 uppercase tracking-widest">{label}</label>
         <input 
-            type="text" 
+            type={type} 
             placeholder={placeholder}
             className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-primary transition-all"
-            value={value || ''}
+            value={value !== undefined ? value : ''}
             onChange={(e) => onChange(e.target.value)}
         />
     </div>
