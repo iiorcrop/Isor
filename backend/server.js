@@ -29,8 +29,9 @@ const jwt = require('jsonwebtoken');
 const Member = require('./models/Member');
 
 // PDF protection middleware for static uploads
-app.get('/uploads/*.pdf', async (req, res, next) => {
+app.get('/uploads/*path', async (req, res, next) => {
     try {
+        if (!req.path.toLowerCase().endsWith('.pdf')) return next();
         const reqPath = req.path.replace(/^\/uploads[/\\]+/, '');
         const fullFilePath = path.join(__dirname, 'uploads', reqPath);
 
