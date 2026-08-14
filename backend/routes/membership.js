@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const { uploadToStorageServer } = require('../utils/fileUploader');
+const { generateMembershipId, generateEnrollmentId } = require('../utils/idGenerator');
 
 const upload = multer({ 
     storage: multer.memoryStorage(),
@@ -17,23 +18,6 @@ const upload = multer({
         else cb(new Error('Only JPG, PNG and PDF files are allowed'));
     }
 });
-
-// Helper: Generate Unique Membership ID
-const generateMembershipId = async (type) => {
-    const year = new Date().getFullYear();
-    const count = await Member.countDocuments();
-    const sequence = (count + 1).toString().padStart(4, '0');
-    const prefix = (type === 'Life' || type === 'Lifetime') ? 'L' : 'A';
-    return `ISOR-${year}-${prefix}${sequence}`;
-};
-
-// Helper: Generate Sequential Enrollment ID
-const generateEnrollmentId = async () => {
-    const year = new Date().getFullYear();
-    const count = await Member.countDocuments({ enrollmentId: { $exists: true, $ne: '' } });
-    const sequence = (count + 1).toString().padStart(4, '0');
-    return `ENR-${year}-${sequence}`;
-};
 
 // Helper: Check and auto-expire subscription if past end date
 const checkSubscriptionExpiry = async (member) => {

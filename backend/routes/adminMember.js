@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Member = require('../models/Member');
 const { sendEmail, templates } = require('../utils/emailService');
+const { generateMembershipId, generateEnrollmentId } = require('../utils/idGenerator');
 
 // GET all members with filters
 router.get('/', async (req, res) => {
@@ -54,18 +55,11 @@ router.patch('/:id/status', async (req, res) => {
             }
 
             if (!memberToApprove.membershipId) {
-                const year = new Date().getFullYear();
-                const typeCode = (memType === 'Life' || memType === 'Lifetime') ? 'L' : 'A';
-                const count = await Member.countDocuments({ membershipId: { $exists: true, $ne: '' } });
-                const sequence = (count + 1).toString().padStart(4, '0');
-                updateFields.membershipId = `ISOR-${year}-${typeCode}${sequence}`;
+                updateFields.membershipId = await generateMembershipId(memType);
             }
 
             if (!memberToApprove.enrollmentId) {
-                const year = new Date().getFullYear();
-                const enrCount = await Member.countDocuments({ enrollmentId: { $exists: true, $ne: '' } });
-                const sequence = (enrCount + 1).toString().padStart(4, '0');
-                updateFields.enrollmentId = `ENR-${year}-${sequence}`;
+                updateFields.enrollmentId = await generateEnrollmentId();
             }
         }
 
