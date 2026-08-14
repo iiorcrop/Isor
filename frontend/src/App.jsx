@@ -18,6 +18,8 @@ import ContactPage from './pages/ContactPage'
 import ForgotPassword from './pages/ForgotPassword'
 import MemberDashboard from './pages/MemberDashboard'
 import VerifyCertificate from './pages/VerifyCertificate'
+import DynamicPage from './pages/DynamicPage'
+
 
 const Home = () => (
   <>

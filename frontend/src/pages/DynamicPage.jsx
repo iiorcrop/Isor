@@ -107,7 +107,8 @@ const DynamicPage = () => {
                 )}
             </div>
         </div>
-    );
+    </div>
+);
 };
 
 export default DynamicPage;
