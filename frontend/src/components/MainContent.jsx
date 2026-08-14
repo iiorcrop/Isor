@@ -116,7 +116,7 @@ const MainContent = () => {
                                     whileInView={{ opacity: 1, scale: 1 }}
                                     transition={{ delay: index * 0.1 }}
                                     viewport={{ once: true }}
-                                    className="bg-white/60 backdrop-blur-sm border border-[#1e703c]/10 p-8 rounded-[2rem] text-center group hover:bg-white transition-all shadow-sm hover:shadow-xl"
+                                    className="bg-white/60 backdrop-blur-sm border border-[#1e703c]/10 p-6 rounded-2xl text-center group hover:bg-white transition-all shadow-sm hover:shadow-xl"
                                 >
                                     <div className="text-4xl font-serif font-bold text-[#1e703c] mb-2 group-hover:scale-110 transition-transform">
                                         {stat.value}
@@ -131,13 +131,13 @@ const MainContent = () => {
 
                     {/* Right Column: News & Announcements */}
                     <div className="lg:col-span-4">
-                        <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-[#064e3b]/5 border border-black/5 overflow-hidden sticky top-8">
-                            <div className="bg-[#064e3b] p-6 text-white flex items-center justify-between">
-                                <h3 className="text-xl font-bold tracking-tight flex items-center gap-2">
-                                    <Bell size={20} className="text-[#fbbf24]" />
+                        <div className="bg-white rounded-2xl shadow-lg shadow-[#064e3b]/5 border border-gray-200/80 overflow-hidden sticky top-8">
+                            <div className="bg-[#064e3b] px-5 py-4 text-white flex items-center justify-between border-b border-[#064e3b]/20">
+                                <h3 className="text-base font-bold tracking-tight flex items-center gap-2">
+                                    <Bell size={18} className="text-[#fbbf24]" />
                                     NEWS & EVENTS
                                 </h3>
-                                <button className="text-[10px] uppercase font-bold tracking-widest opacity-60 hover:opacity-100 transition-opacity">
+                                <button className="text-[10px] uppercase font-bold tracking-wider text-emerald-100 hover:text-white transition-colors">
                                     View All
                                 </button>
                             </div>
@@ -146,32 +146,32 @@ const MainContent = () => {
                                 ref={scrollRef}
                                 onMouseEnter={() => setIsPaused(true)}
                                 onMouseLeave={() => setIsPaused(false)}
-                                className="divide-y divide-gray-100 max-h-[500px] overflow-y-auto hidden-scrollbar scroll-smooth"
+                                className="divide-y divide-gray-100 max-h-[480px] overflow-y-auto hidden-scrollbar scroll-smooth"
                             >
                                 {/* Double the list for seamless looping */}
                                 {[...announcements, ...announcements].map((ann, index) => (
                                     <motion.a 
                                         key={`${ann._id}-${index}`}
                                         href={ann.link}
-                                        className="p-6 block hover:bg-gray-50 transition-colors group"
+                                        className="p-4 px-5 block hover:bg-emerald-50/40 transition-colors group"
                                     >
-                                        <div className="flex justify-between items-start mb-2">
-                                            <div className="flex items-center gap-2 text-xs font-bold text-gray-400">
-                                                <Calendar size={14} />
-                                                {new Date(ann.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                        <div className="flex justify-between items-center gap-2 mb-1.5">
+                                            <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-500">
+                                                <Calendar size={13} className="text-[#b47c1c]" />
+                                                {new Date(ann.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                             </div>
                                             {ann.badge && (
-                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-tighter ${
-                                                    ann.badgeColor === 'urgent' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
+                                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                                                    ann.badgeColor === 'urgent' ? 'bg-red-50 text-red-600 border border-red-200/60' : 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
                                                 }`}>
                                                     {ann.badge}
                                                 </span>
                                             )}
                                         </div>
-                                        <h4 className="text-[#064e3b] font-bold leading-snug group-hover:text-[#b47c1c] transition-colors">
+                                        <h4 className="text-[#064e3b] font-semibold text-sm leading-snug group-hover:text-[#b47c1c] transition-colors">
                                             {ann.title}
                                         </h4>
-                                        <div className="mt-3 flex items-center gap-1 text-[10px] font-bold text-[#b47c1c] opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest">
+                                        <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-[#b47c1c] opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest">
                                             Read More <ChevronRight size={12} />
                                         </div>
                                     </motion.a>
