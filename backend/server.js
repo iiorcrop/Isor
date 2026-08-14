@@ -31,8 +31,14 @@ const Member = require('./models/Member');
 // PDF protection middleware for static uploads
 app.get('/uploads/*path', async (req, res, next) => {
     try {
-        if (!req.path.toLowerCase().endsWith('.pdf')) return next();
-        const reqPath = req.path.replace(/^\/uploads[/\\]+/, '');
+        let decodedPath = req.path;
+        try {
+            decodedPath = decodeURIComponent(req.path);
+        } catch (e) {}
+
+        if (!decodedPath.toLowerCase().endsWith('.pdf')) return next();
+
+        const reqPath = decodedPath.replace(/^\/uploads[/\\]+/, '');
         const fullFilePath = path.join(__dirname, 'uploads', reqPath);
 
         if (!fs.existsSync(fullFilePath)) {
