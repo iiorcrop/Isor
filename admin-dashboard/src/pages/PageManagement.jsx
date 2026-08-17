@@ -36,6 +36,7 @@ const PageManagement = () => {
     const [modalFile, setModalFile] = useState(null);
     const [modalUploading, setModalUploading] = useState(false);
     const modalFileInputRef = useRef(null);
+    const savedRangeRef = useRef(null);
 
 
     useEffect(() => {
@@ -202,14 +203,22 @@ const PageManagement = () => {
         let selText = '';
         if (editorRef.current && editorRef.current.editor) {
             const ed = editorRef.current.editor;
-            selText = ed.selection.sel?.toString() || ed.selection.getHTML() || '';
+            try {
+                savedRangeRef.current = ed.selection.save();
+            } catch (e) {}
+
+            try {
+                selText = ed.selection.sel?.toString() || ed.selection.getHTML() || ed.s?.sel?.toString() || '';
+            } catch (e) {}
         }
         if (!selText) {
             try {
                 selText = window.getSelection()?.toString() || '';
             } catch (e) {}
         }
-        setSelectedText(selText.trim() || 'Attachment Link');
+        const cleanText = selText.replace(/<[^>]*>/g, '').trim();
+
+        setSelectedText(cleanText || 'Attachment Link');
         setLinkUrl('');
         setSelectedPdfUrl('');
         setIsSecureToggle(false);
@@ -253,7 +262,13 @@ const PageManagement = () => {
             const htmlToInsert = `<a href="${finalUrl}" target="_blank" rel="noopener noreferrer">${textToInsert}</a>`;
 
             if (editorRef.current && editorRef.current.editor) {
-                editorRef.current.editor.selection.insertHTML(htmlToInsert);
+                const ed = editorRef.current.editor;
+                if (savedRangeRef.current) {
+                    try {
+                        ed.selection.restore(savedRangeRef.current);
+                    } catch (e) {}
+                }
+                ed.selection.insertHTML(htmlToInsert);
             } else {
                 setFormData(prev => ({ ...prev, content: prev.content + ' ' + htmlToInsert }));
             }
@@ -273,11 +288,32 @@ const PageManagement = () => {
     };
 
     const editorConfig = React.useMemo(() => ({
-
         readonly: false,
         theme: 'dark',
         minHeight: 400,
         enableDragAndDropFileToEditor: true,
+        buttons: [
+            'source', '|',
+            'bold', 'strikethrough', 'underline', 'italic', '|',
+            'ul', 'ol', '|',
+            'outdent', 'indent', '|',
+            'font', 'fontsize', 'brush', 'paragraph', '|',
+            'image', 'table', 'link', 'attachFile', '|',
+            'align', 'undo', 'redo', '|',
+            'hr', 'eraser', 'copyformat', '|',
+            'fullsize', 'selectall'
+        ],
+        controls: {
+            attachFile: {
+                name: 'attachFile',
+                iconURL: '',
+                icon: 'file',
+                tooltip: 'Attach File / Convert Text to Link',
+                exec: () => {
+                    openLinkModal();
+                }
+            }
+        },
         uploader: {
             url: `${import.meta.env.VITE_API_URL}/pages/upload-image`,
             format: 'json',
