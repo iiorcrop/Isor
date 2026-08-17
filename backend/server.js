@@ -132,6 +132,7 @@ app.use("/api/brainstorm", require("./routes/brainstorm"));
 app.use("/api/footer", require("./routes/footer"));
 
 app.use("/api/pages", require("./routes/page"));
+app.use("/api/pdf", require("./routes/pdf"));
 
 app.get("/api/ping", (req, res) => res.json({ status: "ok", message: "Backend is reachable v2" }));
 
