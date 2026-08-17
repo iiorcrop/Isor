@@ -202,15 +202,17 @@ const PageManagement = () => {
 
     const openLinkModal = () => {
         let selText = '';
-        if (editorRef.current && editorRef.current.editor) {
-            const ed = editorRef.current.editor;
-            try {
-                savedRangeRef.current = ed.selection.save();
-            } catch (e) {}
+        if (editorRef.current) {
+            const ed = editorRef.current.editor || editorRef.current;
+            if (ed && ed.selection) {
+                try {
+                    savedRangeRef.current = ed.selection.save ? ed.selection.save() : null;
+                } catch (e) {}
 
-            try {
-                selText = ed.selection.sel?.toString() || ed.selection.getHTML() || ed.s?.sel?.toString() || '';
-            } catch (e) {}
+                try {
+                    selText = ed.selection.sel?.toString() || ed.selection.getHTML() || (ed.s && ed.s.sel ? ed.s.sel.toString() : '') || '';
+                } catch (e) {}
+            }
         }
         if (!selText) {
             try {
@@ -262,16 +264,29 @@ const PageManagement = () => {
             const textToInsert = selectedText.trim() || 'Download File';
             const htmlToInsert = `<a href="${finalUrl}" target="_blank" rel="noopener noreferrer">${textToInsert}</a>`;
 
-            if (editorRef.current && editorRef.current.editor) {
-                const ed = editorRef.current.editor;
-                if (savedRangeRef.current) {
-                    try {
-                        ed.selection.restore(savedRangeRef.current);
-                    } catch (e) {}
+            let inserted = false;
+            if (editorRef.current) {
+                const ed = editorRef.current.editor || editorRef.current;
+                if (ed) {
+                    if (savedRangeRef.current && ed.selection?.restore) {
+                        try {
+                            ed.selection.restore(savedRangeRef.current);
+                        } catch (e) {}
+                    }
+                    if (ed.selection?.insertHTML) {
+                        ed.selection.insertHTML(htmlToInsert);
+                        inserted = true;
+                    } else if (ed.s?.insertHTML) {
+                        ed.s.insertHTML(htmlToInsert);
+                        inserted = true;
+                    } else if (ed.execCommand) {
+                        ed.execCommand('insertHTML', false, htmlToInsert);
+                        inserted = true;
+                    }
                 }
-                ed.selection.insertHTML(htmlToInsert);
-            } else {
-                setFormData(prev => ({ ...prev, content: prev.content + ' ' + htmlToInsert }));
+            }
+            if (!inserted) {
+                setFormData(prev => ({ ...prev, content: (prev.content || '') + ' ' + htmlToInsert }));
             }
 
             setShowLinkModal(false);
