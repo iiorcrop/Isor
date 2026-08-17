@@ -54,12 +54,18 @@ const editorUpload = multer({
 router.post('/upload-image', editorUpload.single('image'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+        const isSecure = req.body.isSecure === 'true' || req.body.isSecure === true;
         const key = await uploadToStorageServer(req.file);
         const fileStorageUrl = process.env.VITE_FILE_STORAGE_URL || "https://file.iior-niger.in";
-        const url = `${fileStorageUrl.replace(/\/+$/, '')}/uploads/${key}`;
-        res.json({ url, isPdf: req.file.mimetype === 'application/pdf' });
+        let url = `${fileStorageUrl.replace(/\/+$/, '')}/uploads/${key}`;
+        const isPdf = req.file.mimetype === 'application/pdf' || req.file.originalname.toLowerCase().endsWith('.pdf');
+        if (isPdf && isSecure) {
+            url += '?secure=1';
+        }
+        res.json({ url, isPdf, isSecure });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
+
 
 // LIST all PDFs in uploads/pages
 router.get('/list-pdfs', (req, res) => {

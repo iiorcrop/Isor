@@ -2,6 +2,11 @@ const mongoose = require('mongoose');
 
 const eventSchema = new mongoose.Schema({
     title: { type: String, required: true },
+    type: { 
+        type: String, 
+        enum: ['events', 'conference', 'seminar', 'workshops', 'upcoming events'], 
+        default: 'events' 
+    },
     date: { type: Date, required: true },
     location: { type: String },
     description: { type: String },
@@ -12,3 +17,4 @@ const eventSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('Event', eventSchema);
+

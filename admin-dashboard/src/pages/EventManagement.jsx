@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getServerUrl } from '../utils/urlHelper';
-import { Plus, Trash2, Edit, Calendar, MapPin, ImageIcon, Save, Loader2, X } from 'lucide-react';
+import { Plus, Trash2, Edit, Calendar, MapPin, ImageIcon, Save, Loader2, Tag } from 'lucide-react';
+
+const EVENT_TYPES = [
+    { label: 'General Event', value: 'events' },
+    { label: 'Conference', value: 'conference' },
+    { label: 'Seminar', value: 'seminar' },
+    { label: 'Workshop', value: 'workshops' },
+    { label: 'Upcoming Event', value: 'upcoming events' }
+];
 
 const EventManagement = () => {
     const [events, setEvents] = useState([]);
@@ -9,7 +17,7 @@ const EventManagement = () => {
     const [editing, setEditing] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [formData, setFormData] = useState({
-        title: '', date: '', location: '', description: '', isLatest: true
+        title: '', type: 'events', date: '', location: '', description: '', isLatest: true
     });
     const [files, setFiles] = useState([]);
 
@@ -43,7 +51,7 @@ const EventManagement = () => {
             fetchEvents();
             setShowForm(false);
             setEditing(null);
-            setFormData({ title: '', date: '', location: '', description: '', isLatest: true });
+            setFormData({ title: '', type: 'events', date: '', location: '', description: '', isLatest: true });
             setFiles([]);
         } catch (err) { console.error(err); }
         finally { setLoading(false); }
@@ -62,10 +70,10 @@ const EventManagement = () => {
             <div className="flex justify-between items-center bg-[#1e293b] p-8 rounded-[2rem] border border-white/5 shadow-2xl">
                 <div>
                     <h2 className="text-3xl font-serif font-bold text-white">Event Management</h2>
-                    <p className="text-white/40 text-sm">Manage ISOR events, conferences, and photo galleries.</p>
+                    <p className="text-white/40 text-sm">Manage ISOR events, conferences, seminars, workshops, and photo galleries.</p>
                 </div>
                 <button 
-                    onClick={() => { setShowForm(!showForm); setEditing(null); setFormData({ title: '', date: '', location: '', description: '', isLatest: true }); setFiles([]); }}
+                    onClick={() => { setShowForm(!showForm); setEditing(null); setFormData({ title: '', type: 'events', date: '', location: '', description: '', isLatest: true }); setFiles([]); }}
                     className="bg-primary text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-all"
                 >
                     <Plus size={20} /> Add New Event
@@ -88,6 +96,18 @@ const EventManagement = () => {
                                 />
                             </div>
                             <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Event Category / Type</label>
+                                <select 
+                                    className="w-full bg-[#0a0f1d] border border-white/10 rounded-xl p-4 text-white focus:outline-none focus:border-primary"
+                                    value={formData.type}
+                                    onChange={e => setFormData({...formData, type: e.target.value})}
+                                >
+                                    {EVENT_TYPES.map(t => (
+                                        <option key={t.value} value={t.value}>{t.label}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="space-y-2">
                                 <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Event Date</label>
                                 <input 
                                     required
@@ -106,19 +126,20 @@ const EventManagement = () => {
                                     onChange={e => setFormData({...formData, location: e.target.value})}
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Display Settings</label>
-                                <div className="flex items-center gap-4 h-[58px]">
-                                    <label className="flex items-center gap-2 cursor-pointer">
-                                        <input 
-                                            type="checkbox" 
-                                            checked={formData.isLatest} 
-                                            onChange={e => setFormData({...formData, isLatest: e.target.checked})}
-                                            className="w-5 h-5 rounded border-white/10 bg-white/5 text-primary focus:ring-primary"
-                                        />
-                                        <span className="text-sm text-white/60">Show in Latest Events</span>
-                                    </label>
-                                </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Display Settings</label>
+                            <div className="flex items-center gap-4 h-[58px]">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={formData.isLatest} 
+                                        onChange={e => setFormData({...formData, isLatest: e.target.checked})}
+                                        className="w-5 h-5 rounded border-white/10 bg-white/5 text-primary focus:ring-primary"
+                                    />
+                                    <span className="text-sm text-white/60">Show in Latest Events homepage section</span>
+                                </label>
                             </div>
                         </div>
 
@@ -182,20 +203,25 @@ const EventManagement = () => {
                         
                         <div className="flex-1 flex flex-col justify-between">
                             <div>
-                                <div className="flex justify-between items-start mb-2">
+                                <div className="flex justify-between items-start mb-2 gap-2">
                                     <h4 className="text-xl font-bold text-white">{event.title}</h4>
-                                    {event.isLatest && <span className="bg-primary/20 text-primary text-[10px] px-2 py-1 rounded-full font-bold">LATEST</span>}
+                                    <div className="flex gap-1 flex-wrap">
+                                        <span className="bg-amber-500/20 text-amber-400 text-[10px] px-2 py-1 rounded-full font-bold uppercase flex items-center gap-1">
+                                            <Tag size={10} /> {event.type || 'events'}
+                                        </span>
+                                        {event.isLatest && <span className="bg-primary/20 text-primary text-[10px] px-2 py-1 rounded-full font-bold">LATEST</span>}
+                                    </div>
                                 </div>
                                 <div className="flex flex-wrap gap-4 text-white/40 text-xs mb-4">
                                     <div className="flex items-center gap-1"><Calendar size={14} /> {new Date(event.date).toLocaleDateString()}</div>
-                                    <div className="flex items-center gap-1"><MapPin size={14} /> {event.location}</div>
+                                    {event.location && <div className="flex items-center gap-1"><MapPin size={14} /> {event.location}</div>}
                                 </div>
                                 <p className="text-white/60 text-sm line-clamp-2 mb-4">{event.description}</p>
                             </div>
                             
                             <div className="flex gap-2 pt-4 border-t border-white/5">
                                 <button 
-                                    onClick={() => { setEditing(event); setFormData(event); setShowForm(true); }}
+                                    onClick={() => { setEditing(event); setFormData({ ...event, type: event.type || 'events' }); setShowForm(true); }}
                                     className="flex-1 bg-white/5 text-white py-3 rounded-xl font-bold hover:bg-primary transition-all flex items-center justify-center gap-2"
                                 >
                                     <Edit size={16} /> Edit

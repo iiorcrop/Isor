@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Save, Loader2, FileText, Globe, Search, Plus, Eye, Edit, Trash2, CheckCircle, Upload, Link2, X, FilePlus } from 'lucide-react';
+import { Save, Loader2, FileText, Globe, Search, Plus, Eye, Edit, Trash2, CheckCircle, Upload, Link2, X, FilePlus, Shield, Lock, FileUp, Link } from 'lucide-react';
 import JoditEditor from 'jodit-react';
 
 const PageManagement = () => {
@@ -25,6 +25,16 @@ const PageManagement = () => {
     // Menu placement for new page
     const [menuPlacement, setMenuPlacement] = useState('none'); // 'none' | 'top' | 'child-N'
     const [menuSaving, setMenuSaving] = useState(false);
+
+    // Hyperlink / File Modal state
+    const [showLinkModal, setShowLinkModal] = useState(false);
+    const [selectedText, setSelectedText] = useState('');
+    const [linkUrl, setLinkUrl] = useState('');
+    const [isSecureToggle, setIsSecureToggle] = useState(false);
+    const [modalFile, setModalFile] = useState(null);
+    const [modalUploading, setModalUploading] = useState(false);
+    const modalFileInputRef = useRef(null);
+
 
     useEffect(() => {
         fetchPages();
@@ -192,7 +202,66 @@ const PageManagement = () => {
         finally { setSaving(false); }
     };
 
+    const openLinkModal = () => {
+        let selText = '';
+        if (editorRef.current && editorRef.current.editor) {
+            selText = editorRef.current.editor.selection.sel?.toString() || '';
+        }
+        setSelectedText(selText || 'Attachment Link');
+        setLinkUrl('');
+        setIsSecureToggle(false);
+        setModalFile(null);
+        setShowLinkModal(true);
+    };
+
+    const handleModalSubmit = async (e) => {
+        e.preventDefault();
+        setModalUploading(true);
+        try {
+            let finalUrl = linkUrl.trim();
+
+            if (modalFile) {
+                const payload = new FormData();
+                payload.append('image', modalFile);
+                payload.append('isSecure', isSecureToggle);
+                const res = await axios.post(`${import.meta.env.VITE_API_URL}/pages/upload-image`, payload, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                finalUrl = res.data.url;
+            } else if (finalUrl && isSecureToggle && !finalUrl.includes('secure=1')) {
+                finalUrl += finalUrl.includes('?') ? '&secure=1' : '?secure=1';
+            }
+
+            if (!finalUrl) {
+                alert('Please provide a URL or upload a file');
+                setModalUploading(false);
+                return;
+            }
+
+            const textToInsert = selectedText.trim() || 'Download File';
+            const htmlToInsert = `<a href="${finalUrl}" target="_blank" rel="noopener noreferrer">${textToInsert}</a>`;
+
+            if (editorRef.current && editorRef.current.editor) {
+                editorRef.current.editor.selection.insertHTML(htmlToInsert);
+            } else {
+                setFormData(prev => ({ ...prev, content: prev.content + ' ' + htmlToInsert }));
+            }
+
+            setShowLinkModal(false);
+            setModalFile(null);
+            setLinkUrl('');
+            setSelectedText('');
+            setIsSecureToggle(false);
+        } catch (err) {
+            console.error(err);
+            alert(err.response?.data?.message || 'Failed to attach file link');
+        } finally {
+            setModalUploading(false);
+        }
+    };
+
     const editorConfig = React.useMemo(() => ({
+
         readonly: false,
         theme: 'dark',
         minHeight: 400,
@@ -559,7 +628,16 @@ const PageManagement = () => {
 
                         {!previewMode ? (
                             <div className="space-y-2">
-                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Page Content</label>
+                                <div className="flex justify-between items-center">
+                                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Page Content</label>
+                                    <button 
+                                        type="button"
+                                        onClick={openLinkModal}
+                                        className="bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-sm"
+                                    >
+                                        <Link size={14} /> Attach File / Convert Text to Hyperlink
+                                    </button>
+                                </div>
                                 <div className="rounded-xl overflow-hidden text-black">
                                     <JoditEditor
                                         ref={editorRef}
@@ -570,6 +648,7 @@ const PageManagement = () => {
                                 </div>
                             </div>
                         ) : (
+
                             <div className="space-y-2">
                                 <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Live Preview</label>
                                 <div className="w-full bg-white p-12 rounded-[2.5rem] text-gray-800 min-h-[500px] overflow-y-auto">
@@ -670,8 +749,136 @@ const PageManagement = () => {
                     )}
                 </div>
             )}
+
+            {/* Attach File / Convert to Hyperlink Modal */}
+            {showLinkModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-[#1e293b] border border-white/10 rounded-[2rem] p-8 max-w-lg w-full shadow-2xl space-y-6 text-white relative">
+                        <div className="flex justify-between items-center pb-4 border-b border-white/10">
+                            <div className="flex items-center gap-3">
+                                <div className="p-3 bg-primary/20 text-primary rounded-xl">
+                                    <Link size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-white">Attach File / Add Hyperlink</h3>
+                                    <p className="text-xs text-white/40">Attach a file URL or upload a PDF/file to selected text</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={() => setShowLinkModal(false)}
+                                className="p-2 rounded-xl bg-white/5 text-white/60 hover:text-white hover:bg-white/10 transition-all"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleModalSubmit} className="space-y-5">
+                            {/* Selected Text / Display Text */}
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Display Text</label>
+                                <input 
+                                    type="text"
+                                    required
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-primary"
+                                    value={selectedText}
+                                    onChange={(e) => setSelectedText(e.target.value)}
+                                    placeholder="e.g. Read full proceedings PDF"
+                                />
+                            </div>
+
+                            {/* Option 1: URL input */}
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Option A: Link URL</label>
+                                <input 
+                                    type="text"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-primary"
+                                    value={linkUrl}
+                                    onChange={(e) => { setLinkUrl(e.target.value); setModalFile(null); }}
+                                    placeholder="https://example.com/document.pdf or /uploads/..."
+                                />
+                            </div>
+
+                            <div className="flex items-center gap-4 my-2">
+                                <div className="h-px bg-white/10 flex-1"></div>
+                                <span className="text-[10px] uppercase font-bold text-white/30">OR</span>
+                                <div className="h-px bg-white/10 flex-1"></div>
+                            </div>
+
+                            {/* Option 2: Upload File */}
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Option B: Upload File</label>
+                                <div 
+                                    onClick={() => modalFileInputRef.current?.click()}
+                                    className="border-2 border-dashed border-white/10 hover:border-primary/50 bg-white/5 rounded-2xl p-5 text-center cursor-pointer transition-all"
+                                >
+                                    <FileUp size={24} className="mx-auto text-primary mb-2" />
+                                    <p className="text-xs text-white/70 font-semibold">
+                                        {modalFile ? modalFile.name : 'Click to select file to upload'}
+                                    </p>
+                                    <p className="text-[10px] text-white/30 mt-1">PDFs, Documents, Images supported</p>
+                                    <input 
+                                        ref={modalFileInputRef}
+                                        type="file"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            if (e.target.files[0]) {
+                                                setModalFile(e.target.files[0]);
+                                                setLinkUrl('');
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Secure Toggle Switch */}
+                            <div className="bg-black/30 border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+                                <div className="space-y-0.5">
+                                    <div className="flex items-center gap-2">
+                                        <Lock size={14} className={isSecureToggle ? 'text-amber-400' : 'text-white/40'} />
+                                        <span className="text-sm font-bold text-white">Secure PDF Access</span>
+                                    </div>
+                                    <p className="text-[11px] text-white/40">
+                                        When turned ON, non-members can only view the first 2 pages of the PDF file.
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsSecureToggle(!isSecureToggle)}
+                                    className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${
+                                        isSecureToggle ? 'bg-amber-500' : 'bg-white/10'
+                                    }`}
+                                >
+                                    <div className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                                        isSecureToggle ? 'translate-x-6' : 'translate-x-0'
+                                    }`} />
+                                </button>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex justify-end gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowLinkModal(false)}
+                                    className="px-5 py-3 rounded-xl text-xs font-bold text-white/60 hover:bg-white/5 transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={modalUploading}
+                                    className="bg-primary text-white px-6 py-3 rounded-xl text-xs font-bold flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
+                                >
+                                    {modalUploading ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
+                                    {modalUploading ? 'Uploading & Attaching...' : 'Insert Hyperlink'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
 export default PageManagement;
+

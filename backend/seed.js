@@ -166,9 +166,12 @@ const seedDB = async () => {
                         link: '#', 
                         isDropdown: true,
                         children: [
+                            { label: 'All Events', link: '/events' },
                             { label: 'Conferences', link: '/events/conferences' },
                             { label: 'Workshops', link: '/events/workshops' },
-                            { label: 'Upcoming Seminars', link: '/events/seminars' }
+                            { label: 'Seminars', link: '/events/seminars' },
+                            { label: 'Upcoming Events', link: '/events/upcoming' },
+                            { label: 'Brain Stroming Sessions', link: '/events/brain-stroming-sessions' }
                         ]
                     },
                     { label: 'Downloads', link: '/downloads', isDropdown: false },
@@ -177,6 +180,8 @@ const seedDB = async () => {
             });
             console.log('Menu seeded');
         }
+
+
 
         console.log('Seeding completed successfully');
         process.exit();

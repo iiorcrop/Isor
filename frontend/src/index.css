@@ -65,9 +65,66 @@ body {
 .prose ul { list-style-type: disc; }
 .prose ol { list-style-type: decimal; }
 .prose li { margin-top: 0.5rem; margin-bottom: 0.5rem; }
-.prose table { width: 100%; border-collapse: collapse; margin-top: 2rem; margin-bottom: 2rem; }
-.prose th, .prose td { border: 1px solid #e5e7eb; padding: 0.75rem; text-align: left; }
-.prose th { background-color: #f9fafb; font-weight: 600; }
+.prose table { 
+  width: 100%; 
+  border-collapse: separate; 
+  border-spacing: 0;
+  margin-top: 2rem; 
+  margin-bottom: 2rem; 
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid #d1d5db;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+.prose th, .prose td { 
+  border-bottom: 1px solid #e5e7eb; 
+  border-right: 1px solid #e5e7eb;
+  padding: 0.875rem 1.25rem; 
+  text-align: left; 
+}
+.prose th:last-child, .prose td:last-child {
+  border-right: none;
+}
+.prose tr:last-child td {
+  border-bottom: none;
+}
+/* First row styling as header if inside thead or first tr */
+.prose thead tr, .prose tbody tr:first-child, .prose tr:first-child { 
+  background-color: #064e3b !important; 
+  color: #ffffff !important; 
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+.prose thead th, .prose tbody tr:first-child td, .prose tr:first-child td, .prose tr:first-child th {
+  color: #ffffff !important;
+  border-bottom: 2px solid #b47c1c !important;
+  border-right-color: rgba(255, 255, 255, 0.15) !important;
+  background-color: #064e3b !important;
+}
+.prose thead th a, .prose tbody tr:first-child td a, .prose tr:first-child td a {
+  color: #fbbf24 !important;
+}
+/* Alternating row styling */
+.prose tbody tr:nth-child(even), .prose tr:nth-child(even):not(:first-child) {
+  background-color: #f8fafc;
+}
+.prose tbody tr:hover, .prose tr:hover:not(:first-child) {
+  background-color: #f1f5f9;
+}
+/* First column styling (e.g., SNO) */
+.prose td:first-child, .prose th:first-child {
+  font-weight: 700 !important;
+  color: #064e3b;
+  text-align: center;
+  width: 1%;
+  white-space: nowrap;
+}
+.prose tr:first-child td:first-child, .prose tr:first-child th:first-child {
+  color: #ffffff !important;
+}
+
 .prose img { border-radius: 1rem; margin-top: 2rem; margin-bottom: 2rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
 .prose blockquote { border-left: 4px solid #b47c1c; padding-left: 1.5rem; font-style: italic; color: #4b5563; margin: 2rem 0; }
 

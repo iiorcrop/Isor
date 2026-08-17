@@ -53,6 +53,8 @@ app.get('/uploads/*path', async (req, res, next) => {
             token = req.query.token;
         }
 
+        const isSecureReq = req.query && (req.query.secure === '1' || req.query.secure === 'true');
+
         let isActiveMember = false;
         if (token) {
             try {
@@ -74,10 +76,10 @@ app.get('/uploads/*path', async (req, res, next) => {
 
         res.setHeader('Content-Type', 'application/pdf');
 
-        if (isActiveMember) {
+        if (isActiveMember && !isSecureReq) {
             return res.sendFile(fullFilePath);
-        } else {
-            // Sliced 2 pages for public & inactive users
+        } else if (isSecureReq || !isActiveMember) {
+            // Sliced 2 pages for secure files or non-members
             const fileBytes = fs.readFileSync(fullFilePath);
             const pdfDoc = await PDFDocument.load(fileBytes);
             if (pdfDoc.getPageCount() <= 2) {
@@ -88,7 +90,10 @@ app.get('/uploads/*path', async (req, res, next) => {
             copiedPages.forEach((page) => previewDoc.addPage(page));
             const previewBytes = await previewDoc.save();
             return res.send(Buffer.from(previewBytes));
+        } else {
+            return res.sendFile(fullFilePath);
         }
+
     } catch (err) {
         next();
     }
@@ -120,7 +125,9 @@ app.use('/api/committees', require('./routes/committee'));
 app.use('/api/journal', require('./routes/journal'));
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/events', require('./routes/event'));
+app.use('/api/brainstorm', require('./routes/brainstorm'));
 app.use('/api/footer', require('./routes/footer'));
+
 app.use('/api/pages', require('./routes/page'));
 
 app.get('/api/ping', (req, res) => res.json({ status: 'ok', message: 'Backend is reachable' }));

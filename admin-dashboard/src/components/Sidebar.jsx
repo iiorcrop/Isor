@@ -56,7 +56,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         { icon: Shield, label: 'Committees', path: '/committees' },
         { icon: BookOpen, label: 'Journal Volumes', path: '/journals' },
         { icon: Calendar, label: 'Events', path: '/events' },
+        { icon: FileText, label: 'Brainstorm PDFs', path: '/brainstorm' },
         { icon: Mail, label: 'Contact Inbox', path: '/contact' },
+
         { icon: LayoutDashboard, label: 'Footer Settings', path: '/footer' },
         { icon: FileText, label: 'Dynamic Pages', path: '/pages' },
         { icon: CreditCard, label: 'Payment Settings', path: '/payment-settings' },

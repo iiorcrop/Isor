@@ -3,13 +3,18 @@ const router = express.Router();
 const Event = require('../models/Event');
 const { upload, uploadMultipleToStorageServer } = require('../utils/fileUploader');
 
-// GET all events
+// GET all events (optional ?type= filter)
 router.get('/', async (req, res) => {
     try {
-        const events = await Event.find().sort({ date: -1, createdAt: -1 });
+        const query = {};
+        if (req.query.type) {
+            query.type = req.query.type;
+        }
+        const events = await Event.find(query).sort({ date: -1, createdAt: -1 });
         res.json(events);
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
+
 
 // GET latest events (top 3)
 router.get('/latest', async (req, res) => {
