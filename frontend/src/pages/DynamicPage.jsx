@@ -71,8 +71,19 @@ const DynamicPage = () => {
                 {/* Content Area */}
                 <div className="bg-white p-10 md:p-16 rounded-[3rem] border border-[#064e3b]/10 shadow-2xl shadow-[#064e3b]/5">
                 <div 
-                    className="prose prose-lg max-w-none prose-slate prose-headings:text-[#064e3b] prose-headings:font-serif prose-p:text-gray-700 prose-p:leading-relaxed prose-p:text-justify prose-img:rounded-2xl prose-img:shadow-xl"
+                    className="prose prose-lg max-w-none prose-slate prose-headings:text-[#064e3b] prose-headings:font-serif prose-p:text-gray-700 prose-p:leading-relaxed prose-p:text-justify prose-img:rounded-2xl prose-img:shadow-xl prose-a:text-[#064e3b] prose-a:underline prose-a:font-semibold hover:prose-a:text-[#b47c1c]"
                 >
+                    <style>{`
+                        .prose a, .prose table td a {
+                            color: #064e3b !important;
+                            text-decoration: underline !important;
+                            font-weight: 600 !important;
+                            transition: color 0.2s ease;
+                        }
+                        .prose a:hover, .prose table td a:hover {
+                            color: #b47c1c !important;
+                        }
+                    `}</style>
                     <ReadMore limit={800}>{page.content}</ReadMore>
                 </div>
 
