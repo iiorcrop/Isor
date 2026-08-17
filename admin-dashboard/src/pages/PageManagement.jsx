@@ -219,21 +219,19 @@ const PageManagement = () => {
             'ul', 'ol', '|',
             'outdent', 'indent', '|',
             'font', 'fontsize', 'brush', 'paragraph', '|',
-            'image', 'file', 'table', 'link', 'uploadLink', '|',
+            'image', 'file', 'table', 'link', '|',
             'align', 'undo', 'redo', '|',
             'hr', 'eraser', 'copyformat', '|',
             'fullsize', 'selectall'
         ],
         popup: {
-            selection: ['bold', 'italic', 'underline', 'link', 'uploadLink', 'file', '|', 'fontsize', 'brush'],
-            table: ['uploadLink', 'link', 'file', '|', 'align', 'valign', 'table'],
-            text: ['bold', 'italic', 'underline', 'link', 'uploadLink', 'file']
+            selection: ['bold', 'italic', 'underline', 'link', 'file', '|', 'fontsize', 'brush'],
+            table: ['file', 'link', '|', 'align', 'valign', 'table'],
+            text: ['bold', 'italic', 'underline', 'link', 'file']
         },
         controls: {
-            uploadLink: {
-                name: 'uploadLink',
-                iconURL: '',
-                icon: 'upload',
+            file: {
+                name: 'file',
                 tooltip: 'Upload File & Link to Selected Text',
                 exec: function (editor) {
                     let selText = '';
