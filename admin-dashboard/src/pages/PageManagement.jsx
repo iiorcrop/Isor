@@ -211,17 +211,69 @@ const PageManagement = () => {
             fillEmptyParagraph: false
         },
         enableDragAndDropFileToEditor: true,
+        toolbarInline: true,
+        toolbarInlineForSelection: true,
         buttons: [
             'source', '|',
             'bold', 'strikethrough', 'underline', 'italic', '|',
             'ul', 'ol', '|',
             'outdent', 'indent', '|',
             'font', 'fontsize', 'brush', 'paragraph', '|',
-            'image', 'file', 'table', 'link', '|',
+            'image', 'file', 'table', 'link', 'uploadLink', '|',
             'align', 'undo', 'redo', '|',
             'hr', 'eraser', 'copyformat', '|',
             'fullsize', 'selectall'
         ],
+        popup: {
+            selection: ['bold', 'italic', 'underline', 'link', 'uploadLink', 'file', '|', 'fontsize', 'brush'],
+            table: ['uploadLink', 'link', 'file', '|', 'align', 'valign', 'table'],
+            text: ['bold', 'italic', 'underline', 'link', 'uploadLink', 'file']
+        },
+        controls: {
+            uploadLink: {
+                name: 'uploadLink',
+                iconURL: '',
+                icon: 'upload',
+                tooltip: 'Upload File & Link to Selected Text',
+                exec: function (editor) {
+                    let selText = '';
+                    try {
+                        selText = editor.selection?.sel?.toString() || editor.selection?.getHTML() || '';
+                    } catch (e) {}
+                    if (!selText) {
+                        try {
+                            selText = window.getSelection()?.toString() || '';
+                        } catch (e) {}
+                    }
+                    const cleanText = selText.replace(/<[^>]*>/g, '').trim() || 'Download File';
+
+                    const fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.accept = '*/*';
+                    fileInput.onchange = async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                            const key = await uploadToStorageServer(file);
+                            const fileUrl = getServerUrl(key);
+                            const htmlToInsert = `<a href="${fileUrl}" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
+                            
+                            if (editor.selection?.insertHTML) {
+                                editor.selection.insertHTML(htmlToInsert);
+                            } else if (editor.s?.insertHTML) {
+                                editor.s.insertHTML(htmlToInsert);
+                            } else if (editor.execCommand) {
+                                editor.execCommand('insertHTML', false, htmlToInsert);
+                            }
+                        } catch (err) {
+                            console.error('Failed to upload and attach file:', err);
+                            alert('Failed to upload file');
+                        }
+                    };
+                    fileInput.click();
+                }
+            }
+        },
         uploader: {
             insertImageAsBase64URI: false,
             imagesExtensions: ['jpg', 'png', 'jpeg', 'gif', 'svg', 'webp', 'pdf', 'doc', 'docx', 'xls', 'xlsx'],
