@@ -15,9 +15,10 @@ import PaymentSettings from './pages/PaymentSettings';
 import CommitteeSettings from './pages/CommitteeSettings';
 import JournalManagement from './pages/JournalManagement';
 import EventManagement from './pages/EventManagement';
+import NationalEventManagement from './pages/NationalEventManagement';
+import EventRegistrationManagement from './pages/EventRegistrationManagement';
 import BrainstormManagement from './pages/BrainstormManagement';
 import FooterSettings from './pages/FooterSettings';
-
 import PageManagement from './pages/PageManagement';
 import ContactManagement from './pages/ContactManagement';
 import Sidebar from './components/Sidebar';
@@ -138,6 +139,18 @@ function App() {
                     <Route path="/events" element={
                         <PrivateRoute>
                             <DashboardLayout><EventManagement /></DashboardLayout>
+                        </PrivateRoute>
+                    } />
+
+                    <Route path="/national-events" element={
+                        <PrivateRoute>
+                            <DashboardLayout><NationalEventManagement /></DashboardLayout>
+                        </PrivateRoute>
+                    } />
+
+                    <Route path="/event-registrations" element={
+                        <PrivateRoute>
+                            <DashboardLayout><EventRegistrationManagement /></DashboardLayout>
                         </PrivateRoute>
                     } />
 

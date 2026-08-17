@@ -171,9 +171,11 @@ const seedDB = async () => {
                             { label: 'Workshops', link: '/events/workshops' },
                             { label: 'Seminars', link: '/events/seminars' },
                             { label: 'Upcoming Events', link: '/events/upcoming' },
-                            { label: 'Brain Stroming Sessions', link: '/events/brain-stroming-sessions' }
+                            { label: 'Brain Stroming Sessions', link: '/events/brain-stroming-sessions' },
+                            { label: 'National Events', link: '/events/national' }
                         ]
                     },
+
                     { label: 'Downloads', link: '/downloads', isDropdown: false },
                     { label: 'Contact', link: '/contact', isDropdown: false }
                 ]

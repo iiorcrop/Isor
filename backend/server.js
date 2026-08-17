@@ -125,8 +125,11 @@ app.use('/api/committees', require('./routes/committee'));
 app.use('/api/journal', require('./routes/journal'));
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/events', require('./routes/event'));
+app.use('/api/national-events', require('./routes/nationalEvent'));
+app.use('/api/admin/event-registrations', require('./routes/eventRegistration'));
 app.use('/api/brainstorm', require('./routes/brainstorm'));
 app.use('/api/footer', require('./routes/footer'));
+
 
 app.use('/api/pages', require('./routes/page'));
 
