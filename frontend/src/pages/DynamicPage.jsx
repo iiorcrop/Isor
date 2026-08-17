@@ -100,6 +100,13 @@ const DynamicPage = () => {
                             .prose a:hover, .prose table td a:hover, .prose table th a:hover, .prose p a:hover, .prose li a:hover {
                                 color: #b47c1c !important;
                             }
+                            .prose table {
+                                margin-top: 1rem !important;
+                                margin-bottom: 1rem !important;
+                            }
+                            .prose p:empty {
+                                display: none !important;
+                            }
                         `}</style>
                         <ReadMore limit={800}>{page.content}</ReadMore>
                     </div>

@@ -448,6 +448,8 @@ const PageManagement = () => {
                 .jodit-container { border-radius: 1.5rem !important; overflow: hidden; border: 1px solid rgba(255,255,255,0.1) !important; }
                 .jodit-workplace { min-height: 400px !important; }
                 .jodit-popup, .jodit-toolbar-inline, .jodit-ui-popup, .jodit-toolbar-container { z-index: 100 !important; }
+                .jodit-wysiwyg p:empty { display: none !important; }
+                .jodit-wysiwyg table { margin-bottom: 0.5rem !important; }
             `}</style>
 
             <div className="flex justify-between items-center bg-[#1e293b] p-8 rounded-[2rem] border border-white/5 shadow-2xl">
