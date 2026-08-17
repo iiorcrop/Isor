@@ -3,6 +3,8 @@ import axios from 'axios';
 import { Calendar, ArrowRight, ImageIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+import { getServerUrl } from '../utils/urlHelper';
+
 const LatestEvents = () => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -18,12 +20,7 @@ const LatestEvents = () => {
         fetchLatest();
     }, []);
 
-    const getImageUrl = (path) => {
-        if (!path) return '';
-        if (path.startsWith('http')) return path;
-        const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
-        return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
-    };
+    const getImageUrl = (path) => getServerUrl(path);
 
     if (!loading && events.length === 0) return null;
 

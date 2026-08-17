@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getServerUrl } from '../utils/urlHelper';
 import { Shield, BookOpen, Award, History, Users } from 'lucide-react';
 
 const CommitteePage = () => {
@@ -142,7 +143,7 @@ const CommitteePage = () => {
                                                             <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden border-2 border-white shadow-md">
                                                                 {member.photoUrl && typeof member.photoUrl === 'string' ? (
                                                                     <img 
-                                                                        src={member.photoUrl.startsWith('http') ? member.photoUrl : `${import.meta.env.VITE_API_URL}/../${member.photoUrl}`} 
+                                                                        src={getServerUrl(member.photoUrl)} 
                                                                         alt={member.name} 
                                                                         className="w-full h-full object-cover"
                                                                     />

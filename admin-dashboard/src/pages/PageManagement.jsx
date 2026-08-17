@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Save, Loader2, FileText, Globe, Search, Plus, Eye, Edit, Trash2, CheckCircle, Upload, Link2, X, FilePlus, Shield, Lock, FileUp, Link } from 'lucide-react';
 import JoditEditor from 'jodit-react';
+import { getServerUrl } from '../utils/urlHelper';
 
 const PageManagement = () => {
     const [pages, setPages] = useState([]);
@@ -104,15 +105,14 @@ const PageManagement = () => {
     };
 
     const copyUrl = (url) => {
-        const fullUrl = url.startsWith('http') ? url : `${import.meta.env.VITE_API_URL.replace('/api', '')}/${url}`;
+        const fullUrl = getServerUrl(url);
         navigator.clipboard.writeText(fullUrl);
         setCopiedUrl(url);
         setTimeout(() => setCopiedUrl(''), 2000);
     };
 
     const insertPdfLink = (pdf) => {
-        const baseUrl = import.meta.env.VITE_API_URL.replace('/api', '');
-        const fullUrl = pdf.url.startsWith('http') ? pdf.url : `${baseUrl}/${pdf.url}`;
+        const fullUrl = getServerUrl(pdf.url);
         const displayName = pdf.filename.replace(/^\d+-/, '').replace(/_/g, ' ');
         const linkHtml = `<p><a href="${fullUrl}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#064e3b;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">📄 ${displayName}</a></p>`;
         setFormData(prev => ({ ...prev, content: prev.content + linkHtml }));

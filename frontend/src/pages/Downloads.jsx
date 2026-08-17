@@ -3,6 +3,8 @@ import axios from 'axios';
 import { Download, FileText, Calendar, Search, Loader2, Sparkles, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+import { getServerUrl } from '../utils/urlHelper';
+
 const Downloads = () => {
     const [sessions, setSessions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -22,12 +24,7 @@ const Downloads = () => {
         fetchSessions();
     }, []);
 
-    const getFileUrl = (path) => {
-        if (!path) return '#';
-        if (path.startsWith('http')) return path;
-        const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
-        return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
-    };
+    const getFileUrl = (path) => getServerUrl(path);
 
     const filteredSessions = sessions.filter(session =>
         session.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||

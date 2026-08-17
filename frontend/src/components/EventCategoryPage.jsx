@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Calendar, MapPin, ImageIcon, ArrowRight, X, Loader2, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getServerUrl } from '../utils/urlHelper';
 
 const EventCategoryPage = ({ categoryType, title, subtitle }) => {
     const [events, setEvents] = useState([]);
@@ -26,12 +27,7 @@ const EventCategoryPage = ({ categoryType, title, subtitle }) => {
         fetchEvents();
     }, [categoryType]);
 
-    const getImageUrl = (path) => {
-        if (!path) return '';
-        if (path.startsWith('http')) return path;
-        const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
-        return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
-    };
+    const getImageUrl = (path) => getServerUrl(path);
 
     return (
         <div className="min-h-screen bg-[#fff9f0] py-16 px-6">

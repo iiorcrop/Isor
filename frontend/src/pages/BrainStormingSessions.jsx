@@ -3,6 +3,8 @@ import axios from 'axios';
 import { Calendar, User, Download, FileText, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+import { getServerUrl } from '../utils/urlHelper';
+
 const BrainStormingSessions = () => {
     const [sessions, setSessions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -21,12 +23,7 @@ const BrainStormingSessions = () => {
         fetchSessions();
     }, []);
 
-    const getFileUrl = (path) => {
-        if (!path) return '#';
-        if (path.startsWith('http')) return path;
-        const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
-        return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
-    };
+    const getFileUrl = (path) => getServerUrl(path);
 
     const getFileName = (path, defaultTitle) => {
         if (defaultTitle && defaultTitle.toLowerCase().endsWith('.pdf')) {

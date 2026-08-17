@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Loader2, Calendar, User } from 'lucide-react';
 import ReadMore from '../components/ReadMore';
+import { getServerUrl } from '../utils/urlHelper';
 
 import { Link } from 'react-router-dom';
 
@@ -81,8 +82,7 @@ const DynamicPage = () => {
                         <h3 className="text-2xl font-serif font-bold text-[#064e3b] mb-6">📄 Downloads</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {page.pdfs.map((pdf, idx) => {
-                                const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
-                                const pdfUrl = `${baseUrl}/${pdf.url}`;
+                                const pdfUrl = getServerUrl(pdf.url);
                                 const displayName = (pdf.filename || pdf.url.split('/').pop()).replace(/^\d+-/, '').replace(/_/g, ' ');
                                 return (
                                     <a

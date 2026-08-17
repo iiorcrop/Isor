@@ -3,6 +3,8 @@ import axios from 'axios';
 import { Calendar, MapPin, ImageIcon, ArrowRight, X, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { getServerUrl } from '../utils/urlHelper';
+
 const Events = () => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -22,12 +24,7 @@ const Events = () => {
         fetchEvents();
     }, []);
 
-    const getImageUrl = (path) => {
-        if (!path) return '';
-        if (path.startsWith('http')) return path;
-        const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
-        return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
-    };
+    const getImageUrl = (path) => getServerUrl(path);
 
     return (
         <div className="min-h-screen bg-[#fff9f0] py-16 px-6">

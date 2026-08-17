@@ -4,6 +4,8 @@ import { Calendar, MapPin, Tag, ArrowRight, Loader2, Sparkles, CheckCircle2, Tic
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
+import { getServerUrl } from '../utils/urlHelper';
+
 const NationalEvents = () => {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -22,12 +24,7 @@ const NationalEvents = () => {
         fetchEvents();
     }, []);
 
-    const getImageUrl = (path) => {
-        if (!path) return '';
-        if (path.startsWith('http')) return path;
-        const baseUrl = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '');
-        return `${baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
-    };
+    const getImageUrl = (path) => getServerUrl(path);
 
     return (
         <div className="min-h-screen bg-[#fff9f0] py-16 px-6">
