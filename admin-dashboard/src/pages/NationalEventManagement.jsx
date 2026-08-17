@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getServerUrl } from '../utils/urlHelper';
 import { uploadToStorageServer } from '../utils/fileUploader';
-import { Plus, Trash2, Edit, Calendar, MapPin, Save, Loader2, Tag, Check, X, Layers, PlusCircle, Trash, DollarSign } from 'lucide-react';
+import { Plus, Trash2, Edit, Calendar, MapPin, Save, Loader2, Tag, Check, X, Layers, PlusCircle, Trash, DollarSign, Users } from 'lucide-react';
 
 const DEFAULT_FIELDS = [
     { label: 'Full Name', name: 'Name', fieldType: 'text', required: true, options: [] },
@@ -13,6 +14,7 @@ const DEFAULT_FIELDS = [
 ];
 
 const NationalEventManagement = () => {
+    const navigate = useNavigate();
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState(null);
@@ -362,7 +364,13 @@ const NationalEventManagement = () => {
                             <p className="text-white/60 text-sm line-clamp-2">{event.description}</p>
                         </div>
 
-                        <div className="pt-4 border-t border-white/5 flex gap-2">
+                        <div className="pt-4 border-t border-white/5 flex gap-2 flex-wrap">
+                            <button 
+                                onClick={() => navigate(`/event-registrations?eventId=${event._id}`)}
+                                className="flex-1 bg-primary/20 text-primary hover:bg-primary hover:text-white py-3 px-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 text-xs"
+                            >
+                                <Users size={16} /> List Registrations
+                            </button>
                             <button 
                                 onClick={() => {
                                     setEditing(event);
@@ -370,13 +378,14 @@ const NationalEventManagement = () => {
                                     setCustomFields(event.customFields || DEFAULT_FIELDS);
                                     setShowForm(true);
                                 }}
-                                className="flex-1 bg-white/5 text-white py-3 rounded-xl font-bold hover:bg-primary transition-all flex items-center justify-center gap-2"
+                                className="bg-white/5 text-white py-3 px-4 rounded-xl font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-xs"
                             >
-                                <Edit size={16} /> Edit Event & Form
+                                <Edit size={16} /> Edit Event
                             </button>
                             <button 
                                 onClick={() => deleteEvent(event._id)}
                                 className="bg-error/10 text-error p-3 rounded-xl hover:bg-error hover:text-white transition-all"
+                                title="Delete Event"
                             >
                                 <Trash2 size={16} />
                             </button>

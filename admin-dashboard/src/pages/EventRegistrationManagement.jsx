@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { getServerUrl } from '../utils/urlHelper';
 import { CheckCircle, XCircle, Trash2, Eye, FileText, Image, Search, Filter, Loader2, CreditCard } from 'lucide-react';
 
 const EventRegistrationManagement = () => {
+    const [searchParams] = useSearchParams();
+    const initialEventId = searchParams.get('eventId') || '';
+
     const [registrations, setRegistrations] = useState([]);
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedEventId, setSelectedEventId] = useState('');
+    const [selectedEventId, setSelectedEventId] = useState(initialEventId);
     const [selectedStatus, setSelectedStatus] = useState('');
 
     // Modal view state
