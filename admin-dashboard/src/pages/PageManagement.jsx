@@ -237,8 +237,7 @@ const PageManagement = () => {
 
             if (modalFile) {
                 const key = await uploadToStorageServer(modalFile);
-                const storageUrl = (import.meta.env.VITE_FILE_STORAGE_URL || "https://file.iior-niger.in").replace(/\/+$/, "");
-                finalUrl = `${storageUrl}/uploads/${key}`;
+                finalUrl = key;
             } else if (selectedPdfUrl) {
                 finalUrl = selectedPdfUrl;
             } else if (linkUrl) {
@@ -261,8 +260,9 @@ const PageManagement = () => {
                 finalUrl = finalUrl.replace(/[?&]secure=1/, '');
             }
 
+            const resolvedUrl = getServerUrl(finalUrl);
             const textToInsert = selectedText.trim() || 'Download File';
-            const htmlToInsert = `<a href="${finalUrl}" target="_blank" rel="noopener noreferrer">${textToInsert}</a>`;
+            const htmlToInsert = `<a href="${resolvedUrl}" target="_blank" rel="noopener noreferrer">${textToInsert}</a>`;
 
             let inserted = false;
             if (editorRef.current) {
@@ -282,6 +282,11 @@ const PageManagement = () => {
                     } else if (ed.execCommand) {
                         ed.execCommand('insertHTML', false, htmlToInsert);
                         inserted = true;
+                    }
+
+                    const currentEditorHtml = ed.value || (ed.getEditorValue ? ed.getEditorValue() : null) || (ed.getHTML ? ed.getHTML() : null);
+                    if (currentEditorHtml) {
+                        setFormData(prev => ({ ...prev, content: currentEditorHtml }));
                     }
                 }
             }
