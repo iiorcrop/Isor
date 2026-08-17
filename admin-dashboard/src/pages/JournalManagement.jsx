@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getServerUrl } from '../utils/urlHelper';
+import { uploadToStorageServer } from '../utils/fileUploader';
 import { Plus, Trash2, Edit, FileText, ImageIcon, CheckCircle, XCircle, Save, Loader2 } from 'lucide-react';
 
 const JournalManagement = () => {
@@ -28,16 +29,28 @@ const JournalManagement = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        const data = new FormData();
-        Object.keys(formData).forEach(key => data.append(key, formData[key]));
-        if (files.cover) data.append('cover', files.cover);
-        if (files.pdf) data.append('pdf', files.pdf);
 
         try {
+            let coverImageUrl = editing ? editing.coverImageUrl : null;
+            let pdfUrl = editing ? editing.pdfUrl : null;
+
+            if (files.cover) {
+                coverImageUrl = await uploadToStorageServer(files.cover);
+            }
+            if (files.pdf) {
+                pdfUrl = await uploadToStorageServer(files.pdf);
+            }
+
+            const payload = {
+                ...formData,
+                coverImageUrl,
+                pdfUrl
+            };
+
             if (editing) {
-                await axios.patch(`${import.meta.env.VITE_API_URL}/journal/${editing._id}`, data);
+                await axios.patch(`${import.meta.env.VITE_API_URL}/journal/${editing._id}`, payload);
             } else {
-                await axios.post(`${import.meta.env.VITE_API_URL}/journal`, data);
+                await axios.post(`${import.meta.env.VITE_API_URL}/journal`, payload);
             }
             fetchJournals();
             setShowForm(false);

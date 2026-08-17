@@ -51,14 +51,17 @@ router.post('/', upload.single('pdf'), async (req, res) => {
         const newsData = {
             text: req.body.text,
             link: req.body.link,
-            isPdf: req.body.isPdf === 'true',
-            isActive: req.body.isActive === 'true',
-            isNewItem: req.body.isNewItem === 'true',
+            isPdf: req.body.isPdf === 'true' || req.body.isPdf === true,
+            isActive: req.body.isActive === 'true' || req.body.isActive === true,
+            isNewItem: req.body.isNewItem === 'true' || req.body.isNewItem === true,
             order: req.body.order || 0
         };
 
         if (req.file) {
             newsData.pdfUrl = await uploadToStorageServer(req.file);
+            newsData.isPdf = true;
+        } else if (req.body.pdfUrl) {
+            newsData.pdfUrl = req.body.pdfUrl;
             newsData.isPdf = true;
         }
 
@@ -76,14 +79,17 @@ router.put('/:id', upload.single('pdf'), async (req, res) => {
         const newsData = {
             text: req.body.text,
             link: req.body.link,
-            isPdf: req.body.isPdf === 'true',
-            isActive: req.body.isActive === 'true',
-            isNewItem: req.body.isNewItem === 'true',
+            isPdf: req.body.isPdf === 'true' || req.body.isPdf === true,
+            isActive: req.body.isActive === 'true' || req.body.isActive === true,
+            isNewItem: req.body.isNewItem === 'true' || req.body.isNewItem === true,
             order: req.body.order || 0
         };
 
         if (req.file) {
             newsData.pdfUrl = await uploadToStorageServer(req.file);
+            newsData.isPdf = true;
+        } else if (req.body.pdfUrl) {
+            newsData.pdfUrl = req.body.pdfUrl;
             newsData.isPdf = true;
         }
 

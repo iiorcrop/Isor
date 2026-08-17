@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getServerUrl } from '../utils/urlHelper';
+import { uploadToStorageServer } from '../utils/fileUploader';
 import { Plus, Trash2, Edit, Calendar, MapPin, Save, Loader2, Tag, Check, X, Layers, PlusCircle, Trash, DollarSign } from 'lucide-react';
 
 const DEFAULT_FIELDS = [
@@ -69,24 +70,28 @@ const NationalEventManagement = () => {
         e.preventDefault();
         setLoading(true);
 
-        const data = new FormData();
-        data.append('title', formData.title);
-        data.append('eventDate', formData.eventDate);
-        data.append('location', formData.location || '');
-        data.append('description', formData.description || '');
-        data.append('isFree', formData.isFree);
-        data.append('price', formData.isFree ? 0 : formData.price);
-        data.append('isActive', formData.isActive);
-        data.append('customFields', JSON.stringify(customFields));
-        if (bannerFile) {
-            data.append('banner', bannerFile);
-        }
-
         try {
+            let bannerImage = editing ? editing.bannerImage : '';
+            if (bannerFile) {
+                bannerImage = await uploadToStorageServer(bannerFile);
+            }
+
+            const payload = {
+                title: formData.title,
+                eventDate: formData.eventDate,
+                location: formData.location || '',
+                description: formData.description || '',
+                isFree: formData.isFree,
+                price: formData.isFree ? 0 : formData.price,
+                isActive: formData.isActive,
+                customFields: customFields,
+                bannerImage: bannerImage
+            };
+
             if (editing) {
-                await axios.patch(`${import.meta.env.VITE_API_URL}/national-events/${editing._id}`, data);
+                await axios.patch(`${import.meta.env.VITE_API_URL}/national-events/${editing._id}`, payload);
             } else {
-                await axios.post(`${import.meta.env.VITE_API_URL}/national-events`, data);
+                await axios.post(`${import.meta.env.VITE_API_URL}/national-events`, payload);
             }
             fetchEvents();
             setShowForm(false);

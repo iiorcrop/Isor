@@ -152,9 +152,9 @@ router.post('/enroll', upload.single('paymentProof'), async (req, res) => {
             enrollmentId,
             profileCompleted: true,
             subscriptionStatus: 'Pending',
-            paymentStatus: req.file ? 'Pending' : 'Pending',
+            paymentStatus: 'Pending',
             approvalStatus: 'Pending',
-            paymentProofUrl: req.file ? await uploadToStorageServer(req.file) : null
+            paymentProofUrl: req.file ? await uploadToStorageServer(req.file) : (req.body.paymentProofUrl || null)
         });
 
         await newMember.save();
@@ -234,7 +234,7 @@ router.get('/me', async (req, res) => {
 // 4. SUBMIT SUBSCRIPTION & PAYMENT PROOF SCREENSHOT
 router.post('/submit-subscription', upload.single('paymentProof'), async (req, res) => {
     try {
-        const { memberId, membershipType, transactionId } = req.body;
+        const { memberId, membershipType, transactionId, paymentProofUrl } = req.body;
         const member = await Member.findById(memberId);
         if (!member) return res.status(404).json({ message: 'Member not found' });
 
@@ -246,6 +246,8 @@ router.post('/submit-subscription', upload.single('paymentProof'), async (req, r
         }
         if (req.file) {
             member.paymentProofUrl = await uploadToStorageServer(req.file);
+        } else if (paymentProofUrl) {
+            member.paymentProofUrl = paymentProofUrl;
         }
 
         member.paymentStatus = 'Pending';
@@ -266,12 +268,17 @@ router.post('/submit-subscription', upload.single('paymentProof'), async (req, r
 router.post('/resubmit-proof', upload.single('paymentProof'), async (req, res) => {
     try {
         const { memberId } = req.body;
-        if (!req.file) return res.status(400).json({ message: 'Please upload payment proof' });
+        let paymentProofUrl = req.body.paymentProofUrl || null;
+
+        if (req.file) {
+            paymentProofUrl = await uploadToStorageServer(req.file);
+        }
+        if (!paymentProofUrl) return res.status(400).json({ message: 'Please upload payment proof' });
 
         const member = await Member.findById(memberId);
         if (!member) return res.status(404).json({ message: 'Member not found' });
 
-        member.paymentProofUrl = await uploadToStorageServer(req.file);
+        member.paymentProofUrl = paymentProofUrl;
         member.paymentStatus = 'Pending';
         member.approvalStatus = 'Pending';
         member.subscriptionStatus = 'Pending';

@@ -105,7 +105,7 @@ router.post('/:id/register', upload.single('screenshot'), async (req, res) => {
         const event = await NationalEvent.findById(req.params.id);
         if (!event) return res.status(404).json({ message: 'Event not found' });
 
-        let paymentScreenshot = '';
+        let paymentScreenshot = req.body.paymentScreenshot || '';
         if (req.file) {
             paymentScreenshot = await uploadToStorageServer(req.file);
         }

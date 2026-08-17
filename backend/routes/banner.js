@@ -55,11 +55,13 @@ router.post('/', upload.single('image'), async (req, res) => {
             subtitle: req.body.subtitle,
             link: req.body.link,
             order: req.body.order || 0,
-            isActive: req.body.isActive === 'true'
+            isActive: req.body.isActive === 'true' || req.body.isActive === true
         };
 
         if (req.file) {
             bannerData.imageUrl = await uploadToStorageServer(req.file);
+        } else if (req.body.imageUrl) {
+            bannerData.imageUrl = req.body.imageUrl;
         } else {
             return res.status(400).json({ message: 'Image is required' });
         }
@@ -80,11 +82,13 @@ router.put('/:id', upload.single('image'), async (req, res) => {
             subtitle: req.body.subtitle,
             link: req.body.link,
             order: req.body.order || 0,
-            isActive: req.body.isActive === 'true'
+            isActive: req.body.isActive === 'true' || req.body.isActive === true
         };
 
         if (req.file) {
             bannerData.imageUrl = await uploadToStorageServer(req.file);
+        } else if (req.body.imageUrl) {
+            bannerData.imageUrl = req.body.imageUrl;
         }
 
         const banner = await Banner.findByIdAndUpdate(req.params.id, bannerData, { new: true });

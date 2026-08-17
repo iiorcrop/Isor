@@ -73,23 +73,18 @@ const PageManagement = () => {
             alert('Please select a valid PDF file.');
             return;
         }
-        const formPayload = new FormData();
-        formPayload.append('pdf', file);
         setUploadingPdf(true);
-        setUploadProgress(0);
+        setUploadProgress(10);
         try {
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/pages/upload-pdf`, formPayload, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-                onUploadProgress: (e) => {
-                    setUploadProgress(Math.round((e.loaded * 100) / e.total));
-                }
-            });
-            // Add the uploaded PDF to formData.pdfs
-            const newPdf = { url: res.data.url, filename: res.data.filename || file.name };
+            const key = await uploadToStorageServer(file);
+            setUploadProgress(100);
+            const storageUrl = (import.meta.env.VITE_FILE_STORAGE_URL || "https://file.iior-niger.in").replace(/\/+$/, "");
+            const fileUrl = `${storageUrl}/uploads/${key}`;
+            const newPdf = { url: fileUrl, filename: file.name };
             setFormData(prev => ({ ...prev, pdfs: [...(prev.pdfs || []), newPdf] }));
             await fetchPdfs();
         } catch (err) {
-            alert(err.response?.data?.message || 'Upload failed');
+            alert(err.message || 'Upload failed');
         } finally {
             setUploadingPdf(false);
             setUploadProgress(0);
@@ -221,13 +216,13 @@ const PageManagement = () => {
             let finalUrl = linkUrl.trim();
 
             if (modalFile) {
-                const payload = new FormData();
-                payload.append('image', modalFile);
-                payload.append('isSecure', isSecureToggle);
-                const res = await axios.post(`${import.meta.env.VITE_API_URL}/pages/upload-image`, payload, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-                finalUrl = res.data.url;
+                const key = await uploadToStorageServer(modalFile);
+                const storageUrl = (import.meta.env.VITE_FILE_STORAGE_URL || "https://file.iior-niger.in").replace(/\/+$/, "");
+                finalUrl = `${storageUrl}/uploads/${key}`;
+                const isPdf = modalFile.type === 'application/pdf' || modalFile.name.toLowerCase().endsWith('.pdf');
+                if (isPdf && isSecureToggle) {
+                    finalUrl += '?secure=1';
+                }
             } else if (finalUrl && isSecureToggle && !finalUrl.includes('secure=1')) {
                 finalUrl += finalUrl.includes('?') ? '&secure=1' : '?secure=1';
             }

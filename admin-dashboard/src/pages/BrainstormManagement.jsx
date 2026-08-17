@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getServerUrl } from '../utils/urlHelper';
+import { uploadToStorageServer } from '../utils/fileUploader';
 import { Plus, Trash2, Edit, FileText, Upload, Save, Loader2, Download, ExternalLink } from 'lucide-react';
 
 const BrainstormManagement = () => {
@@ -31,18 +32,29 @@ const BrainstormManagement = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        const data = new FormData();
-        data.append('title', formData.title);
-        data.append('description', formData.description || '');
-        if (formData.date) data.append('date', formData.date);
-        if (formData.pdfUrl) data.append('pdfUrl', formData.pdfUrl);
-        if (pdfFile) data.append('pdf', pdfFile);
 
         try {
+            let pdfUrl = formData.pdfUrl || (editing ? editing.pdfUrl : '');
+            if (pdfFile) {
+                pdfUrl = await uploadToStorageServer(pdfFile);
+            }
+            if (!pdfUrl) {
+                alert('Please upload a PDF file or enter a PDF URL');
+                setLoading(false);
+                return;
+            }
+
+            const payload = {
+                title: formData.title,
+                description: formData.description || '',
+                date: formData.date || undefined,
+                pdfUrl: pdfUrl
+            };
+
             if (editing) {
-                await axios.patch(`${import.meta.env.VITE_API_URL}/brainstorm/${editing._id}`, data);
+                await axios.patch(`${import.meta.env.VITE_API_URL}/brainstorm/${editing._id}`, payload);
             } else {
-                await axios.post(`${import.meta.env.VITE_API_URL}/brainstorm`, data);
+                await axios.post(`${import.meta.env.VITE_API_URL}/brainstorm`, payload);
             }
             fetchSessions();
             setShowForm(false);

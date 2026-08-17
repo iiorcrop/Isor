@@ -119,8 +119,8 @@ router.post('/', upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'pdf', m
     try {
         const journalData = {
             ...req.body,
-            coverImageUrl: req.files['cover'] ? await uploadToStorageServer(req.files['cover'][0]) : null,
-            pdfUrl: req.files['pdf'] ? await uploadToStorageServer(req.files['pdf'][0]) : null
+            coverImageUrl: (req.files && req.files['cover']) ? await uploadToStorageServer(req.files['cover'][0]) : (req.body.coverImageUrl || null),
+            pdfUrl: (req.files && req.files['pdf']) ? await uploadToStorageServer(req.files['pdf'][0]) : (req.body.pdfUrl || null)
         };
         const journal = new Journal(journalData);
         await journal.save();
@@ -132,8 +132,8 @@ router.post('/', upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'pdf', m
 router.patch('/:id', upload.fields([{ name: 'cover', maxCount: 1 }, { name: 'pdf', maxCount: 1 }]), async (req, res) => {
     try {
         const updateData = { ...req.body };
-        if (req.files['cover']) updateData.coverImageUrl = await uploadToStorageServer(req.files['cover'][0]);
-        if (req.files['pdf']) updateData.pdfUrl = await uploadToStorageServer(req.files['pdf'][0]);
+        if (req.files && req.files['cover']) updateData.coverImageUrl = await uploadToStorageServer(req.files['cover'][0]);
+        if (req.files && req.files['pdf']) updateData.pdfUrl = await uploadToStorageServer(req.files['pdf'][0]);
 
         const journal = await Journal.findByIdAndUpdate(req.params.id, updateData, { new: true });
         res.json(journal);

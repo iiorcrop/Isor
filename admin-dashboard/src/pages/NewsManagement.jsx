@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { uploadToStorageServer } from '../utils/fileUploader';
+
 const NewsManagement = () => {
     const [newsItems, setNewsItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -87,20 +89,30 @@ const NewsManagement = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSaving(true);
-        const data = new FormData();
-        data.append('text', formData.text);
-        data.append('link', formData.link);
-        data.append('isPdf', formData.isPdf);
-        data.append('isActive', formData.isActive);
-        data.append('isNewItem', formData.isNewItem);
-        if (formData.pdf) data.append('pdf', formData.pdf);
 
         try {
+            let pdfUrl = editingItem ? editingItem.pdfUrl : null;
+            let isPdf = formData.isPdf;
+
+            if (formData.pdf) {
+                pdfUrl = await uploadToStorageServer(formData.pdf);
+                isPdf = true;
+            }
+
+            const payload = {
+                text: formData.text,
+                link: formData.link,
+                isPdf: isPdf,
+                pdfUrl: pdfUrl,
+                isActive: formData.isActive,
+                isNewItem: formData.isNewItem
+            };
+
             if (editingItem) {
-                await axios.put(`${import.meta.env.VITE_API_URL}/news/${editingItem._id}`, data);
+                await axios.put(`${import.meta.env.VITE_API_URL}/news/${editingItem._id}`, payload);
                 setMessage('News updated successfully!');
             } else {
-                await axios.post(`${import.meta.env.VITE_API_URL}/news`, data);
+                await axios.post(`${import.meta.env.VITE_API_URL}/news`, payload);
                 setMessage('News added successfully!');
             }
             fetchNews();

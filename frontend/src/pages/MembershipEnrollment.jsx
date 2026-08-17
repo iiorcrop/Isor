@@ -21,6 +21,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { Link } from 'react-router-dom';
 
+import { uploadToStorageServer } from '../utils/fileUploader';
+
 const MembershipEnrollment = () => {
     const [step, setStep] = useState(1); // 1: Profile Setup, 2: Subscription & Payment, 3: Pending Approval
     const [formData, setFormData] = useState({
@@ -92,14 +94,15 @@ const MembershipEnrollment = () => {
         }
 
         setLoading(true);
-        const data = new FormData();
-        Object.keys(formData).forEach(key => data.append(key, formData[key]));
-        data.append('paymentProof', paymentProof);
 
         try {
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/membership/enroll`, data, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const paymentProofUrl = await uploadToStorageServer(paymentProof);
+            const payload = {
+                ...formData,
+                paymentProofUrl
+            };
+
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/membership/enroll`, payload);
             setRegisteredMember(res.data.member || res.data);
             if (res.data.token) {
                 localStorage.setItem('memberToken', res.data.token);

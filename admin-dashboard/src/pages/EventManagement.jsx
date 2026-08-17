@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getServerUrl } from '../utils/urlHelper';
+import { uploadToStorageServer } from '../utils/fileUploader';
 import { Plus, Trash2, Edit, Calendar, MapPin, ImageIcon, Save, Loader2, Tag } from 'lucide-react';
 
 const EVENT_TYPES = [
@@ -36,17 +37,23 @@ const EventManagement = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        const data = new FormData();
-        Object.keys(formData).forEach(key => data.append(key, formData[key]));
-        for (let i = 0; i < files.length; i++) {
-            data.append('images', files[i]);
-        }
 
         try {
+            let uploadedImages = editing ? (editing.images || []) : [];
+            if (files && files.length > 0) {
+                const uploadPromises = Array.from(files).map(file => uploadToStorageServer(file));
+                uploadedImages = await Promise.all(uploadPromises);
+            }
+
+            const payload = {
+                ...formData,
+                images: uploadedImages
+            };
+
             if (editing) {
-                await axios.patch(`${import.meta.env.VITE_API_URL}/events/${editing._id}`, data);
+                await axios.patch(`${import.meta.env.VITE_API_URL}/events/${editing._id}`, payload);
             } else {
-                await axios.post(`${import.meta.env.VITE_API_URL}/events`, data);
+                await axios.post(`${import.meta.env.VITE_API_URL}/events`, payload);
             }
             fetchEvents();
             setShowForm(false);

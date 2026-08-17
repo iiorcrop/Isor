@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getServerUrl } from '../utils/urlHelper';
+import { uploadToStorageServer } from '../utils/fileUploader';
 
 import { 
     Save, 
@@ -61,26 +62,22 @@ const HeaderSettings = () => {
         setSaving(true);
         setMessage('');
 
-        const formData = new FormData();
-        Object.keys(settings).forEach(key => {
-            if (key !== 'logoUrl') {
-                formData.append(key, settings[key]);
-            }
-        });
-        if (logoFile) {
-            formData.append('logo', logoFile);
-        }
-
         try {
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/header`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            let logoUrl = settings.logoUrl;
+            if (logoFile) {
+                logoUrl = await uploadToStorageServer(logoFile);
+            }
+            const payload = { ...settings, logoUrl };
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/header`, payload);
             setSettings(res.data);
+            if (res.data.logoUrl) {
+                setLogoPreview(getServerUrl(res.data.logoUrl));
+            }
             setMessage('Settings updated successfully!');
             setTimeout(() => setMessage(''), 3000);
         } catch (err) {
             console.error('Failed to save header settings', err);
-            setMessage('Error saving settings.');
+            setMessage('Error saving settings: ' + (err.response?.data?.message || err.message));
         } finally {
             setSaving(false);
         }

@@ -4,6 +4,8 @@ import axios from 'axios';
 import { Calendar, MapPin, Tag, Upload, Loader2, CheckCircle2, ArrowLeft, Building2, CreditCard, Copy, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+import { uploadToStorageServer } from '../utils/fileUploader';
+
 const EventRegister = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -63,29 +65,30 @@ const EventRegister = () => {
         }
 
         setSubmitting(true);
-        const payload = new FormData();
-        payload.append('responses', JSON.stringify(formData));
-        if (screenshotFile) {
-            payload.append('screenshot', screenshotFile);
-        }
-
-        // Extract applicant name & email from form responses for indexing
-        const nameKey = Object.keys(formData).find(k => k.toLowerCase().includes('name')) || Object.keys(formData)[0];
-        const emailKey = Object.keys(formData).find(k => k.toLowerCase().includes('email'));
-        const phoneKey = Object.keys(formData).find(k => k.toLowerCase().includes('phone') || k.toLowerCase().includes('mobile'));
-
-        if (nameKey && formData[nameKey]) payload.append('applicantName', formData[nameKey]);
-        if (emailKey && formData[emailKey]) payload.append('applicantEmail', formData[emailKey]);
-        if (phoneKey && formData[phoneKey]) payload.append('applicantPhone', formData[phoneKey]);
 
         try {
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/national-events/${id}/register`, payload, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            let paymentScreenshot = '';
+            if (screenshotFile) {
+                paymentScreenshot = await uploadToStorageServer(screenshotFile);
+            }
+
+            const nameKey = Object.keys(formData).find(k => k.toLowerCase().includes('name')) || Object.keys(formData)[0];
+            const emailKey = Object.keys(formData).find(k => k.toLowerCase().includes('email'));
+            const phoneKey = Object.keys(formData).find(k => k.toLowerCase().includes('phone') || k.toLowerCase().includes('mobile'));
+
+            const payload = {
+                responses: formData,
+                paymentScreenshot,
+                applicantName: (nameKey && formData[nameKey]) ? formData[nameKey] : undefined,
+                applicantEmail: (emailKey && formData[emailKey]) ? formData[emailKey] : undefined,
+                applicantPhone: (phoneKey && formData[phoneKey]) ? formData[phoneKey] : undefined
+            };
+
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/national-events/${id}/register`, payload);
             setSubmittedData(res.data);
         } catch (err) {
             console.error('Submission failed:', err);
-            alert(err.response?.data?.message || 'Registration failed. Please try again.');
+            alert(err.response?.data?.message || err.message || 'Registration failed. Please try again.');
         } finally {
             setSubmitting(false);
         }

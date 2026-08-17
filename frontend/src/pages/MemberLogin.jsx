@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { Link } from 'react-router-dom';
 
+import { uploadToStorageServer } from '../utils/fileUploader';
+
 const MemberLogin = () => {
     const [credentials, setCredentials] = useState({ identifier: '', password: '' });
     const [loading, setLoading] = useState(false);
@@ -57,16 +59,18 @@ const MemberLogin = () => {
     const handleResubmit = async () => {
         if (!resubmitFile) return alert('Please select a file');
         setResubmitting(true);
-        const formData = new FormData();
-        formData.append('memberId', statusData._id || statusData.id);
-        formData.append('paymentProof', resubmitFile);
 
         try {
-            await axios.post(`${import.meta.env.VITE_API_URL}/membership/resubmit-proof`, formData);
+            const paymentProofUrl = await uploadToStorageServer(resubmitFile);
+            const payload = {
+                memberId: statusData._id || statusData.id,
+                paymentProofUrl
+            };
+            await axios.post(`${import.meta.env.VITE_API_URL}/membership/resubmit-proof`, payload);
             alert('Proof resubmitted! Our admin team will review it.');
             setStatusData(null);
         } catch (err) {
-            alert('Failed to resubmit proof');
+            alert('Failed to resubmit proof: ' + (err.message || ''));
         } finally {
             setResubmitting(false);
         }
@@ -77,18 +81,19 @@ const MemberLogin = () => {
         if (!renewProof) return alert('Please upload payment screenshot proof');
         setResubmitting(true);
 
-        const formData = new FormData();
-        formData.append('memberId', expiredMember._id);
-        formData.append('membershipType', renewPlan);
-        formData.append('paymentProof', renewProof);
-
         try {
-            const res = await axios.post(`${import.meta.env.VITE_API_URL}/membership/submit-subscription`, formData);
+            const paymentProofUrl = await uploadToStorageServer(renewProof);
+            const payload = {
+                memberId: expiredMember._id,
+                membershipType: renewPlan,
+                paymentProofUrl
+            };
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/membership/submit-subscription`, payload);
             alert('Renewal payment submitted! Admin will verify and activate your membership.');
             setExpiredMember(null);
             setStatusData(res.data.member || expiredMember);
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to submit renewal payment');
+            alert(err.response?.data?.message || err.message || 'Failed to submit renewal payment');
         } finally {
             setResubmitting(false);
         }

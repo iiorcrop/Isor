@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getServerUrl } from '../utils/urlHelper';
+import { uploadToStorageServer } from '../utils/fileUploader';
 
 import { Users, Plus, Trash2, Award, BookOpen, Shield, History, Pencil, Eye, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -87,21 +88,24 @@ const CommitteeSettings = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        const formData = new FormData();
-        Object.keys(newMember).forEach(key => formData.append(key, newMember[key]));
-        formData.set('committeeType', activeTab);
-        if (photo) formData.append('photo', photo);
 
         try {
+            let photoUrl = editingMember ? editingMember.photoUrl : null;
+            if (photo) {
+                photoUrl = await uploadToStorageServer(photo);
+            }
+
+            const payload = {
+                ...newMember,
+                committeeType: activeTab,
+                photoUrl
+            };
+
             if (editingMember) {
                 if (!editingMember._id) throw new Error('Member ID is missing');
-                await axios.post(`${import.meta.env.VITE_API_URL}/committees/update-member/${editingMember._id}`, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
+                await axios.post(`${import.meta.env.VITE_API_URL}/committees/update-member/${editingMember._id}`, payload);
             } else {
-                await axios.post(`${import.meta.env.VITE_API_URL}/committees`, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
+                await axios.post(`${import.meta.env.VITE_API_URL}/committees`, payload);
             }
             cancelEdit();
             fetchMembers();

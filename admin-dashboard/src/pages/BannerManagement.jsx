@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getServerUrl } from '../utils/urlHelper';
+import { uploadToStorageServer } from '../utils/fileUploader';
 
 import { 
     Plus, 
@@ -91,19 +92,31 @@ const BannerManagement = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSaving(true);
-        const data = new FormData();
-        data.append('title', formData.title);
-        data.append('subtitle', formData.subtitle);
-        data.append('link', formData.link);
-        data.append('isActive', formData.isActive);
-        if (formData.image) data.append('image', formData.image);
 
         try {
+            let imageUrl = editingBanner ? editingBanner.imageUrl : '';
+            if (formData.image) {
+                imageUrl = await uploadToStorageServer(formData.image);
+            }
+            if (!imageUrl && !editingBanner) {
+                alert('Please select an image');
+                setSaving(false);
+                return;
+            }
+
+            const payload = {
+                title: formData.title,
+                subtitle: formData.subtitle,
+                link: formData.link,
+                isActive: formData.isActive,
+                imageUrl: imageUrl
+            };
+
             if (editingBanner) {
-                await axios.put(`${import.meta.env.VITE_API_URL}/banner/${editingBanner._id}`, data);
+                await axios.put(`${import.meta.env.VITE_API_URL}/banner/${editingBanner._id}`, payload);
                 setMessage('Banner updated successfully!');
             } else {
-                await axios.post(`${import.meta.env.VITE_API_URL}/banner`, data);
+                await axios.post(`${import.meta.env.VITE_API_URL}/banner`, payload);
                 setMessage('Banner added successfully!');
             }
             fetchBanners();

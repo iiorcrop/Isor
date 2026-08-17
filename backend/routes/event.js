@@ -27,7 +27,12 @@ router.get('/latest', async (req, res) => {
 // CREATE event
 router.post('/', upload.array('images', 20), async (req, res) => {
     try {
-        const imagePaths = await uploadMultipleToStorageServer(req.files);
+        let imagePaths = [];
+        if (req.files && req.files.length > 0) {
+            imagePaths = await uploadMultipleToStorageServer(req.files);
+        } else if (req.body.images) {
+            imagePaths = Array.isArray(req.body.images) ? req.body.images : [req.body.images];
+        }
         const event = new Event({
             ...req.body,
             images: imagePaths
@@ -42,11 +47,9 @@ router.patch('/:id', upload.array('images', 20), async (req, res) => {
     try {
         const updateData = { ...req.body };
         if (req.files && req.files.length > 0) {
-            const newImagePaths = await uploadMultipleToStorageServer(req.files);
-            // Option: append or replace? Let's replace if new images provided, 
-            // or we could add logic to manage existing images.
-            // For simplicity, we'll replace the gallery if new images are uploaded.
-            updateData.images = newImagePaths;
+            updateData.images = await uploadMultipleToStorageServer(req.files);
+        } else if (req.body.images) {
+            updateData.images = Array.isArray(req.body.images) ? req.body.images : [req.body.images];
         }
 
         const event = await Event.findByIdAndUpdate(req.params.id, updateData, { new: true });
