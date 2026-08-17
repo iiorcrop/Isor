@@ -28,17 +28,6 @@ const PageManagement = () => {
     const [menuPlacement, setMenuPlacement] = useState('none'); // 'none' | 'top' | 'child-N'
     const [menuSaving, setMenuSaving] = useState(false);
 
-    // Hyperlink / File Modal state
-    const [showLinkModal, setShowLinkModal] = useState(false);
-    const [selectedText, setSelectedText] = useState('');
-    const [linkUrl, setLinkUrl] = useState('');
-    const [selectedPdfUrl, setSelectedPdfUrl] = useState('');
-    const [isSecureToggle, setIsSecureToggle] = useState(false);
-    const [modalFile, setModalFile] = useState(null);
-    const [modalUploading, setModalUploading] = useState(false);
-    const modalFileInputRef = useRef(null);
-    const savedRangeRef = useRef(null);
-
 
     useEffect(() => {
         fetchPages();
@@ -213,120 +202,6 @@ const PageManagement = () => {
         finally { setSaving(false); }
     };
 
-    const openLinkModal = () => {
-        let selText = '';
-        if (editorRef.current) {
-            const ed = editorRef.current.editor || editorRef.current;
-            if (ed) {
-                try {
-                    if (ed.events) ed.events.fire('closeAllPopups');
-                } catch (e) {}
-
-                if (ed.selection) {
-                    try {
-                        savedRangeRef.current = ed.selection.save ? ed.selection.save() : null;
-                    } catch (e) {}
-
-                    try {
-                        selText = ed.selection.sel?.toString() || ed.selection.getHTML() || (ed.s && ed.s.sel ? ed.s.sel.toString() : '') || '';
-                    } catch (e) {}
-                }
-            }
-        }
-        if (!selText) {
-            try {
-                selText = window.getSelection()?.toString() || '';
-            } catch (e) {}
-        }
-        const cleanText = selText.replace(/<[^>]*>/g, '').trim();
-
-        setSelectedText(cleanText || 'Attachment Link');
-        setLinkUrl('');
-        setSelectedPdfUrl('');
-        setIsSecureToggle(false);
-        setModalFile(null);
-        setShowLinkModal(true);
-    };
-
-    const handleModalSubmit = async (e) => {
-        e.preventDefault();
-        setModalUploading(true);
-        try {
-            let finalUrl = '';
-
-            if (modalFile) {
-                const key = await uploadToStorageServer(modalFile);
-                finalUrl = key;
-            } else if (selectedPdfUrl) {
-                finalUrl = selectedPdfUrl;
-            } else if (linkUrl) {
-                finalUrl = linkUrl.trim();
-            }
-
-            if (!finalUrl) {
-                alert('Please choose an uploaded PDF, provide a URL, or upload a file');
-                setModalUploading(false);
-                return;
-            }
-
-            const isPdf = modalFile?.type === 'application/pdf' || 
-                          modalFile?.name.toLowerCase().endsWith('.pdf') || 
-                          finalUrl.toLowerCase().includes('.pdf');
-
-            if (isPdf && isSecureToggle && !finalUrl.includes('secure=1')) {
-                finalUrl += finalUrl.includes('?') ? '&secure=1' : '?secure=1';
-            } else if (!isSecureToggle && finalUrl.includes('secure=1')) {
-                finalUrl = finalUrl.replace(/[?&]secure=1/, '');
-            }
-
-            const resolvedUrl = getServerUrl(finalUrl);
-            const textToInsert = selectedText.trim() || 'Download File';
-            const htmlToInsert = `<a href="${resolvedUrl}" target="_blank" rel="noopener noreferrer">${textToInsert}</a>`;
-
-            let inserted = false;
-            if (editorRef.current) {
-                const ed = editorRef.current.editor || editorRef.current;
-                if (ed) {
-                    if (savedRangeRef.current && ed.selection?.restore) {
-                        try {
-                            ed.selection.restore(savedRangeRef.current);
-                        } catch (e) {}
-                    }
-                    if (ed.selection?.insertHTML) {
-                        ed.selection.insertHTML(htmlToInsert);
-                        inserted = true;
-                    } else if (ed.s?.insertHTML) {
-                        ed.s.insertHTML(htmlToInsert);
-                        inserted = true;
-                    } else if (ed.execCommand) {
-                        ed.execCommand('insertHTML', false, htmlToInsert);
-                        inserted = true;
-                    }
-
-                    const currentEditorHtml = ed.value || (ed.getEditorValue ? ed.getEditorValue() : null) || (ed.getHTML ? ed.getHTML() : null);
-                    if (currentEditorHtml) {
-                        setFormData(prev => ({ ...prev, content: currentEditorHtml }));
-                    }
-                }
-            }
-            if (!inserted) {
-                setFormData(prev => ({ ...prev, content: (prev.content || '') + ' ' + htmlToInsert }));
-            }
-
-            setShowLinkModal(false);
-            setModalFile(null);
-            setLinkUrl('');
-            setSelectedPdfUrl('');
-            setSelectedText('');
-            setIsSecureToggle(false);
-        } catch (err) {
-            console.error(err);
-            alert(err.response?.data?.message || err.message || 'Failed to attach file link');
-        } finally {
-            setModalUploading(false);
-        }
-    };
-
     const editorConfig = React.useMemo(() => ({
         readonly: false,
         theme: 'dark',
@@ -336,82 +211,43 @@ const PageManagement = () => {
             fillEmptyParagraph: false
         },
         enableDragAndDropFileToEditor: true,
-        toolbarInline: true,
-        toolbarInlineForSelection: true,
         buttons: [
             'source', '|',
             'bold', 'strikethrough', 'underline', 'italic', '|',
             'ul', 'ol', '|',
             'outdent', 'indent', '|',
             'font', 'fontsize', 'brush', 'paragraph', '|',
-            'image', 'table', 'link', 'attachFile', '|',
+            'image', 'file', 'table', 'link', '|',
             'align', 'undo', 'redo', '|',
             'hr', 'eraser', 'copyformat', '|',
             'fullsize', 'selectall'
         ],
-        popup: {
-            selection: ['bold', 'italic', 'underline', 'link', 'attachFile', 'fontsize', 'brush', 'paragraph'],
-            table: ['attachFile', 'link', 'align', 'valign', 'table'],
-            text: ['bold', 'italic', 'underline', 'link', 'attachFile']
-        },
-        controls: {
-            attachFile: {
-                name: 'attachFile',
-                iconURL: '',
-                icon: 'file',
-                tooltip: 'Attach File / Convert Text to Link',
-                popup: (editor, current, self, close) => {
-                    openLinkModal();
-                    if (typeof close === 'function') close();
-                },
-                exec: () => {
-                    openLinkModal();
-                }
-            }
-        },
         uploader: {
-            url: `${import.meta.env.VITE_API_URL}/pages/upload-image`,
-            format: 'json',
-            method: 'POST',
-            prepareData: function (data) {
-                const file = data.get('files[0]');
-                if (file) {
-                    data.append('image', file);
-                    data.delete('files[0]');
-                }
-                return data;
-            },
-            isSuccess: function(resp) { return resp && (resp.url !== undefined || (typeof resp === 'object' && !resp.error)); },
-            process: function (resp) {
-                if (!resp || typeof resp !== 'object' || (!resp.url && !resp.isPdf)) {
-                    return { error: 1, msg: (resp && resp.message) ? resp.message : 'Error uploading file (Server Error)' };
-                }
-                return {
-                    files: resp.url ? [resp.url] : [],
-                    isPdf: resp.isPdf,
-                    path: import.meta.env.VITE_API_URL.replace('/api', '') + '/',
-                    baseurl: import.meta.env.VITE_API_URL.replace('/api', '') + '/',
-                    error: 0,
-                    msg: 'Uploaded'
-                };
-            },
-            defaultHandlerSuccess: function (data, resp) {
-                if (data.error) {
-                    this.events.fire('errorMessage', data.msg);
-                    return;
-                }
-                if (data.files && data.files.length) {
-                    const url = data.files[0];
-                    if (data.isPdf) {
-                        let linkText = 'View PDF';
-                        if (this.s.sel && this.s.sel.toString().trim() !== '') {
+            insertImageAsBase64URI: false,
+            imagesExtensions: ['jpg', 'png', 'jpeg', 'gif', 'svg', 'webp', 'pdf', 'doc', 'docx', 'xls', 'xlsx'],
+            handler: async function (files, response, handler, e) {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    try {
+                        const key = await uploadToStorageServer(file);
+                        const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+                        const fileUrl = getServerUrl(key);
+
+                        let linkText = file.name;
+                        if (this.s && this.s.sel && this.s.sel.toString().trim() !== '') {
                             linkText = this.s.sel.toString();
-                        } else if (this.s.html && this.s.html.trim() !== '') {
+                        } else if (this.s && this.s.html && this.s.html.trim() !== '') {
                             linkText = this.s.html;
                         }
-                        this.s.insertHTML(`<a href="${url}" target="_blank" rel="noopener noreferrer">${linkText}</a>`);
-                    } else {
-                        this.s.insertImage(url);
+
+                        if (isPdf || !file.type.startsWith('image/')) {
+                            this.s.insertHTML(`<a href="${fileUrl}" target="_blank" rel="noopener noreferrer">${linkText}</a>`);
+                        } else {
+                            this.s.insertImage(fileUrl);
+                        }
+                    } catch (err) {
+                        console.error('File upload failed:', err);
+                        alert('Failed to upload file');
                     }
                 }
             }
@@ -734,16 +570,7 @@ const PageManagement = () => {
 
                         {!previewMode ? (
                             <div className="space-y-2">
-                                <div className="flex justify-between items-center">
-                                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Page Content</label>
-                                    <button 
-                                        type="button"
-                                        onClick={openLinkModal}
-                                        className="bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-sm"
-                                    >
-                                        <Link size={14} /> Attach File / Convert Text to Hyperlink
-                                    </button>
-                                </div>
+                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Page Content</label>
                                 <div className="rounded-xl overflow-hidden text-black">
                                     <JoditEditor
                                         ref={editorRef}
