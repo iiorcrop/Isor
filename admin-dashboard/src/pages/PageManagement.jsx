@@ -31,6 +31,7 @@ const PageManagement = () => {
     const [showLinkModal, setShowLinkModal] = useState(false);
     const [selectedText, setSelectedText] = useState('');
     const [linkUrl, setLinkUrl] = useState('');
+    const [selectedPdfUrl, setSelectedPdfUrl] = useState('');
     const [isSecureToggle, setIsSecureToggle] = useState(false);
     const [modalFile, setModalFile] = useState(null);
     const [modalUploading, setModalUploading] = useState(false);
@@ -200,10 +201,17 @@ const PageManagement = () => {
     const openLinkModal = () => {
         let selText = '';
         if (editorRef.current && editorRef.current.editor) {
-            selText = editorRef.current.editor.selection.sel?.toString() || '';
+            const ed = editorRef.current.editor;
+            selText = ed.selection.sel?.toString() || ed.selection.getHTML() || '';
         }
-        setSelectedText(selText || 'Attachment Link');
+        if (!selText) {
+            try {
+                selText = window.getSelection()?.toString() || '';
+            } catch (e) {}
+        }
+        setSelectedText(selText.trim() || 'Attachment Link');
         setLinkUrl('');
+        setSelectedPdfUrl('');
         setIsSecureToggle(false);
         setModalFile(null);
         setShowLinkModal(true);
@@ -213,24 +221,32 @@ const PageManagement = () => {
         e.preventDefault();
         setModalUploading(true);
         try {
-            let finalUrl = linkUrl.trim();
+            let finalUrl = '';
 
             if (modalFile) {
                 const key = await uploadToStorageServer(modalFile);
                 const storageUrl = (import.meta.env.VITE_FILE_STORAGE_URL || "https://file.iior-niger.in").replace(/\/+$/, "");
                 finalUrl = `${storageUrl}/uploads/${key}`;
-                const isPdf = modalFile.type === 'application/pdf' || modalFile.name.toLowerCase().endsWith('.pdf');
-                if (isPdf && isSecureToggle) {
-                    finalUrl += '?secure=1';
-                }
-            } else if (finalUrl && isSecureToggle && !finalUrl.includes('secure=1')) {
-                finalUrl += finalUrl.includes('?') ? '&secure=1' : '?secure=1';
+            } else if (selectedPdfUrl) {
+                finalUrl = selectedPdfUrl;
+            } else if (linkUrl) {
+                finalUrl = linkUrl.trim();
             }
 
             if (!finalUrl) {
-                alert('Please provide a URL or upload a file');
+                alert('Please choose an uploaded PDF, provide a URL, or upload a file');
                 setModalUploading(false);
                 return;
+            }
+
+            const isPdf = modalFile?.type === 'application/pdf' || 
+                          modalFile?.name.toLowerCase().endsWith('.pdf') || 
+                          finalUrl.toLowerCase().includes('.pdf');
+
+            if (isPdf && isSecureToggle && !finalUrl.includes('secure=1')) {
+                finalUrl += finalUrl.includes('?') ? '&secure=1' : '?secure=1';
+            } else if (!isSecureToggle && finalUrl.includes('secure=1')) {
+                finalUrl = finalUrl.replace(/[?&]secure=1/, '');
             }
 
             const textToInsert = selectedText.trim() || 'Download File';
@@ -245,11 +261,12 @@ const PageManagement = () => {
             setShowLinkModal(false);
             setModalFile(null);
             setLinkUrl('');
+            setSelectedPdfUrl('');
             setSelectedText('');
             setIsSecureToggle(false);
         } catch (err) {
             console.error(err);
-            alert(err.response?.data?.message || 'Failed to attach file link');
+            alert(err.response?.data?.message || err.message || 'Failed to attach file link');
         } finally {
             setModalUploading(false);
         }
@@ -781,14 +798,45 @@ const PageManagement = () => {
                                 />
                             </div>
 
-                            {/* Option 1: URL input */}
+                            {/* Option A: Select from Uploaded PDFs */}
+                            {pdfs.length > 0 && (
+                                <div className="space-y-1.5">
+                                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Option A: Select from Uploaded PDFs</label>
+                                    <select 
+                                        className="w-full bg-[#0a0f1d] border border-white/10 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-primary"
+                                        value={selectedPdfUrl}
+                                        onChange={(e) => {
+                                            setSelectedPdfUrl(e.target.value);
+                                            if (e.target.value) {
+                                                setLinkUrl('');
+                                                setModalFile(null);
+                                            }
+                                        }}
+                                    >
+                                        <option value="">-- Choose an uploaded PDF --</option>
+                                        {pdfs.map((pdf, i) => (
+                                            <option key={i} value={pdf.url}>
+                                                📄 {pdf.filename.replace(/^\d+-/, '')}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            {/* Option B: URL input */}
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Option A: Link URL</label>
+                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Option B: Link URL</label>
                                 <input 
                                     type="text"
                                     className="w-full bg-white/5 border border-white/10 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-primary"
                                     value={linkUrl}
-                                    onChange={(e) => { setLinkUrl(e.target.value); setModalFile(null); }}
+                                    onChange={(e) => { 
+                                        setLinkUrl(e.target.value); 
+                                        if (e.target.value) {
+                                            setSelectedPdfUrl('');
+                                            setModalFile(null);
+                                        }
+                                    }}
                                     placeholder="https://example.com/document.pdf or /uploads/..."
                                 />
                             </div>
@@ -799,9 +847,9 @@ const PageManagement = () => {
                                 <div className="h-px bg-white/10 flex-1"></div>
                             </div>
 
-                            {/* Option 2: Upload File */}
+                            {/* Option C: Upload File */}
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Option B: Upload File</label>
+                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Option C: Upload New File</label>
                                 <div 
                                     onClick={() => modalFileInputRef.current?.click()}
                                     className="border-2 border-dashed border-white/10 hover:border-primary/50 bg-white/5 rounded-2xl p-5 text-center cursor-pointer transition-all"
@@ -819,6 +867,7 @@ const PageManagement = () => {
                                             if (e.target.files[0]) {
                                                 setModalFile(e.target.files[0]);
                                                 setLinkUrl('');
+                                                setSelectedPdfUrl('');
                                             }
                                         }}
                                     />
