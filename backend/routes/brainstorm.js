@@ -25,11 +25,17 @@ router.post('/', upload.single('pdf'), async (req, res) => {
             return res.status(400).json({ message: 'PDF file or URL is required' });
         }
 
+        const isSecure = req.body.isSecure === 'true' || req.body.isSecure === true;
+        if (isSecure && !pdfUrl.includes('secure=1')) {
+            pdfUrl += pdfUrl.includes('?') ? '&secure=1' : '?secure=1';
+        }
+
         const session = new BrainstormSession({
             title: req.body.title,
             pdfUrl,
             description: req.body.description,
             date: req.body.date || Date.now(),
+            isSecure,
             order: req.body.order || 0
         });
 
@@ -46,6 +52,23 @@ router.patch('/:id', upload.single('pdf'), async (req, res) => {
         const updateData = { ...req.body };
         if (req.file) {
             updateData.pdfUrl = await uploadToStorageServer(req.file);
+        }
+
+        if (updateData.isSecure !== undefined) {
+            updateData.isSecure = updateData.isSecure === 'true' || updateData.isSecure === true;
+            let currentPdfUrl = updateData.pdfUrl;
+            if (!currentPdfUrl) {
+                const existing = await BrainstormSession.findById(req.params.id);
+                if (existing) currentPdfUrl = existing.pdfUrl;
+            }
+            if (currentPdfUrl) {
+                if (updateData.isSecure && !currentPdfUrl.includes('secure=1')) {
+                    currentPdfUrl += currentPdfUrl.includes('?') ? '&secure=1' : '?secure=1';
+                } else if (!updateData.isSecure) {
+                    currentPdfUrl = currentPdfUrl.replace(/[?&]secure=1/, '');
+                }
+                updateData.pdfUrl = currentPdfUrl;
+            }
         }
 
         const session = await BrainstormSession.findByIdAndUpdate(req.params.id, updateData, { new: true });

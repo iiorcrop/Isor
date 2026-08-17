@@ -95,7 +95,11 @@ const BrainStormingSessions = () => {
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {sessions.map((session) => {
-                                    const fileUrl = getFileUrl(session.pdfUrl);
+                                    let rawUrl = session.pdfUrl || '';
+                                    if (session.isSecure && !rawUrl.includes('secure=1')) {
+                                        rawUrl += rawUrl.includes('?') ? '&secure=1' : '?secure=1';
+                                    }
+                                    const fileUrl = getFileUrl(rawUrl);
                                     const displayName = session.title || 'Brainstorm Session PDF';
 
                                     return (

@@ -10,7 +10,7 @@ const BrainstormManagement = () => {
     const [editing, setEditing] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [formData, setFormData] = useState({
-        title: '', description: '', date: '', pdfUrl: ''
+        title: '', description: '', date: '', pdfUrl: '', isSecure: false
     });
     const [pdfFile, setPdfFile] = useState(null);
 
@@ -48,7 +48,8 @@ const BrainstormManagement = () => {
                 title: formData.title,
                 description: formData.description || '',
                 date: formData.date || undefined,
-                pdfUrl: pdfUrl
+                pdfUrl: pdfUrl,
+                isSecure: formData.isSecure || false
             };
 
             if (editing) {
@@ -59,7 +60,7 @@ const BrainstormManagement = () => {
             fetchSessions();
             setShowForm(false);
             setEditing(null);
-            setFormData({ title: '', description: '', date: '', pdfUrl: '' });
+            setFormData({ title: '', description: '', date: '', pdfUrl: '', isSecure: false });
             setPdfFile(null);
         } catch (err) {
             console.error(err);
@@ -145,6 +146,20 @@ const BrainstormManagement = () => {
                             </div>
                         </div>
 
+                        <div className="flex items-center gap-3 bg-white/5 p-4 rounded-xl border border-white/10">
+                            <input 
+                                type="checkbox"
+                                id="isSecureCheckbox"
+                                checked={formData.isSecure || false}
+                                onChange={e => setFormData({ ...formData, isSecure: e.target.checked })}
+                                className="w-5 h-5 accent-primary rounded cursor-pointer"
+                            />
+                            <label htmlFor="isSecureCheckbox" className="text-sm font-semibold text-white cursor-pointer flex flex-col">
+                                <span>Secure PDF (Restrict to first 2 pages preview)</span>
+                                <span className="text-xs text-white/50 font-normal">When checked, non-members can only preview the first 2 pages. When unchecked, full PDF is displayed.</span>
+                            </label>
+                        </div>
+
                         <div className="flex justify-end gap-4">
                             <button 
                                 type="button"
@@ -190,7 +205,7 @@ const BrainstormManagement = () => {
                                 <Download size={14} /> View / Download PDF
                             </a>
                             <button 
-                                onClick={() => { setEditing(session); setFormData(session); setShowForm(true); }}
+                                onClick={() => { setEditing(session); setFormData({ ...session, isSecure: session.isSecure || (session.pdfUrl && session.pdfUrl.includes('secure=1')) || false }); setShowForm(true); }}
                                 className="bg-white/5 text-white p-2.5 rounded-xl hover:bg-primary transition-all"
                             >
                                 <Edit size={14} />
