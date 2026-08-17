@@ -313,6 +313,8 @@ const PageManagement = () => {
         theme: 'dark',
         minHeight: 400,
         enableDragAndDropFileToEditor: true,
+        toolbarInline: true,
+        toolbarInlineForSelection: true,
         buttons: [
             'source', '|',
             'bold', 'strikethrough', 'underline', 'italic', '|',
@@ -324,12 +326,21 @@ const PageManagement = () => {
             'hr', 'eraser', 'copyformat', '|',
             'fullsize', 'selectall'
         ],
+        popup: {
+            selection: ['bold', 'italic', 'underline', 'link', 'attachFile', 'fontsize', 'brush', 'paragraph'],
+            table: ['attachFile', 'link', 'align', 'valign', 'table'],
+            text: ['bold', 'italic', 'underline', 'link', 'attachFile']
+        },
         controls: {
             attachFile: {
                 name: 'attachFile',
                 iconURL: '',
                 icon: 'file',
                 tooltip: 'Attach File / Convert Text to Link',
+                popup: (editor, current, self, close) => {
+                    openLinkModal();
+                    if (typeof close === 'function') close();
+                },
                 exec: () => {
                     openLinkModal();
                 }
