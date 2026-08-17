@@ -204,14 +204,20 @@ const PageManagement = () => {
         let selText = '';
         if (editorRef.current) {
             const ed = editorRef.current.editor || editorRef.current;
-            if (ed && ed.selection) {
+            if (ed) {
                 try {
-                    savedRangeRef.current = ed.selection.save ? ed.selection.save() : null;
+                    if (ed.events) ed.events.fire('closeAllPopups');
                 } catch (e) {}
 
-                try {
-                    selText = ed.selection.sel?.toString() || ed.selection.getHTML() || (ed.s && ed.s.sel ? ed.s.sel.toString() : '') || '';
-                } catch (e) {}
+                if (ed.selection) {
+                    try {
+                        savedRangeRef.current = ed.selection.save ? ed.selection.save() : null;
+                    } catch (e) {}
+
+                    try {
+                        selText = ed.selection.sel?.toString() || ed.selection.getHTML() || (ed.s && ed.s.sel ? ed.s.sel.toString() : '') || '';
+                    } catch (e) {}
+                }
             }
         }
         if (!selText) {
@@ -424,6 +430,7 @@ const PageManagement = () => {
             <style>{`
                 .jodit-container { border-radius: 1.5rem !important; overflow: hidden; border: 1px solid rgba(255,255,255,0.1) !important; }
                 .jodit-workplace { min-height: 400px !important; }
+                .jodit-popup, .jodit-toolbar-inline, .jodit-ui-popup, .jodit-toolbar-container { z-index: 100 !important; }
             `}</style>
 
             <div className="flex justify-between items-center bg-[#1e293b] p-8 rounded-[2rem] border border-white/5 shadow-2xl">
@@ -832,7 +839,7 @@ const PageManagement = () => {
 
             {/* Attach File / Convert to Hyperlink Modal */}
             {showLinkModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
+                <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
                     <div className="bg-[#1e293b] border border-white/10 rounded-[2rem] p-8 max-w-lg w-full shadow-2xl space-y-6 text-white relative">
                         <div className="flex justify-between items-center pb-4 border-b border-white/10">
                             <div className="flex items-center gap-3">
