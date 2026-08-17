@@ -22,7 +22,7 @@ async function uploadToStorageServer(file) {
         contentType: file.mimetype
     });
 
-    const baseUrl = process.env.VITE_FILE_STORAGE_URL || 'https://file.iior-niger.in';
+    const baseUrl = process.env.FILE_STORAGE_INTERNAL_URL || process.env.VITE_FILE_STORAGE_URL || 'https://file.iior-niger.in';
     const uploadUrl = `${baseUrl.replace(/\/+$/, '')}/upload`;
     
     console.log(`Uploading file to remote storage server: ${uploadUrl} (${file.originalname})`);
