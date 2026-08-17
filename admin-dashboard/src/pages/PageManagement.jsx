@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Save, Loader2, FileText, Globe, Search, Plus, Eye, Edit, Trash2, CheckCircle, Upload, Link2, X, FilePlus, Shield, Lock, FileUp, Link } from 'lucide-react';
 import JoditEditor from 'jodit-react';
 import { getServerUrl } from '../utils/urlHelper';
+import { uploadToStorageServer } from '../utils/fileUploader';
 
 const PageManagement = () => {
     const [pages, setPages] = useState([]);
