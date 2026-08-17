@@ -219,15 +219,16 @@ const PageManagement = () => {
             'ul', 'ol', '|',
             'outdent', 'indent', '|',
             'font', 'fontsize', 'brush', 'paragraph', '|',
-            'image', 'file', 'table', 'link', '|',
+            'image', 'file', 'table', 'link', 'unlink', '|',
             'align', 'undo', 'redo', '|',
             'hr', 'eraser', 'copyformat', '|',
             'fullsize', 'selectall'
         ],
         popup: {
-            selection: ['bold', 'italic', 'underline', 'link', 'file', '|', 'fontsize', 'brush'],
-            table: ['file', 'link', '|', 'align', 'valign', 'table'],
-            text: ['bold', 'italic', 'underline', 'link', 'file']
+            selection: ['bold', 'italic', 'underline', 'link', 'unlink', 'file', '|', 'fontsize', 'brush'],
+            table: ['file', 'link', 'unlink', '|', 'align', 'valign', 'table'],
+            text: ['bold', 'italic', 'underline', 'link', 'unlink', 'file'],
+            a: ['link', 'unlink', 'file']
         },
         controls: {
             file: {
