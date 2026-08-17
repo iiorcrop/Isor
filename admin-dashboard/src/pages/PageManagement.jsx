@@ -162,7 +162,20 @@ const PageManagement = () => {
         setSaving(true);
         setSuccess(false);
         try {
-            await axios.post(`${import.meta.env.VITE_API_URL}/pages`, formData);
+            let finalContent = formData.content;
+            if (editorRef.current) {
+                const ed = editorRef.current.editor || editorRef.current;
+                if (ed) {
+                    finalContent = ed.value || (ed.getEditorValue ? ed.getEditorValue() : null) || (ed.getHTML ? ed.getHTML() : null) || formData.content;
+                }
+            }
+
+            const payload = {
+                ...formData,
+                content: finalContent
+            };
+
+            await axios.post(`${import.meta.env.VITE_API_URL}/pages`, payload);
             await fetchPages();
 
             // Also update menu if placement selected
@@ -730,7 +743,8 @@ const PageManagement = () => {
                                         ref={editorRef}
                                         value={formData.content}
                                         config={editorConfig}
-                                        onBlur={newContent => setFormData({...formData, content: newContent})}
+                                        onBlur={newContent => setFormData(prev => ({ ...prev, content: newContent }))}
+                                        onChange={newContent => setFormData(prev => ({ ...prev, content: newContent }))}
                                     />
                                 </div>
                             </div>
