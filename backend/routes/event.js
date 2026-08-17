@@ -8,7 +8,11 @@ router.get('/', async (req, res) => {
     try {
         const query = {};
         if (req.query.type) {
-            query.type = req.query.type;
+            if (req.query.type === 'events') {
+                query.$or = [{ type: 'events' }, { type: { $exists: false } }, { type: '' }, { type: null }];
+            } else {
+                query.type = req.query.type;
+            }
         }
         const events = await Event.find(query).sort({ date: -1, createdAt: -1 });
         res.json(events);
@@ -16,10 +20,10 @@ router.get('/', async (req, res) => {
 });
 
 
-// GET latest events (top 3)
+// GET latest events (top 3 general events)
 router.get('/latest', async (req, res) => {
     try {
-        const events = await Event.find({ isLatest: true }).sort({ date: -1 }).limit(3);
+        const events = await Event.find({ isLatest: true, $or: [{ type: 'events' }, { type: { $exists: false } }, { type: '' }, { type: null }] }).sort({ date: -1 }).limit(3);
         res.json(events);
     } catch (err) { res.status(500).json({ message: err.message }); }
 });

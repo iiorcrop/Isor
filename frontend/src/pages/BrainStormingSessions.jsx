@@ -96,7 +96,7 @@ const BrainStormingSessions = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {sessions.map((session) => {
                                     const fileUrl = getFileUrl(session.pdfUrl);
-                                    const fileName = getFileName(session.pdfUrl, session.title);
+                                    const displayName = session.title || 'Brainstorm Session PDF';
 
                                     return (
                                         <a
@@ -114,7 +114,7 @@ const BrainStormingSessions = () => {
                                             {/* File Details */}
                                             <div className="overflow-hidden">
                                                 <h4 className="font-bold text-[#064e3b] text-sm md:text-base truncate group-hover:text-[#b47c1c] transition-colors">
-                                                    {fileName}
+                                                    {displayName}
                                                 </h4>
                                                 <p className="text-xs text-gray-400 font-semibold mt-0.5">
                                                     Click to download
