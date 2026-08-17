@@ -331,6 +331,10 @@ const PageManagement = () => {
         readonly: false,
         theme: 'dark',
         minHeight: 400,
+        addNewLine: false,
+        cleanHTML: {
+            fillEmptyParagraph: false
+        },
         enableDragAndDropFileToEditor: true,
         toolbarInline: true,
         toolbarInlineForSelection: true,
