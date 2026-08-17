@@ -454,7 +454,7 @@ const PageManagement = () => {
                                                     onChange={() => setMenuPlacement(val)} />
                                                 <span className="w-3 h-3 rounded-full border-2 flex-shrink-0" style={{ borderColor: menuPlacement === val ? '#6366f1' : 'rgba(255,255,255,0.2)', background: menuPlacement === val ? '#6366f1' : 'transparent' }} />
                                                 <div>
-                                                    <p className="text-xs font-bold">Under &ldquo;{item.label}&rdquo;</p>
+                                                    <p className="text-xs font-bold">Under "{item.label}"</p>
                                                     <p className="text-[10px] text-white/30">Added as a dropdown sub-item</p>
                                                 </div>
                                             </label>
@@ -650,11 +650,11 @@ const PageManagement = () => {
                                     Updated: {new Date(page.updatedAt).toLocaleDateString()}
                                 </span>
                                 {/* Add to Menu quick dropdown */}
-                                <div className="relative group/menu">
+                                <div className="relative group-menu">
                                     <button className="flex items-center gap-1 text-white/30 hover:text-primary text-xs transition-all">
                                         <Plus size={12} /> Menu
                                     </button>
-                                    <div className="absolute bottom-full right-0 mb-2 w-52 bg-[#0f172a] border border-white/10 rounded-xl shadow-2xl py-2 hidden group-hover/menu:block z-50">
+                                    <div className="absolute bottom-full right-0 mb-2 w-52 bg-[#0f172a] border border-white/10 rounded-xl shadow-2xl py-2 hidden group-hover-menu:block z-50">
                                         <p className="text-[10px] text-white/30 px-3 py-1 uppercase tracking-widest">Add to menu under:</p>
                                         <button
                                             onClick={() => addExistingPageToMenu(page, 'top')}
@@ -667,7 +667,7 @@ const PageManagement = () => {
                                                     key={idx}
                                                     onClick={() => addExistingPageToMenu(page, `child-${idx}`)}
                                                     className="w-full text-left px-3 py-2 text-xs text-white/60 hover:text-white hover:bg-white/5 transition-all"
-                                                >↳ Under &ldquo;{item.label}&rdquo;</button>
+                                                >↳ Under "{item.label}"</button>
                                             );
                                         })}
                                     </div>
@@ -681,174 +681,6 @@ const PageManagement = () => {
                             <p className="text-white/20">No pages found matching your search.</p>
                         </div>
                     )}
-                </div>
-            )}
-
-            {/* Attach File / Convert to Hyperlink Modal */}
-            {showLinkModal && (
-                <div className="fixed inset-0 z-[999999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-                    <div className="bg-[#1e293b] border border-white/10 rounded-[2rem] p-8 max-w-lg w-full shadow-2xl space-y-6 text-white relative">
-                        <div className="flex justify-between items-center pb-4 border-b border-white/10">
-                            <div className="flex items-center gap-3">
-                                <div className="p-3 bg-primary/20 text-primary rounded-xl">
-                                    <Link size={20} />
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-white">Attach File / Add Hyperlink</h3>
-                                    <p className="text-xs text-white/40">Attach a file URL or upload a PDF/file to selected text</p>
-                                </div>
-                            </div>
-                            <button 
-                                onClick={() => setShowLinkModal(false)}
-                                className="p-2 rounded-xl bg-white/5 text-white/60 hover:text-white hover:bg-white/10 transition-all"
-                            >
-                                <X size={18} />
-                            </button>
-                        </div>
-
-                        <form onSubmit={handleModalSubmit} className="space-y-5">
-                            {/* Selected Text / Display Text */}
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Display Text</label>
-                                <input 
-                                    type="text"
-                                    required
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-primary"
-                                    value={selectedText}
-                                    onChange={(e) => setSelectedText(e.target.value)}
-                                    placeholder="e.g. Read full proceedings PDF"
-                                />
-                            </div>
-
-                            {/* Option A: Upload New File */}
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Option A: Upload New File</label>
-                                <div 
-                                    onClick={() => modalFileInputRef.current?.click()}
-                                    className={`border-2 border-dashed rounded-2xl p-5 text-center cursor-pointer transition-all ${
-                                        modalFile ? 'border-primary bg-primary/10' : 'border-white/10 hover:border-primary/50 bg-white/5'
-                                    }`}
-                                >
-                                    <FileUp size={24} className="mx-auto text-primary mb-2" />
-                                    <p className="text-xs text-white/90 font-semibold">
-                                        {modalFile ? modalFile.name : 'Click to select PDF or file to upload'}
-                                    </p>
-                                    <p className="text-[10px] text-white/30 mt-1">PDFs, Documents, Images supported</p>
-                                    <input 
-                                        ref={modalFileInputRef}
-                                        type="file"
-                                        className="hidden"
-                                        onChange={(e) => {
-                                            if (e.target.files[0]) {
-                                                setModalFile(e.target.files[0]);
-                                                setLinkUrl('');
-                                                setSelectedPdfUrl('');
-                                            }
-                                        }}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-4 my-2">
-                                <div className="h-px bg-white/10 flex-1"></div>
-                                <span className="text-[10px] uppercase font-bold text-white/30">OR CHOOSE EXISTING</span>
-                                <div className="h-px bg-white/10 flex-1"></div>
-                            </div>
-
-                            {/* Option B: Select from Uploaded PDFs */}
-                            {pdfs.length > 0 && (
-                                <div className="space-y-1.5">
-                                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Option B: Select from Uploaded Page PDFs</label>
-                                    <select 
-                                        className="w-full bg-[#0a0f1d] border border-white/10 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-primary"
-                                        value={selectedPdfUrl}
-                                        onChange={(e) => {
-                                            setSelectedPdfUrl(e.target.value);
-                                            if (e.target.value) {
-                                                setLinkUrl('');
-                                                setModalFile(null);
-                                            }
-                                        }}
-                                    >
-                                        <option value="">-- Choose an uploaded PDF --</option>
-                                        {pdfs.map((pdf, i) => (
-                                            <option key={i} value={pdf.url}>
-                                                📄 {pdf.filename.replace(/^\d+-/, '')}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
-
-                            {/* Option C: URL input */}
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Option C: Custom Link URL</label>
-                                <input 
-                                    type="text"
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-primary"
-                                    value={linkUrl}
-                                    onChange={(e) => { 
-                                        setLinkUrl(e.target.value); 
-                                        if (e.target.value) {
-                                            setSelectedPdfUrl('');
-                                            setModalFile(null);
-                                        }
-                                    }}
-                                    placeholder="https://example.com/document.pdf or /uploads/..."
-                                />
-                            </div>
-
-                            {/* Secure Toggle Switch */}
-                            <div className="bg-black/30 border border-white/10 rounded-2xl p-4 flex items-center justify-between">
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-2">
-                                        <Lock size={14} className={isSecureToggle ? 'text-amber-400' : 'text-emerald-400'} />
-                                        <span className="text-sm font-bold text-white">Secure PDF Access</span>
-                                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                                            isSecureToggle ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                                        }`}>
-                                            {isSecureToggle ? 'First 2 Pages Only' : 'Full Document'}
-                                        </span>
-                                    </div>
-                                    <p className="text-[11px] text-white/40">
-                                        {isSecureToggle 
-                                            ? 'Secure mode active: Non-members will only see the first 2 pages of the PDF file.'
-                                            : 'Public mode active: Entire PDF document will be displayed to all viewers.'}
-                                    </p>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsSecureToggle(!isSecureToggle)}
-                                    className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 shrink-0 ${
-                                        isSecureToggle ? 'bg-amber-500' : 'bg-white/10'
-                                    }`}
-                                >
-                                    <div className={`w-4 h-4 rounded-full bg-white transition-transform ${
-                                        isSecureToggle ? 'translate-x-6' : 'translate-x-0'
-                                    }`} />
-                                </button>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="flex justify-end gap-3 pt-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setShowLinkModal(false)}
-                                    className="px-5 py-3 rounded-xl text-xs font-bold text-white/60 hover:bg-white/5 transition-all"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    disabled={modalUploading}
-                                    className="bg-primary text-white px-6 py-3 rounded-xl text-xs font-bold flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
-                                >
-                                    {modalUploading ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
-                                    {modalUploading ? 'Uploading & Attaching...' : 'Insert Hyperlink'}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
                 </div>
             )}
         </div>
