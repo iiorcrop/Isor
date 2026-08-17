@@ -866,10 +866,45 @@ const PageManagement = () => {
                                 />
                             </div>
 
-                            {/* Option A: Select from Uploaded PDFs */}
+                            {/* Option A: Upload New File */}
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Option A: Upload New File</label>
+                                <div 
+                                    onClick={() => modalFileInputRef.current?.click()}
+                                    className={`border-2 border-dashed rounded-2xl p-5 text-center cursor-pointer transition-all ${
+                                        modalFile ? 'border-primary bg-primary/10' : 'border-white/10 hover:border-primary/50 bg-white/5'
+                                    }`}
+                                >
+                                    <FileUp size={24} className="mx-auto text-primary mb-2" />
+                                    <p className="text-xs text-white/90 font-semibold">
+                                        {modalFile ? modalFile.name : 'Click to select PDF or file to upload'}
+                                    </p>
+                                    <p className="text-[10px] text-white/30 mt-1">PDFs, Documents, Images supported</p>
+                                    <input 
+                                        ref={modalFileInputRef}
+                                        type="file"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            if (e.target.files[0]) {
+                                                setModalFile(e.target.files[0]);
+                                                setLinkUrl('');
+                                                setSelectedPdfUrl('');
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-4 my-2">
+                                <div className="h-px bg-white/10 flex-1"></div>
+                                <span className="text-[10px] uppercase font-bold text-white/30">OR CHOOSE EXISTING</span>
+                                <div className="h-px bg-white/10 flex-1"></div>
+                            </div>
+
+                            {/* Option B: Select from Uploaded PDFs */}
                             {pdfs.length > 0 && (
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Option A: Select from Uploaded PDFs</label>
+                                    <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Option B: Select from Uploaded Page PDFs</label>
                                     <select 
                                         className="w-full bg-[#0a0f1d] border border-white/10 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-primary"
                                         value={selectedPdfUrl}
@@ -891,9 +926,9 @@ const PageManagement = () => {
                                 </div>
                             )}
 
-                            {/* Option B: URL input */}
+                            {/* Option C: URL input */}
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Option B: Link URL</label>
+                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Option C: Custom Link URL</label>
                                 <input 
                                     type="text"
                                     className="w-full bg-white/5 border border-white/10 rounded-xl p-3.5 text-sm text-white focus:outline-none focus:border-primary"
@@ -909,54 +944,28 @@ const PageManagement = () => {
                                 />
                             </div>
 
-                            <div className="flex items-center gap-4 my-2">
-                                <div className="h-px bg-white/10 flex-1"></div>
-                                <span className="text-[10px] uppercase font-bold text-white/30">OR</span>
-                                <div className="h-px bg-white/10 flex-1"></div>
-                            </div>
-
-                            {/* Option C: Upload File */}
-                            <div className="space-y-1.5">
-                                <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Option C: Upload New File</label>
-                                <div 
-                                    onClick={() => modalFileInputRef.current?.click()}
-                                    className="border-2 border-dashed border-white/10 hover:border-primary/50 bg-white/5 rounded-2xl p-5 text-center cursor-pointer transition-all"
-                                >
-                                    <FileUp size={24} className="mx-auto text-primary mb-2" />
-                                    <p className="text-xs text-white/70 font-semibold">
-                                        {modalFile ? modalFile.name : 'Click to select file to upload'}
-                                    </p>
-                                    <p className="text-[10px] text-white/30 mt-1">PDFs, Documents, Images supported</p>
-                                    <input 
-                                        ref={modalFileInputRef}
-                                        type="file"
-                                        className="hidden"
-                                        onChange={(e) => {
-                                            if (e.target.files[0]) {
-                                                setModalFile(e.target.files[0]);
-                                                setLinkUrl('');
-                                                setSelectedPdfUrl('');
-                                            }
-                                        }}
-                                    />
-                                </div>
-                            </div>
-
                             {/* Secure Toggle Switch */}
                             <div className="bg-black/30 border border-white/10 rounded-2xl p-4 flex items-center justify-between">
-                                <div className="space-y-0.5">
+                                <div className="space-y-1">
                                     <div className="flex items-center gap-2">
-                                        <Lock size={14} className={isSecureToggle ? 'text-amber-400' : 'text-white/40'} />
+                                        <Lock size={14} className={isSecureToggle ? 'text-amber-400' : 'text-emerald-400'} />
                                         <span className="text-sm font-bold text-white">Secure PDF Access</span>
+                                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                                            isSecureToggle ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                        }`}>
+                                            {isSecureToggle ? 'First 2 Pages Only' : 'Full Document'}
+                                        </span>
                                     </div>
                                     <p className="text-[11px] text-white/40">
-                                        When turned ON, non-members can only view the first 2 pages of the PDF file.
+                                        {isSecureToggle 
+                                            ? 'Secure mode active: Non-members will only see the first 2 pages of the PDF file.'
+                                            : 'Public mode active: Entire PDF document will be displayed to all viewers.'}
                                     </p>
                                 </div>
                                 <button
                                     type="button"
                                     onClick={() => setIsSecureToggle(!isSecureToggle)}
-                                    className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 ${
+                                    className={`w-12 h-6 rounded-full transition-colors relative flex items-center px-1 shrink-0 ${
                                         isSecureToggle ? 'bg-amber-500' : 'bg-white/10'
                                     }`}
                                 >
