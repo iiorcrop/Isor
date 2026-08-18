@@ -55,7 +55,8 @@ app.get("/uploads/*path", async (req, res, next) => {
       token = req.query.token;
     }
 
-    const isSecureReq = req.query && (req.query.secure === "1" || req.query.secure === "true");
+    const isExplicitUnsecure = req.query && (req.query.secure === "0" || req.query.secure === "false" || req.query.unsecure === "1" || req.query.unsecure === "true");
+    const isSecureReq = !isExplicitUnsecure;
 
     let isActiveMember = false;
     if (token) {
@@ -78,10 +79,8 @@ app.get("/uploads/*path", async (req, res, next) => {
 
     res.setHeader("Content-Type", "application/pdf");
 
-    if (isActiveMember && !isSecureReq) {
-      return res.sendFile(fullFilePath);
-    } else if (isSecureReq || !isActiveMember) {
-      // Sliced 2 pages for secure files or non-members
+    if (isSecureReq && !isActiveMember) {
+      // Sliced 2 pages for secure files when user is non-member or inactive
       const fileBytes = fs.readFileSync(fullFilePath);
       const pdfDoc = await PDFDocument.load(fileBytes);
       if (pdfDoc.getPageCount() <= 2) {

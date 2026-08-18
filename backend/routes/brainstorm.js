@@ -26,8 +26,12 @@ router.post('/', upload.single('pdf'), async (req, res) => {
         }
 
         const isSecure = req.body.isSecure === 'true' || req.body.isSecure === true;
-        if (isSecure && !pdfUrl.includes('secure=1')) {
-            pdfUrl += pdfUrl.includes('?') ? '&secure=1' : '?secure=1';
+        if (isSecure) {
+            pdfUrl = pdfUrl.replace(/[?&]secure=0/, '');
+            if (!pdfUrl.includes('secure=1')) pdfUrl += pdfUrl.includes('?') ? '&secure=1' : '?secure=1';
+        } else {
+            pdfUrl = pdfUrl.replace(/[?&]secure=1/, '');
+            if (!pdfUrl.includes('secure=0')) pdfUrl += pdfUrl.includes('?') ? '&secure=0' : '?secure=0';
         }
 
         const session = new BrainstormSession({
@@ -62,10 +66,12 @@ router.patch('/:id', upload.single('pdf'), async (req, res) => {
                 if (existing) currentPdfUrl = existing.pdfUrl;
             }
             if (currentPdfUrl) {
-                if (updateData.isSecure && !currentPdfUrl.includes('secure=1')) {
-                    currentPdfUrl += currentPdfUrl.includes('?') ? '&secure=1' : '?secure=1';
-                } else if (!updateData.isSecure) {
+                if (updateData.isSecure) {
+                    currentPdfUrl = currentPdfUrl.replace(/[?&]secure=0/, '');
+                    if (!currentPdfUrl.includes('secure=1')) currentPdfUrl += currentPdfUrl.includes('?') ? '&secure=1' : '?secure=1';
+                } else {
                     currentPdfUrl = currentPdfUrl.replace(/[?&]secure=1/, '');
+                    if (!currentPdfUrl.includes('secure=0')) currentPdfUrl += currentPdfUrl.includes('?') ? '&secure=0' : '?secure=0';
                 }
                 updateData.pdfUrl = currentPdfUrl;
             }

@@ -15,7 +15,8 @@ router.get('/:filename', async (req, res) => {
             return res.status(400).send('Invalid PDF file format');
         }
 
-        const isSecureReq = req.query && (req.query.secure === '1' || req.query.secure === 'true');
+        const isExplicitUnsecure = req.query && (req.query.secure === '0' || req.query.secure === 'false' || req.query.unsecure === '1' || req.query.unsecure === 'true');
+        const isSecureReq = !isExplicitUnsecure;
 
         let token = null;
         const authHeader = req.headers.authorization;

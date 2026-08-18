@@ -59,8 +59,12 @@ router.post('/upload-image', editorUpload.single('image'), async (req, res) => {
         const fileStorageUrl = process.env.VITE_FILE_STORAGE_URL || "https://file.iior-niger.in";
         let url = `${fileStorageUrl.replace(/\/+$/, '')}/uploads/${key}`;
         const isPdf = req.file.mimetype === 'application/pdf' || req.file.originalname.toLowerCase().endsWith('.pdf');
-        if (isPdf && isSecure) {
-            url += '?secure=1';
+        if (isPdf) {
+            if (isSecure) {
+                url += '?secure=1';
+            } else {
+                url += '?secure=0';
+            }
         }
         res.json({ url, isPdf, isSecure });
     } catch (err) { res.status(500).json({ message: err.message }); }
