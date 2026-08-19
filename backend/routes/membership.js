@@ -45,6 +45,10 @@ const formatMemberData = (member) => ({
     qualification: member.qualification,
     specialization: member.specialization,
     address: member.address,
+    pincode: member.pincode,
+    state: member.state,
+    district: member.district,
+    mandal: member.mandal,
     membershipType: member.membershipType,
     membershipYear: member.membershipYear,
     profileCompleted: member.profileCompleted || (Boolean(member.firstName && member.lastName && member.email && member.mobileNumber && member.address)),
@@ -120,7 +124,7 @@ router.get('/payment-info', async (req, res) => {
 // 1. ENROLLMENT / SIGNUP (Mandatory fields: FNAME, LNAME, EMAIL, MOBILENUMBER, ADDRESS)
 router.post('/enroll', upload.single('paymentProof'), async (req, res) => {
     try {
-        const { title, firstName, lastName, email, mobileNumber, address, password, membershipType, designation, organization, qualification, specialization, membershipYear } = req.body;
+        const { title, firstName, lastName, email, mobileNumber, address, pincode, state, district, mandal, password, membershipType, designation, organization, qualification, specialization, membershipYear } = req.body;
 
         if (!firstName || !lastName || !email || !mobileNumber || !address) {
             return res.status(400).json({ message: 'First Name, Last Name, Email, Mobile Number, and Communication Address are mandatory.' });
@@ -141,6 +145,10 @@ router.post('/enroll', upload.single('paymentProof'), async (req, res) => {
             email: email.toLowerCase(),
             mobileNumber,
             address,
+            pincode,
+            state,
+            district,
+            mandal,
             password: hashedPassword,
             membershipType: typeToUse,
             membershipYear: membershipYear || new Date().getFullYear().toString(),
@@ -313,7 +321,7 @@ router.post('/forgot-password', async (req, res) => {
 // 7. UPDATE / SETUP MEMBER PROFILE
 router.put('/profile', async (req, res) => {
     try {
-        const { memberId, title, firstName, lastName, email, mobileNumber, designation, organization, address, qualification, specialization, membershipYear } = req.body;
+        const { memberId, title, firstName, lastName, email, mobileNumber, designation, organization, address, pincode, state, district, mandal, qualification, specialization, membershipYear } = req.body;
         const member = await Member.findById(memberId);
         if (!member) return res.status(404).json({ message: 'Member not found' });
 
@@ -323,6 +331,10 @@ router.put('/profile', async (req, res) => {
         if (email !== undefined) member.email = email.toLowerCase();
         if (mobileNumber !== undefined) member.mobileNumber = mobileNumber;
         if (address !== undefined) member.address = address;
+        if (pincode !== undefined) member.pincode = pincode;
+        if (state !== undefined) member.state = state;
+        if (district !== undefined) member.district = district;
+        if (mandal !== undefined) member.mandal = mandal;
         if (designation !== undefined) member.designation = designation;
         if (organization !== undefined) member.organization = organization;
         if (qualification !== undefined) member.qualification = qualification;

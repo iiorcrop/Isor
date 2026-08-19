@@ -12,6 +12,10 @@ const memberSchema = new mongoose.Schema({
     address: { type: String, required: true },
     qualification: { type: String },
     specialization: { type: String },
+    pincode: { type: String },
+    state: { type: String },
+    district: { type: String },
+    mandal: { type: String },
     membershipType: { 
         type: String, 
         enum: ['yearly', 'lifetime'],

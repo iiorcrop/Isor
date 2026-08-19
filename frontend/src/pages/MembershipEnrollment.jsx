@@ -22,6 +22,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 import { uploadToStorageServer } from '../utils/fileUploader';
+import { fetchLocationByPincode } from '../utils/pincodeService';
 
 const MembershipEnrollment = () => {
     const [step, setStep] = useState(1); // 1: Profile Setup, 2: Subscription & Payment, 3: Pending Approval
@@ -31,9 +32,13 @@ const MembershipEnrollment = () => {
         lastName: '',
         email: '',
         mobileNumber: '',
+        address: '',
+        pincode: '',
+        state: '',
+        district: '',
+        mandal: '',
         designation: '',
         organization: '',
-        address: '',
         qualification: '',
         specialization: '',
         membershipYear: new Date().getFullYear().toString(),
@@ -41,6 +46,36 @@ const MembershipEnrollment = () => {
         membershipType: 'yearly',
         transactionId: ''
     });
+
+    const [mandalOptions, setMandalOptions] = useState([]);
+    const [fetchingPincode, setFetchingPincode] = useState(false);
+    const [pincodeError, setPincodeError] = useState('');
+
+    const handlePincodeChange = async (pinValue) => {
+        const cleaned = pinValue.replace(/\D/g, '').slice(0, 6);
+        setFormData(prev => ({ ...prev, pincode: cleaned }));
+        setPincodeError('');
+
+        if (cleaned.length === 6) {
+            setFetchingPincode(true);
+            const res = await fetchLocationByPincode(cleaned);
+            setFetchingPincode(false);
+
+            if (res.success) {
+                setMandalOptions(res.mandals || []);
+                setFormData(prev => ({
+                    ...prev,
+                    state: res.state || prev.state,
+                    district: res.district || prev.district,
+                    mandal: (res.mandals && res.mandals.length > 0) ? res.mandals[0] : prev.mandal
+                }));
+            } else {
+                setPincodeError(res.message || 'Could not fetch pincode details.');
+            }
+        } else {
+            setMandalOptions([]);
+        }
+    };
     
     const [paymentProof, setPaymentProof] = useState(null);
     const [paymentSettings, setPaymentSettings] = useState({
@@ -241,13 +276,80 @@ const MembershipEnrollment = () => {
                                             <MapPin size={16} className="absolute left-4 top-4 text-gray-400" />
                                             <textarea 
                                                 required
-                                                rows={3}
+                                                rows={2}
                                                 value={formData.address}
                                                 onChange={e => setFormData({...formData, address: e.target.value})}
                                                 className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 pl-12 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
-                                                placeholder="Full Postal Communication Address"
+                                                placeholder="Street Address, House/Flat No, Landmark"
                                             />
                                         </div>
+                                    </div>
+
+                                    {/* Location Details (PIN Code, State, District, Mandal) */}
+                                    <div className="md:col-span-3 space-y-1">
+                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center justify-between">
+                                            <span>PIN Code <span className="text-red-500">*</span></span>
+                                            {fetchingPincode && <span className="text-xs text-[#064e3b] font-normal animate-pulse flex items-center gap-1"><Loader2 size={12} className="animate-spin" /> Fetching location...</span>}
+                                        </label>
+                                        <input 
+                                            required
+                                            type="text" 
+                                            maxLength={6}
+                                            value={formData.pincode}
+                                            onChange={e => handlePincodeChange(e.target.value)}
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                            placeholder="Enter 6-digit PIN code (e.g. 500030)"
+                                        />
+                                        {pincodeError && <p className="text-[11px] text-red-500 font-medium">{pincodeError}</p>}
+                                    </div>
+
+                                    <div className="md:col-span-3 space-y-1">
+                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">State <span className="text-red-500">*</span></label>
+                                        <input 
+                                            required
+                                            type="text" 
+                                            value={formData.state}
+                                            onChange={e => setFormData({...formData, state: e.target.value})}
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                            placeholder="State (auto-filled on PIN)"
+                                        />
+                                    </div>
+
+                                    <div className="md:col-span-3 space-y-1">
+                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">District <span className="text-red-500">*</span></label>
+                                        <input 
+                                            required
+                                            type="text" 
+                                            value={formData.district}
+                                            onChange={e => setFormData({...formData, district: e.target.value})}
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                            placeholder="District (auto-filled on PIN)"
+                                        />
+                                    </div>
+
+                                    <div className="md:col-span-3 space-y-1">
+                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Mandal / Tehsil / Area <span className="text-red-500">*</span></label>
+                                        {mandalOptions.length > 0 ? (
+                                            <select 
+                                                required
+                                                value={formData.mandal}
+                                                onChange={e => setFormData({...formData, mandal: e.target.value})}
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                            >
+                                                {mandalOptions.map((opt, idx) => (
+                                                    <option key={idx} value={opt}>{opt}</option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            <input 
+                                                required
+                                                type="text" 
+                                                value={formData.mandal}
+                                                onChange={e => setFormData({...formData, mandal: e.target.value})}
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                                placeholder="Enter Mandal / Tehsil name"
+                                            />
+                                        )}
                                     </div>
                                 </div>
                             </div>

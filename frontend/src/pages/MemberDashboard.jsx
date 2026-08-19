@@ -6,11 +6,12 @@ import {
     Award, ShieldCheck, Download, Eye,
     LogOut, Calendar, Briefcase,
     ChevronRight, BookOpen, GraduationCap,
-    Edit3, X, Check, Search, FileText
+    Edit3, X, Check, Search, FileText, Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MemberCertificate from '../components/MemberCertificate';
 import { getServerUrl } from '../utils/urlHelper';
+import { fetchLocationByPincode } from '../utils/pincodeService';
 
 import { Link } from 'react-router-dom';
 
@@ -26,6 +27,9 @@ const MemberDashboard = () => {
     // Edit Profile Modal State
     const [isEditingProfile, setIsEditingProfile] = useState(false);
     const [editForm, setEditForm] = useState({});
+    const [mandalOptions, setMandalOptions] = useState([]);
+    const [fetchingPincode, setFetchingPincode] = useState(false);
+    const [pincodeError, setPincodeError] = useState('');
     const [savingProfile, setSavingProfile] = useState(false);
     const [editMessage, setEditMessage] = useState('');
 
@@ -41,12 +45,42 @@ const MemberDashboard = () => {
                 designation: parsedMember.designation || '',
                 organization: parsedMember.organization || '',
                 address: parsedMember.address || '',
+                pincode: parsedMember.pincode || '',
+                state: parsedMember.state || '',
+                district: parsedMember.district || '',
+                mandal: parsedMember.mandal || '',
                 qualification: parsedMember.qualification || '',
                 specialization: parsedMember.specialization || '',
                 mobileNumber: parsedMember.mobileNumber || ''
             });
         }
     }, [navigate]);
+
+    const handlePincodeChange = async (pinValue) => {
+        const cleaned = pinValue.replace(/\D/g, '').slice(0, 6);
+        setEditForm(prev => ({ ...prev, pincode: cleaned }));
+        setPincodeError('');
+
+        if (cleaned.length === 6) {
+            setFetchingPincode(true);
+            const res = await fetchLocationByPincode(cleaned);
+            setFetchingPincode(false);
+
+            if (res.success) {
+                setMandalOptions(res.mandals || []);
+                setEditForm(prev => ({
+                    ...prev,
+                    state: res.state || prev.state,
+                    district: res.district || prev.district,
+                    mandal: (res.mandals && res.mandals.length > 0) ? res.mandals[0] : prev.mandal
+                }));
+            } else {
+                setPincodeError(res.message || 'Could not fetch location details.');
+            }
+        } else {
+            setMandalOptions([]);
+        }
+    };
 
     const isMemberActive = member && member.approvalStatus === 'Approved' && (
         member.membershipType?.toLowerCase() === 'lifetime' || 
@@ -308,14 +342,36 @@ const MemberDashboard = () => {
                                     </div>
                                 </motion.div>
 
-                                {/* Mailing Address */}
+                                {/* Mailing & Location Address */}
                                 <div className="bg-white p-10 rounded-[3rem] shadow-xl shadow-[#064e3b]/5 border border-[#064e3b]/5">
                                     <h2 className="text-xl font-serif font-bold text-[#064e3b] mb-6 flex items-center gap-3">
-                                        <MapPin className="text-[#b47c1c]" /> Communication Address
+                                        <MapPin className="text-[#b47c1c]" /> Communication Address & Location
                                     </h2>
-                                    <p className="text-[#064e3b] font-medium leading-relaxed bg-[#fff9f0] p-6 rounded-2xl border border-[#b47c1c]/10 whitespace-pre-line">
-                                        {member.address || 'No communication address registered.'}
-                                    </p>
+                                    <div className="bg-[#fff9f0] p-6 rounded-2xl border border-[#b47c1c]/10 space-y-4">
+                                        <p className="text-[#064e3b] font-semibold leading-relaxed whitespace-pre-line text-sm">
+                                            {member.address || 'No street address registered.'}
+                                        </p>
+                                        {(member.pincode || member.mandal || member.district || member.state) && (
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-[#b47c1c]/20 text-xs">
+                                                <div>
+                                                    <span className="text-[10px] font-bold text-gray-500 uppercase block">PIN Code</span>
+                                                    <span className="font-bold text-[#064e3b]">{member.pincode || '-'}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="text-[10px] font-bold text-gray-400 uppercase block">Mandal / Tehsil</span>
+                                                    <span className="font-bold text-[#064e3b]">{member.mandal || '-'}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="text-[10px] font-bold text-gray-400 uppercase block">District</span>
+                                                    <span className="font-bold text-[#064e3b]">{member.district || '-'}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="text-[10px] font-bold text-gray-400 uppercase block">State</span>
+                                                    <span className="font-bold text-[#064e3b]">{member.state || '-'}</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </>
                         ) : (
@@ -503,11 +559,74 @@ const MemberDashboard = () => {
                                     <div className="md:col-span-2">
                                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Communication Address</label>
                                         <textarea 
-                                            rows={3}
+                                            rows={2}
                                             value={editForm.address}
                                             onChange={e => setEditForm({...editForm, address: e.target.value})}
                                             className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                            placeholder="Street / House No"
                                         />
+                                    </div>
+
+                                    {/* Location fields */}
+                                    <div>
+                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center justify-between">
+                                            <span>PIN Code</span>
+                                            {fetchingPincode && <span className="text-[10px] text-[#064e3b] font-normal animate-pulse flex items-center gap-1"><Loader2 size={10} className="animate-spin" /> Fetching...</span>}
+                                        </label>
+                                        <input 
+                                            type="text" 
+                                            maxLength={6}
+                                            value={editForm.pincode || ''}
+                                            onChange={e => handlePincodeChange(e.target.value)}
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                            placeholder="Enter 6-digit PIN"
+                                        />
+                                        {pincodeError && <p className="text-[10px] text-red-500 font-medium">{pincodeError}</p>}
+                                    </div>
+
+                                    <div>
+                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">State</label>
+                                        <input 
+                                            type="text" 
+                                            value={editForm.state || ''}
+                                            onChange={e => setEditForm({...editForm, state: e.target.value})}
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                            placeholder="State"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">District</label>
+                                        <input 
+                                            type="text" 
+                                            value={editForm.district || ''}
+                                            onChange={e => setEditForm({...editForm, district: e.target.value})}
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                            placeholder="District"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Mandal / Tehsil</label>
+                                        {mandalOptions.length > 0 ? (
+                                            <select 
+                                                value={editForm.mandal || ''}
+                                                onChange={e => setEditForm({...editForm, mandal: e.target.value})}
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                            >
+                                                {mandalOptions.map((opt, idx) => (
+                                                    <option key={idx} value={opt}>{opt}</option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            <input 
+                                                type="text" 
+                                                value={editForm.mandal || ''}
+                                                onChange={e => setEditForm({...editForm, mandal: e.target.value})}
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                                placeholder="Mandal / Tehsil"
+                                            />
+                                        )}
                                     </div>
                                 </div>
 
