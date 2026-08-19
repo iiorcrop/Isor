@@ -214,7 +214,7 @@ const MembershipEnrollment = () => {
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
                                     <div className="md:col-span-1 space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Title</label>
+                                        <label className="text-xs font-semibold text-gray-700">Title</label>
                                         <select 
                                             className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
                                             value={formData.title}
@@ -227,7 +227,7 @@ const MembershipEnrollment = () => {
                                         </select>
                                     </div>
                                     <div className="md:col-span-2 space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">First Name <span className="text-red-500">*</span></label>
+                                        <label className="text-xs font-semibold text-gray-700">First Name <span className="text-red-500">*</span></label>
                                         <input 
                                             required
                                             type="text" 
@@ -238,7 +238,7 @@ const MembershipEnrollment = () => {
                                         />
                                     </div>
                                     <div className="md:col-span-3 space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Last Name <span className="text-red-500">*</span></label>
+                                        <label className="text-xs font-semibold text-gray-700">Last Name <span className="text-red-500">*</span></label>
                                         <input 
                                             required
                                             type="text" 
@@ -249,7 +249,7 @@ const MembershipEnrollment = () => {
                                         />
                                     </div>
                                     <div className="md:col-span-3 space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Email Address <span className="text-red-500">*</span></label>
+                                        <label className="text-xs font-semibold text-gray-700">Email Address <span className="text-red-500">*</span></label>
                                         <div className="relative">
                                             <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                             <input 
@@ -263,7 +263,7 @@ const MembershipEnrollment = () => {
                                         </div>
                                     </div>
                                     <div className="md:col-span-3 space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Mobile Number <span className="text-red-500">*</span></label>
+                                        <label className="text-xs font-semibold text-gray-700">Mobile Number <span className="text-red-500">*</span></label>
                                         <div className="relative">
                                             <Phone size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                             <input 
@@ -277,7 +277,7 @@ const MembershipEnrollment = () => {
                                         </div>
                                     </div>
                                     <div className="md:col-span-6 space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Communication Address <span className="text-red-500">*</span></label>
+                                        <label className="text-xs font-semibold text-gray-700">Communication Address <span className="text-red-500">*</span></label>
                                         <div className="relative">
                                             <MapPin size={16} className="absolute left-4 top-4 text-gray-400" />
                                             <textarea 
@@ -393,7 +393,7 @@ const MembershipEnrollment = () => {
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Position / Role (Designation)</label>
+                                        <label className="text-xs font-semibold text-gray-700">Position / Role (Designation)</label>
                                         <input 
                                             type="text" 
                                             value={formData.designation}
@@ -403,7 +403,7 @@ const MembershipEnrollment = () => {
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Organization / University</label>
+                                        <label className="text-xs font-semibold text-gray-700">Organization / University</label>
                                         <input 
                                             type="text" 
                                             value={formData.organization}
@@ -413,7 +413,7 @@ const MembershipEnrollment = () => {
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Educational Qualification</label>
+                                        <label className="text-xs font-semibold text-gray-700">Educational Qualification</label>
                                         <input 
                                             type="text" 
                                             value={formData.qualification}
@@ -423,7 +423,7 @@ const MembershipEnrollment = () => {
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Field of Specialization</label>
+                                        <label className="text-xs font-semibold text-gray-700">Field of Specialization</label>
                                         <input 
                                             type="text" 
                                             value={formData.specialization}
@@ -433,7 +433,7 @@ const MembershipEnrollment = () => {
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Membership Year</label>
+                                        <label className="text-xs font-semibold text-gray-700">Membership Year</label>
                                         <input 
                                             type="text" 
                                             value={formData.membershipYear}
@@ -442,7 +442,7 @@ const MembershipEnrollment = () => {
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Password</label>
+                                        <label className="text-xs font-semibold text-gray-700">Password</label>
                                         <div className="relative">
                                             <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                             <input 

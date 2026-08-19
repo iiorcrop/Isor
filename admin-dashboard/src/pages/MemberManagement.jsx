@@ -278,8 +278,8 @@ const MemberManagement = () => {
                                         </div>
 
                                         <div className="space-y-4">
-                                            <h4 className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] flex items-center gap-2">
-                                                <Mail size={14} className="text-primary" /> Contact Details
+                                            <h4 className="text-xs font-semibold text-white/50 flex items-center gap-2">
+                                                <Mail size={14} className="text-primary" /> Contact & Location Details
                                             </h4>
                                             <div className="space-y-3 pl-6">
                                                 <div>
@@ -294,6 +294,26 @@ const MemberManagement = () => {
                                                     <p className="text-xs text-text-muted">Mailing Address</p>
                                                     <p className="text-white font-medium leading-relaxed">{selectedMember.address || 'N/A'}</p>
                                                 </div>
+                                                {(selectedMember.pincode || selectedMember.mandal || selectedMember.district || selectedMember.state) && (
+                                                    <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/5 text-xs">
+                                                        <div>
+                                                            <p className="text-[10px] text-text-muted">PIN Code</p>
+                                                            <p className="text-white font-medium">{selectedMember.pincode || '-'}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] text-text-muted">Mandal / Tehsil</p>
+                                                            <p className="text-white font-medium">{selectedMember.mandal || '-'}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] text-text-muted">District</p>
+                                                            <p className="text-white font-medium">{selectedMember.district || '-'}</p>
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-[10px] text-text-muted">State</p>
+                                                            <p className="text-white font-medium">{selectedMember.state || '-'}</p>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
 
