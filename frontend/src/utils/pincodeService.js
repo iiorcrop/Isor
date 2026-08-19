@@ -18,12 +18,18 @@ export const fetchLocationByPincode = async (pincode) => {
             const data = res.data[0];
             if (data.Status === 'Success' && Array.isArray(data.PostOffice) && data.PostOffice.length > 0) {
                 const postOffices = data.PostOffice;
-                const state = postOffices[0].State || '';
-                const district = postOffices[0].District || '';
                 
-                // Extract unique Mandals/Blocks/Sub-districts/Post Office names
+                const statesSet = new Set();
+                const districtsSet = new Set();
                 const mandalsSet = new Set();
+
                 postOffices.forEach(po => {
+                    if (po.State && po.State.trim()) {
+                        statesSet.add(po.State.trim());
+                    }
+                    if (po.District && po.District.trim()) {
+                        districtsSet.add(po.District.trim());
+                    }
                     if (po.Block && po.Block !== 'NA' && po.Block.trim()) {
                         mandalsSet.add(po.Block.trim());
                     }
@@ -35,12 +41,17 @@ export const fetchLocationByPincode = async (pincode) => {
                     }
                 });
 
+                const states = Array.from(statesSet).sort();
+                const districts = Array.from(districtsSet).sort();
                 const mandals = Array.from(mandalsSet).sort();
 
                 return {
                     success: true,
-                    state,
-                    district,
+                    state: states[0] || '',
+                    district: districts[0] || '',
+                    mandal: mandals[0] || '',
+                    states,
+                    districts,
                     mandals
                 };
             } else {

@@ -47,6 +47,8 @@ const MembershipEnrollment = () => {
         transactionId: ''
     });
 
+    const [stateOptions, setStateOptions] = useState([]);
+    const [districtOptions, setDistrictOptions] = useState([]);
     const [mandalOptions, setMandalOptions] = useState([]);
     const [fetchingPincode, setFetchingPincode] = useState(false);
     const [pincodeError, setPincodeError] = useState('');
@@ -62,17 +64,21 @@ const MembershipEnrollment = () => {
             setFetchingPincode(false);
 
             if (res.success) {
+                setStateOptions(res.states || []);
+                setDistrictOptions(res.districts || []);
                 setMandalOptions(res.mandals || []);
                 setFormData(prev => ({
                     ...prev,
-                    state: res.state || prev.state,
-                    district: res.district || prev.district,
+                    state: (res.states && res.states.length > 0) ? res.states[0] : (res.state || prev.state),
+                    district: (res.districts && res.districts.length > 0) ? res.districts[0] : (res.district || prev.district),
                     mandal: (res.mandals && res.mandals.length > 0) ? res.mandals[0] : prev.mandal
                 }));
             } else {
                 setPincodeError(res.message || 'Could not fetch pincode details.');
             }
         } else {
+            setStateOptions([]);
+            setDistrictOptions([]);
             setMandalOptions([]);
         }
     };
@@ -305,26 +311,52 @@ const MembershipEnrollment = () => {
 
                                     <div className="md:col-span-3 space-y-1">
                                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">State <span className="text-red-500">*</span></label>
-                                        <input 
-                                            required
-                                            type="text" 
-                                            value={formData.state}
-                                            onChange={e => setFormData({...formData, state: e.target.value})}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
-                                            placeholder="State (auto-filled on PIN)"
-                                        />
+                                        {stateOptions.length > 0 ? (
+                                            <select 
+                                                required
+                                                value={formData.state}
+                                                onChange={e => setFormData({...formData, state: e.target.value})}
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                            >
+                                                {stateOptions.map((opt, idx) => (
+                                                    <option key={idx} value={opt}>{opt}</option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            <input 
+                                                required
+                                                type="text" 
+                                                value={formData.state}
+                                                onChange={e => setFormData({...formData, state: e.target.value})}
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                                placeholder="State (auto-filled on PIN)"
+                                            />
+                                        )}
                                     </div>
 
                                     <div className="md:col-span-3 space-y-1">
                                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">District <span className="text-red-500">*</span></label>
-                                        <input 
-                                            required
-                                            type="text" 
-                                            value={formData.district}
-                                            onChange={e => setFormData({...formData, district: e.target.value})}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
-                                            placeholder="District (auto-filled on PIN)"
-                                        />
+                                        {districtOptions.length > 0 ? (
+                                            <select 
+                                                required
+                                                value={formData.district}
+                                                onChange={e => setFormData({...formData, district: e.target.value})}
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                            >
+                                                {districtOptions.map((opt, idx) => (
+                                                    <option key={idx} value={opt}>{opt}</option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            <input 
+                                                required
+                                                type="text" 
+                                                value={formData.district}
+                                                onChange={e => setFormData({...formData, district: e.target.value})}
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                                placeholder="District (auto-filled on PIN)"
+                                            />
+                                        )}
                                     </div>
 
                                     <div className="md:col-span-3 space-y-1">

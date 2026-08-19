@@ -27,6 +27,8 @@ const MemberDashboard = () => {
     // Edit Profile Modal State
     const [isEditingProfile, setIsEditingProfile] = useState(false);
     const [editForm, setEditForm] = useState({});
+    const [stateOptions, setStateOptions] = useState([]);
+    const [districtOptions, setDistrictOptions] = useState([]);
     const [mandalOptions, setMandalOptions] = useState([]);
     const [fetchingPincode, setFetchingPincode] = useState(false);
     const [pincodeError, setPincodeError] = useState('');
@@ -67,17 +69,21 @@ const MemberDashboard = () => {
             setFetchingPincode(false);
 
             if (res.success) {
+                setStateOptions(res.states || []);
+                setDistrictOptions(res.districts || []);
                 setMandalOptions(res.mandals || []);
                 setEditForm(prev => ({
                     ...prev,
-                    state: res.state || prev.state,
-                    district: res.district || prev.district,
+                    state: (res.states && res.states.length > 0) ? res.states[0] : (res.state || prev.state),
+                    district: (res.districts && res.districts.length > 0) ? res.districts[0] : (res.district || prev.district),
                     mandal: (res.mandals && res.mandals.length > 0) ? res.mandals[0] : prev.mandal
                 }));
             } else {
                 setPincodeError(res.message || 'Could not fetch location details.');
             }
         } else {
+            setStateOptions([]);
+            setDistrictOptions([]);
             setMandalOptions([]);
         }
     };
@@ -586,24 +592,48 @@ const MemberDashboard = () => {
 
                                     <div>
                                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">State</label>
-                                        <input 
-                                            type="text" 
-                                            value={editForm.state || ''}
-                                            onChange={e => setEditForm({...editForm, state: e.target.value})}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
-                                            placeholder="State"
-                                        />
+                                        {stateOptions.length > 0 ? (
+                                            <select 
+                                                value={editForm.state || ''}
+                                                onChange={e => setEditForm({...editForm, state: e.target.value})}
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                            >
+                                                {stateOptions.map((opt, idx) => (
+                                                    <option key={idx} value={opt}>{opt}</option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            <input 
+                                                type="text" 
+                                                value={editForm.state || ''}
+                                                onChange={e => setEditForm({...editForm, state: e.target.value})}
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                                placeholder="State"
+                                            />
+                                        )}
                                     </div>
 
                                     <div>
                                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">District</label>
-                                        <input 
-                                            type="text" 
-                                            value={editForm.district || ''}
-                                            onChange={e => setEditForm({...editForm, district: e.target.value})}
-                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
-                                            placeholder="District"
-                                        />
+                                        {districtOptions.length > 0 ? (
+                                            <select 
+                                                value={editForm.district || ''}
+                                                onChange={e => setEditForm({...editForm, district: e.target.value})}
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                            >
+                                                {districtOptions.map((opt, idx) => (
+                                                    <option key={idx} value={opt}>{opt}</option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            <input 
+                                                type="text" 
+                                                value={editForm.district || ''}
+                                                onChange={e => setEditForm({...editForm, district: e.target.value})}
+                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                                placeholder="District"
+                                            />
+                                        )}
                                     </div>
 
                                     <div>
