@@ -43,13 +43,16 @@ body {
   padding: 0;
   overflow-x: hidden;
   background-color: white;
-  text-align: justify;
+  /* Justifying the whole document stretched form labels and other short UI
+     text across their container. Long-form content is justified via .prose. */
+  text-align: left;
 }
 
 /* Custom Prose Styles */
 .prose {
   color: #374151;
   line-height: 1.75;
+  text-align: justify;
 }
 .prose h1, .prose h2, .prose h3 {
   color: #064e3b;
@@ -57,6 +60,7 @@ body {
   margin-top: 2rem;
   margin-bottom: 1rem;
   font-weight: 700;
+  text-align: left;
 }
 .prose h1 { font-size: 2.25rem; }
 .prose h2 { font-size: 1.875rem; border-bottom: 1px solid #f3f4f6; padding-bottom: 0.5rem; }

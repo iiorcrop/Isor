@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { 
     User, 
@@ -22,7 +22,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 import { uploadToStorageServer } from '../utils/fileUploader';
-import { fetchLocationByPincode } from '../utils/pincodeService';
+import { fetchLocationByPincode, INDIAN_STATES, normalizeState } from '../utils/pincodeService';
+
+// Sentinel option value for "my District / Mandal is not in the list".
+const MANUAL_ENTRY = '__manual__';
 
 const MembershipEnrollment = () => {
     const [step, setStep] = useState(1); // 1: Profile Setup, 2: Subscription & Payment, 3: Pending Approval
@@ -47,11 +50,65 @@ const MembershipEnrollment = () => {
         transactionId: ''
     });
 
-    const [stateOptions, setStateOptions] = useState([]);
-    const [districtOptions, setDistrictOptions] = useState([]);
-    const [mandalOptions, setMandalOptions] = useState([]);
+    // Locations the PIN lookup returned, merged into the dropdowns so a PIN can
+    // always be honoured even when its spelling differs from the bundled data.
+    const [apiLocation, setApiLocation] = useState({ states: [], districts: [], mandals: [] });
+    const [locationData, setLocationData] = useState(null);
+    const [manualDistrict, setManualDistrict] = useState(false);
+    const [manualMandal, setManualMandal] = useState(false);
     const [fetchingPincode, setFetchingPincode] = useState(false);
     const [pincodeError, setPincodeError] = useState('');
+
+    useEffect(() => {
+        // Loaded on demand so the State/District/Mandal data stays out of the main bundle.
+        import('../data/indiaLocations.json')
+            .then(module => setLocationData(module.default))
+            .catch(err => console.error('Failed to load location data', err));
+    }, []);
+
+    const sortedUnique = (values) => Array.from(new Set(values.filter(Boolean)))
+        .sort((a, b) => a.localeCompare(b));
+
+    const stateOptions = useMemo(() => sortedUnique([
+        ...(locationData ? Object.keys(locationData) : INDIAN_STATES),
+        ...apiLocation.states.map(normalizeState)
+    ]), [locationData, apiLocation.states]);
+
+    const districtOptions = useMemo(() => {
+        const states = locationData || {};
+        const fromData = states[formData.state] ? Object.keys(states[formData.state]) : [];
+        return sortedUnique([...fromData, ...apiLocation.districts]);
+    }, [locationData, formData.state, apiLocation.districts]);
+
+    const mandalOptions = useMemo(() => {
+        const districts = (locationData || {})[formData.state] || {};
+        return sortedUnique([...(districts[formData.district] || []), ...apiLocation.mandals]);
+    }, [locationData, formData.state, formData.district, apiLocation.mandals]);
+
+    const handleStateChange = (value) => {
+        setFormData(prev => ({ ...prev, state: value, district: '', mandal: '' }));
+        setApiLocation(prev => ({ ...prev, districts: [], mandals: [] }));
+        setManualDistrict(false);
+        setManualMandal(false);
+    };
+
+    const handleDistrictChange = (value) => {
+        if (value === MANUAL_ENTRY) {
+            setManualDistrict(true);
+            value = '';
+        }
+        setFormData(prev => ({ ...prev, district: value, mandal: '' }));
+        setApiLocation(prev => ({ ...prev, mandals: [] }));
+        setManualMandal(false);
+    };
+
+    const handleMandalChange = (value) => {
+        if (value === MANUAL_ENTRY) {
+            setManualMandal(true);
+            value = '';
+        }
+        setFormData(prev => ({ ...prev, mandal: value }));
+    };
 
     const handlePincodeChange = async (pinValue) => {
         const cleaned = pinValue.replace(/\D/g, '').slice(0, 6);
@@ -64,22 +121,24 @@ const MembershipEnrollment = () => {
             setFetchingPincode(false);
 
             if (res.success) {
-                setStateOptions(res.states || []);
-                setDistrictOptions(res.districts || []);
-                setMandalOptions(res.mandals || []);
+                const districts = res.districts || [];
+                const mandals = res.mandals || [];
+                setApiLocation({ states: res.states || [], districts, mandals });
+                setManualDistrict(false);
+                setManualMandal(false);
                 setFormData(prev => ({
                     ...prev,
-                    state: (res.states && res.states.length > 0) ? res.states[0] : (res.state || prev.state),
-                    district: (res.districts && res.districts.length > 0) ? res.districts[0] : (res.district || prev.district),
-                    mandal: (res.mandals && res.mandals.length > 0) ? res.mandals[0] : prev.mandal
+                    state: normalizeState((res.states && res.states[0]) || res.state) || prev.state,
+                    // A PIN code can span several districts or mandals, so only
+                    // pre-select one when the lookup is unambiguous.
+                    district: districts.length === 1 ? districts[0] : '',
+                    mandal: mandals.length === 1 ? mandals[0] : ''
                 }));
             } else {
                 setPincodeError(res.message || 'Could not fetch pincode details.');
             }
         } else {
-            setStateOptions([]);
-            setDistrictOptions([]);
-            setMandalOptions([]);
+            setApiLocation({ states: [], districts: [], mandals: [] });
         }
     };
     
@@ -118,9 +177,12 @@ const MembershipEnrollment = () => {
     // Step 1: Profile Setup Submit
     const handleProfileSubmit = (e) => {
         e.preventDefault();
-        const { firstName, lastName, email, mobileNumber, address } = formData;
+        const { firstName, lastName, email, mobileNumber, address, pincode, state, district, mandal } = formData;
         if (!firstName || !lastName || !email || !mobileNumber || !address) {
             return alert('Please fill all mandatory fields: First Name, Last Name, Email, Mobile Number, and Communication Address.');
+        }
+        if (!pincode || !state || !district || !mandal) {
+            return alert('Please enter your PIN code and select your State, District and Mandal / Tehsil / Area.');
         }
         // Move to Step 2: Select Subscription & Payment
         setStep(2);
@@ -306,81 +368,87 @@ const MembershipEnrollment = () => {
                                             className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
                                             placeholder="Enter 6-digit PIN code (e.g. 500030)"
                                         />
-                                        {pincodeError && <p className="text-[11px] text-red-500 font-medium">{pincodeError}</p>}
+                                        {pincodeError
+                                            ? <p className="text-[11px] text-red-500 font-medium">{pincodeError} You can still pick your location from the lists below.</p>
+                                            : <p className="text-[11px] text-gray-400 font-medium">Fills the lists below automatically, or pick your location yourself.</p>}
                                     </div>
 
                                     <div className="md:col-span-3 space-y-1">
                                         <label className="text-xs font-semibold text-gray-700">State <span className="text-red-500">*</span></label>
-                                        {stateOptions.length > 0 ? (
-                                            <select 
-                                                required
-                                                value={formData.state}
-                                                onChange={e => setFormData({...formData, state: e.target.value})}
-                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
-                                            >
-                                                {stateOptions.map((opt, idx) => (
-                                                    <option key={idx} value={opt}>{opt}</option>
-                                                ))}
-                                            </select>
-                                        ) : (
-                                            <input 
-                                                required
-                                                type="text" 
-                                                value={formData.state}
-                                                onChange={e => setFormData({...formData, state: e.target.value})}
-                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
-                                                placeholder="State (auto-filled on PIN)"
-                                            />
-                                        )}
+                                        <select
+                                            required
+                                            value={formData.state}
+                                            onChange={e => handleStateChange(e.target.value)}
+                                            className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                        >
+                                            <option value="">Select State</option>
+                                            {stateOptions.map((opt, idx) => (
+                                                <option key={idx} value={opt}>{opt}</option>
+                                            ))}
+                                        </select>
                                     </div>
 
                                     <div className="md:col-span-3 space-y-1">
                                         <label className="text-xs font-semibold text-gray-700">District <span className="text-red-500">*</span></label>
-                                        {districtOptions.length > 0 ? (
-                                            <select 
+                                        {manualDistrict ? (
+                                            <>
+                                                <input
+                                                    required
+                                                    type="text"
+                                                    value={formData.district}
+                                                    onChange={e => setFormData({...formData, district: e.target.value})}
+                                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                                    placeholder="Type your District"
+                                                />
+                                                <button type="button" onClick={() => setManualDistrict(false)} className="text-[11px] font-semibold text-[#064e3b] hover:underline">
+                                                    Choose from list instead
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <select
                                                 required
                                                 value={formData.district}
-                                                onChange={e => setFormData({...formData, district: e.target.value})}
+                                                onChange={e => handleDistrictChange(e.target.value)}
                                                 className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
                                             >
+                                                <option value="">{formData.state ? 'Select District' : 'Select your State first'}</option>
                                                 {districtOptions.map((opt, idx) => (
                                                     <option key={idx} value={opt}>{opt}</option>
                                                 ))}
+                                                <option value={MANUAL_ENTRY}>Other / Not listed</option>
                                             </select>
-                                        ) : (
-                                            <input 
-                                                required
-                                                type="text" 
-                                                value={formData.district}
-                                                onChange={e => setFormData({...formData, district: e.target.value})}
-                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
-                                                placeholder="District (auto-filled on PIN)"
-                                            />
                                         )}
                                     </div>
 
                                     <div className="md:col-span-3 space-y-1">
                                         <label className="text-xs font-semibold text-gray-700">Mandal / Tehsil / Area <span className="text-red-500">*</span></label>
-                                        {mandalOptions.length > 0 ? (
-                                            <select 
+                                        {manualMandal ? (
+                                            <>
+                                                <input
+                                                    required
+                                                    type="text"
+                                                    value={formData.mandal}
+                                                    onChange={e => setFormData({...formData, mandal: e.target.value})}
+                                                    className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
+                                                    placeholder="Type your Mandal / Tehsil / Area"
+                                                />
+                                                <button type="button" onClick={() => setManualMandal(false)} className="text-[11px] font-semibold text-[#064e3b] hover:underline">
+                                                    Choose from list instead
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <select
                                                 required
                                                 value={formData.mandal}
-                                                onChange={e => setFormData({...formData, mandal: e.target.value})}
+                                                onChange={e => handleMandalChange(e.target.value)}
                                                 className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
                                             >
+                                                <option value="">{formData.district ? 'Select Mandal / Tehsil / Area' : 'Select your District first'}</option>
                                                 {mandalOptions.map((opt, idx) => (
                                                     <option key={idx} value={opt}>{opt}</option>
                                                 ))}
+                                                <option value={MANUAL_ENTRY}>Other / Not listed</option>
                                             </select>
-                                        ) : (
-                                            <input 
-                                                required
-                                                type="text" 
-                                                value={formData.mandal}
-                                                onChange={e => setFormData({...formData, mandal: e.target.value})}
-                                                className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3.5 text-xs font-medium focus:outline-none focus:border-[#064e3b]"
-                                                placeholder="Enter Mandal / Tehsil name"
-                                            />
                                         )}
                                     </div>
                                 </div>
