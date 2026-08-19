@@ -575,7 +575,7 @@ const MemberDashboard = () => {
 
                                     {/* Location fields */}
                                     <div>
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center justify-between">
+                                        <label className="text-xs font-semibold text-gray-700 flex items-center justify-between">
                                             <span>PIN Code</span>
                                             {fetchingPincode && <span className="text-[10px] text-[#064e3b] font-normal animate-pulse flex items-center gap-1"><Loader2 size={10} className="animate-spin" /> Fetching...</span>}
                                         </label>
@@ -591,7 +591,7 @@ const MemberDashboard = () => {
                                     </div>
 
                                     <div>
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">State</label>
+                                        <label className="text-xs font-semibold text-gray-700">State</label>
                                         {stateOptions.length > 0 ? (
                                             <select 
                                                 value={editForm.state || ''}
@@ -614,7 +614,7 @@ const MemberDashboard = () => {
                                     </div>
 
                                     <div>
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">District</label>
+                                        <label className="text-xs font-semibold text-gray-700">District</label>
                                         {districtOptions.length > 0 ? (
                                             <select 
                                                 value={editForm.district || ''}
@@ -637,7 +637,7 @@ const MemberDashboard = () => {
                                     </div>
 
                                     <div>
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Mandal / Tehsil</label>
+                                        <label className="text-xs font-semibold text-gray-700">Mandal / Tehsil</label>
                                         {mandalOptions.length > 0 ? (
                                             <select 
                                                 value={editForm.mandal || ''}

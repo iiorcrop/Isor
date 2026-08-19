@@ -293,7 +293,7 @@ const MembershipEnrollment = () => {
 
                                     {/* Location Details (PIN Code, State, District, Mandal) */}
                                     <div className="md:col-span-3 space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center justify-between">
+                                        <label className="text-xs font-semibold text-gray-700 flex items-center justify-between">
                                             <span>PIN Code <span className="text-red-500">*</span></span>
                                             {fetchingPincode && <span className="text-xs text-[#064e3b] font-normal animate-pulse flex items-center gap-1"><Loader2 size={12} className="animate-spin" /> Fetching location...</span>}
                                         </label>
@@ -310,7 +310,7 @@ const MembershipEnrollment = () => {
                                     </div>
 
                                     <div className="md:col-span-3 space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">State <span className="text-red-500">*</span></label>
+                                        <label className="text-xs font-semibold text-gray-700">State <span className="text-red-500">*</span></label>
                                         {stateOptions.length > 0 ? (
                                             <select 
                                                 required
@@ -335,7 +335,7 @@ const MembershipEnrollment = () => {
                                     </div>
 
                                     <div className="md:col-span-3 space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">District <span className="text-red-500">*</span></label>
+                                        <label className="text-xs font-semibold text-gray-700">District <span className="text-red-500">*</span></label>
                                         {districtOptions.length > 0 ? (
                                             <select 
                                                 required
@@ -360,7 +360,7 @@ const MembershipEnrollment = () => {
                                     </div>
 
                                     <div className="md:col-span-3 space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Mandal / Tehsil / Area <span className="text-red-500">*</span></label>
+                                        <label className="text-xs font-semibold text-gray-700">Mandal / Tehsil / Area <span className="text-red-500">*</span></label>
                                         {mandalOptions.length > 0 ? (
                                             <select 
                                                 required
