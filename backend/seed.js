@@ -136,7 +136,7 @@ const seedDB = async () => {
                             { label: 'About JOR', link: '/about-journal' },
                             { label: 'Editorial Policy', link: '/editorial-policy' },
                             { label: 'Archives', link: '/archives' },
-                            { label: 'Submit Manuscript', link: '/submit' }
+                            { label: 'Submit Manuscript', link: '/submit-manuscript' }
                         ]
                     },
                     { 

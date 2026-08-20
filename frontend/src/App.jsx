@@ -27,6 +27,14 @@ import ForgotPassword from './pages/ForgotPassword'
 import MemberDashboard from './pages/MemberDashboard'
 import VerifyCertificate from './pages/VerifyCertificate'
 import DynamicPage from './pages/DynamicPage'
+import UserRegister from './pages/UserRegister'
+import UserLogin from './pages/UserLogin'
+import UserDashboard from './pages/UserDashboard'
+import Awards from './pages/Awards'
+import AwardDetails from './pages/AwardDetails'
+import SubmitManuscript from './pages/SubmitManuscript'
+import EditorDashboard from './pages/EditorDashboard'
+import ReviewerDashboard from './pages/ReviewerDashboard'
 
 
 const Home = () => (
@@ -54,6 +62,14 @@ function App() {
           <Route path="/membership" element={<MembershipEnrollment />} />
           <Route path="/membership/login" element={<MemberLogin />} />
           <Route path="/login" element={<MemberLogin />} />
+          <Route path="/user/register" element={<UserRegister />} />
+          <Route path="/user/login" element={<UserLogin />} />
+          <Route path="/user/dashboard" element={<UserDashboard />} />
+          <Route path="/submit-manuscript" element={<SubmitManuscript />} />
+          <Route path="/editor/dashboard" element={<EditorDashboard />} />
+          <Route path="/reviewer/dashboard" element={<ReviewerDashboard />} />
+          <Route path="/awards" element={<Awards />} />
+          <Route path="/awards/:id" element={<AwardDetails />} />
           <Route path="/events" element={<Events />} />
           <Route path="/events/national" element={<NationalEvents />} />
           <Route path="/events/register/:id" element={<EventRegister />} />

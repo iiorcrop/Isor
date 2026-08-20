@@ -29,6 +29,7 @@ const fs = require("fs");
 const { PDFDocument } = require("pdf-lib");
 const jwt = require("jsonwebtoken");
 const Member = require("./models/Member");
+const User = require("./models/User");
 
 // PDF protection middleware for static uploads
 app.get("/uploads/*path", async (req, res, next) => {
@@ -55,45 +56,37 @@ app.get("/uploads/*path", async (req, res, next) => {
       token = req.query.token;
     }
 
-    const isExplicitUnsecure = req.query && (req.query.secure === "0" || req.query.secure === "false" || req.query.unsecure === "1" || req.query.unsecure === "true");
-    const isSecureReq = !isExplicitUnsecure;
-
-    let isActiveMember = false;
+    let isLoggedIn = false;
     if (token) {
       try {
-        const decoded = jwt.verify(token, "isor_secret_key_2026");
-        const member = await Member.findById(decoded.id);
-        if (member && member.approvalStatus === "Approved") {
-          if (member.membershipType?.toLowerCase() === "yearly") {
-            if (member.subscriptionEndDate && new Date() <= new Date(member.subscriptionEndDate)) {
-              isActiveMember = true;
-            }
+        const JWT_SECRET = process.env.JWT_SECRET || "isor_secret_key_2026";
+        const decoded = jwt.verify(token, JWT_SECRET);
+        if (decoded && decoded.id) {
+          // Check if valid User or Member account exists (active or inactive)
+          const userObj = await User.findById(decoded.id);
+          if (userObj) {
+            isLoggedIn = true;
           } else {
-            isActiveMember = true;
+            const memberObj = await Member.findById(decoded.id);
+            if (memberObj) {
+              isLoggedIn = true;
+            }
           }
         }
       } catch (e) {
-        isActiveMember = false;
+        isLoggedIn = false;
       }
+    }
+
+    if (!isLoggedIn) {
+      return res.status(401).json({ 
+        message: "Authentication required to access full journal PDF files.",
+        redirectTo: "/user/login"
+      });
     }
 
     res.setHeader("Content-Type", "application/pdf");
-
-    if (isSecureReq && !isActiveMember) {
-      // Sliced 2 pages for secure files when user is non-member or inactive
-      const fileBytes = fs.readFileSync(fullFilePath);
-      const pdfDoc = await PDFDocument.load(fileBytes);
-      if (pdfDoc.getPageCount() <= 2) {
-        return res.sendFile(fullFilePath);
-      }
-      const previewDoc = await PDFDocument.create();
-      const copiedPages = await previewDoc.copyPages(pdfDoc, [0, 1]);
-      copiedPages.forEach((page) => previewDoc.addPage(page));
-      const previewBytes = await previewDoc.save();
-      return res.send(Buffer.from(previewBytes));
-    } else {
-      return res.sendFile(fullFilePath);
-    }
+    return res.sendFile(fullFilePath);
   } catch (err) {
     next();
   }
@@ -104,13 +97,24 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 // MongoDB Connection
 mongoose
   .connect(process.env.MONGODB_URI, {
-    serverSelectionTimeoutMS: 5000, // 5 second timeout
+    serverSelectionTimeoutMS: 30000, // 30 second timeout for Atlas cluster connections
+    socketTimeoutMS: 45000,
+    family: 4, // Force IPv4 DNS resolution for Node 18/22 compatibility
   })
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+  .then(() => console.log("Successfully connected to MongoDB Atlas"))
+  .catch((err) => console.error("MongoDB connection error:", err.message));
+
+mongoose.connection.on("disconnected", () => {
+  console.warn("MongoDB connection lost. Attempting auto-reconnect...");
+});
+
+mongoose.connection.on("reconnected", () => {
+  console.log("MongoDB reconnected successfully.");
+});
 
 // Routes
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/user", require("./routes/userAuth"));
 app.use("/api/topbar", require("./routes/topbar"));
 app.use("/api/header", require("./routes/header"));
 app.use("/api/menu", require("./routes/menu"));
@@ -128,6 +132,9 @@ app.use("/api/events", require("./routes/event"));
 app.use("/api/national-events", require("./routes/nationalEvent"));
 app.use("/api/admin/event-registrations", require("./routes/eventRegistration"));
 app.use("/api/brainstorm", require("./routes/brainstorm"));
+app.use("/api/awards", require("./routes/award"));
+app.use("/api/manuscript", require("./routes/manuscript"));
+app.use("/api/admin/users", require("./routes/adminUser"));
 app.use("/api/footer", require("./routes/footer"));
 
 app.use("/api/pages", require("./routes/page"));

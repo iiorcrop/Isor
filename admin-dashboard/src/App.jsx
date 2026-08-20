@@ -18,6 +18,9 @@ import EventManagement from './pages/EventManagement';
 import NationalEventManagement from './pages/NationalEventManagement';
 import EventRegistrationManagement from './pages/EventRegistrationManagement';
 import BrainstormManagement from './pages/BrainstormManagement';
+import AwardManagement from './pages/AwardManagement';
+import UserRoleManagement from './pages/UserRoleManagement';
+import ManuscriptManagement from './pages/ManuscriptManagement';
 import FooterSettings from './pages/FooterSettings';
 import PageManagement from './pages/PageManagement';
 import ContactManagement from './pages/ContactManagement';
@@ -26,13 +29,17 @@ import Sidebar from './components/Sidebar';
 const PrivateRoute = ({ children }) => {
     const { user, loading } = useAuth();
     
-    if (loading) return (
-        <div className="min-h-screen flex items-center justify-center bg-[#0a0f1d]">
-            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
-    );
-    
-    return user ? children : <Navigate to="/login" />;
+    if (loading) return null;
+    if (!user) return <Navigate to="/login" replace />;
+    return children;
+};
+
+const DashboardHomeRoute = () => {
+    const { user } = useAuth();
+    if (user?.role === 'editor' || user?.role === 'reviewer') {
+        return <Navigate to="/manuscripts" replace />;
+    }
+    return <Dashboard />;
 };
 
 const DashboardLayout = ({ children }) => {
@@ -60,7 +67,13 @@ function App() {
                     {/* Protected Dashboard Routes */}
                     <Route path="/" element={
                         <PrivateRoute>
-                            <DashboardLayout><Dashboard /></DashboardLayout>
+                            <DashboardLayout><DashboardHomeRoute /></DashboardLayout>
+                        </PrivateRoute>
+                    } />
+
+                    <Route path="/manuscripts" element={
+                        <PrivateRoute>
+                            <DashboardLayout><ManuscriptManagement /></DashboardLayout>
                         </PrivateRoute>
                     } />
                     
@@ -112,6 +125,12 @@ function App() {
                         </PrivateRoute>
                     } />
 
+                    <Route path="/users" element={
+                        <PrivateRoute>
+                            <DashboardLayout><UserRoleManagement /></DashboardLayout>
+                        </PrivateRoute>
+                    } />
+
                     <Route path="/payment-settings" element={
                         <PrivateRoute>
                             <DashboardLayout><PaymentSettings /></DashboardLayout>
@@ -157,6 +176,12 @@ function App() {
                     <Route path="/brainstorm" element={
                         <PrivateRoute>
                             <DashboardLayout><BrainstormManagement /></DashboardLayout>
+                        </PrivateRoute>
+                    } />
+
+                    <Route path="/awards" element={
+                        <PrivateRoute>
+                            <DashboardLayout><AwardManagement /></DashboardLayout>
                         </PrivateRoute>
                     } />
 

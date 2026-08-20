@@ -15,6 +15,7 @@ const TopBar = () => {
     const [dateTime, setDateTime] = useState(new Date());
     const [settings, setSettings] = useState(null);
     const [loggedInMember, setLoggedInMember] = useState(null);
+    const [loggedInUser, setLoggedInUser] = useState(null);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -24,9 +25,10 @@ const TopBar = () => {
         fetchSettings();
 
         const checkAuth = () => {
-            const token = localStorage.getItem('memberToken');
+            // Check Member Auth
+            const memberToken = localStorage.getItem('memberToken');
             const memberDataStr = localStorage.getItem('memberData');
-            if (token && memberDataStr) {
+            if (memberToken && memberDataStr) {
                 try {
                     setLoggedInMember(JSON.parse(memberDataStr));
                 } catch (e) {
@@ -35,19 +37,33 @@ const TopBar = () => {
             } else {
                 setLoggedInMember(null);
             }
+
+            // Check General User Auth
+            const userToken = localStorage.getItem('userToken');
+            const userDataStr = localStorage.getItem('userData');
+            if (userToken && userDataStr) {
+                try {
+                    setLoggedInUser(JSON.parse(userDataStr));
+                } catch (e) {
+                    setLoggedInUser(null);
+                }
+            } else {
+                setLoggedInUser(null);
+            }
         };
 
         checkAuth();
+        const authInterval = setInterval(checkAuth, 1000);
         window.addEventListener('storage', checkAuth);
 
         return () => {
             clearInterval(timer);
+            clearInterval(authInterval);
             window.removeEventListener('storage', checkAuth);
         };
     }, []);
 
     const fetchSettings = async () => {
-        console.log(`${import.meta.env.VITE_API_URL}/topbar`);
         try {
             const res = await axios.get(`${import.meta.env.VITE_API_URL}/topbar`);
             setSettings(res.data);
@@ -113,18 +129,37 @@ const TopBar = () => {
                 <div className="flex items-center gap-3 md:gap-4">
                     <Link to="/verify-certificate" className="hover:text-white text-[#fbbf24] transition-colors uppercase tracking-wider font-bold">Verify Certificate</Link>
                     <span className="text-white/20">|</span>
+                    
+                    {/* General User Profile Section */}
+                    {loggedInUser ? (
+                        <Link 
+                            to="/user/dashboard" 
+                            className="hover:bg-[#fbbf24] hover:text-[#064e3b] text-[#fbbf24] transition-all uppercase tracking-wider font-bold flex items-center gap-1.5 bg-[#fbbf24]/10 px-3 py-1 rounded-full border border-[#fbbf24]/30 shadow-sm"
+                            title="View User Profile"
+                        >
+                            <User size={13} />
+                            <span className="capitalize">{loggedInUser.name ? loggedInUser.name.split(' ')[0] : 'User'} Profile</span>
+                        </Link>
+                    ) : (
+                        <Link to="/user/login" className="hover:text-white transition-colors uppercase tracking-wider font-bold text-emerald-300">User Login</Link>
+                    )}
+
+                    <span className="text-white/20">|</span>
+
+                    {/* Member Profile Section */}
                     {loggedInMember ? (
                         <Link 
                             to="/member-dashboard" 
-                            className="hover:text-[#fbbf24] text-[#fbbf24] transition-colors uppercase tracking-wider font-bold flex items-center gap-1"
-                            title="View Member Dashboard"
+                            className="hover:bg-[#fbbf24] hover:text-[#064e3b] text-emerald-300 transition-all uppercase tracking-wider font-bold flex items-center gap-1.5 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/30 shadow-sm"
+                            title="View Member Profile"
                         >
                             <User size={13} />
-                            <span className="capitalize">{loggedInMember.firstName || 'Profile'}</span>
+                            <span className="capitalize">{loggedInMember.firstName || 'Member'} Profile</span>
                         </Link>
                     ) : (
                         <Link to="/membership/login" className="hover:text-[#fbbf24] transition-colors uppercase tracking-wider font-bold">Member Login</Link>
                     )}
+
                     <span className="text-white/20">|</span>
                     <a href="https://admin.isor.in/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors uppercase tracking-wider text-[9px] md:text-[11px]">Admin</a>
                 </div>

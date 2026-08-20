@@ -23,15 +23,25 @@ const MenuBar = () => {
         fetchMenu();
     }, []);
 
+    const getNormalizedLink = (linkStr) => {
+        if (!linkStr) return '#';
+        let clean = linkStr.trim();
+        if (clean.startsWith('#/')) {
+            clean = clean.substring(1);
+        }
+        return clean;
+    };
+
     return (
         <nav className="bg-[#064e3b] border-t-4 border-[#b47c1c] relative z-50">
             <div className="max-w-7xl mx-auto px-4 md:px-0 flex items-center justify-between md:justify-start h-[54px]">
                 {/* Desktop Menu */}
                 <div className="hidden md:flex items-center h-full">
                     {menuItems.map((item, index) => {
-                        const isInternal = item.link && item.link.startsWith('/');
+                        const targetLink = getNormalizedLink(item.link);
+                        const isInternal = targetLink.startsWith('/');
                         const Component = isInternal ? Link : 'a';
-                        const linkProps = isInternal ? { to: item.link } : { href: item.link };
+                        const linkProps = isInternal ? { to: targetLink } : { href: targetLink };
 
                         return (
                             <div 
@@ -68,9 +78,10 @@ const MenuBar = () => {
                                             className="absolute top-full left-0 w-64 bg-white shadow-2xl border-t-2 border-[#b47c1c] py-2 z-[100]"
                                         >
                                             {item.children.map((child, cIndex) => {
-                                                const childInternal = child.link && child.link.startsWith('/');
+                                                const childTarget = getNormalizedLink(child.link);
+                                                const childInternal = childTarget.startsWith('/');
                                                 const ChildComponent = childInternal ? Link : 'a';
-                                                const childProps = childInternal ? { to: child.link } : { href: child.link };
+                                                const childProps = childInternal ? { to: childTarget } : { href: childTarget };
 
                                                 return (
                                                     <ChildComponent

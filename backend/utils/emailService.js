@@ -63,7 +63,7 @@ const templates = {
                     <p style="margin: 0; font-weight: bold; color: #166534;">Membership ID: ${id}</p>
                 </div>
                 <p>You can now log in to your account and access all member features.</p>
-                <a href="http://localhost:3000/login" style="display: inline-block; background: #b47c1c; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 10px;">Login to Portal</a>
+                <a href="${process.env.FRONTEND_URL || 'https://isor.in'}/membership/login" style="display: inline-block; background: #b47c1c; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 10px;">Login to Portal</a>
                 <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
                 <p style="font-size: 12px; color: #666;">Welcome aboard!</p>
             </div>

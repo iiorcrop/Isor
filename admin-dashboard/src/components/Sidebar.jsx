@@ -15,7 +15,8 @@ import {
     CreditCard,
     Shield,
     Mail,
-    Calendar
+    Calendar,
+    Award
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
@@ -45,6 +46,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
     const menuItems = [
         { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+        { icon: FileText, label: 'Manuscripts Review', path: '/manuscripts' },
         { icon: Globe, label: 'Top Bar', path: '/topbar' },
         { icon: FileText, label: 'Header', path: '/header' },
         { icon: LayoutDashboard, label: 'Menu Bar', path: '/menu' },
@@ -53,11 +55,13 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         { icon: LayoutDashboard, label: 'Quick Links', path: '/quicklinks' },
         { icon: BookOpen, label: 'Home Content', path: '/home-content' },
         { icon: Users, label: 'Member List', path: '/members', badge: pendingCount || null },
+        { icon: Users, label: 'Editors & Reviewers', path: '/users' },
         { icon: Shield, label: 'Committees', path: '/committees' },
         { icon: BookOpen, label: 'Journal Volumes', path: '/journals' },
         { icon: Calendar, label: 'Events', path: '/events' },
         { icon: Calendar, label: 'National Events', path: '/national-events' },
         { icon: Users, label: 'Event Registrations', path: '/event-registrations' },
+        { icon: Award, label: 'Awards Management', path: '/awards' },
         { icon: FileText, label: 'Brainstorm PDFs', path: '/brainstorm' },
 
         { icon: Mail, label: 'Contact Inbox', path: '/contact' },
@@ -66,6 +70,10 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         { icon: FileText, label: 'Dynamic Pages', path: '/pages' },
         { icon: CreditCard, label: 'Payment Settings', path: '/payment-settings' },
     ];
+
+    const displayedMenuItems = (user?.role === 'editor' || user?.role === 'reviewer')
+        ? [{ icon: FileText, label: 'Manuscripts Review', path: '/manuscripts' }]
+        : menuItems;
 
     return (
         <motion.aside 
@@ -98,7 +106,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
             {/* Navigation */}
             <nav className="flex-1 px-4 space-y-2">
-                {menuItems.map((item, index) => (
+                {displayedMenuItems.map((item, index) => (
                     <NavLink 
                         key={index}
                         to={item.path}

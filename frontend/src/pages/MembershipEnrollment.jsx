@@ -15,7 +15,8 @@ import {
     Phone,
     Award,
     ArrowRight,
-    Lock
+    Lock,
+    UserCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -50,6 +51,8 @@ const MembershipEnrollment = () => {
         transactionId: ''
     });
 
+    const [prefilledFromUser, setPrefilledFromUser] = useState(false);
+
     // Locations the PIN lookup returned, merged into the dropdowns so a PIN can
     // always be honoured even when its spelling differs from the bundled data.
     const [apiLocation, setApiLocation] = useState({ states: [], districts: [], mandals: [] });
@@ -64,6 +67,33 @@ const MembershipEnrollment = () => {
         import('../data/indiaLocations.json')
             .then(module => setLocationData(module.default))
             .catch(err => console.error('Failed to load location data', err));
+
+        // Check if a General User is logged in to pre-fill membership enrollment
+        const cachedUserData = localStorage.getItem('userData');
+        if (cachedUserData) {
+            try {
+                const user = JSON.parse(cachedUserData);
+                if (user) {
+                    const nameParts = (user.name || '').trim().split(' ');
+                    const firstName = nameParts[0] || '';
+                    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : firstName;
+
+                    setFormData(prev => ({
+                        ...prev,
+                        firstName: prev.firstName || firstName,
+                        lastName: prev.lastName || lastName,
+                        email: prev.email || user.email || '',
+                        mobileNumber: prev.mobileNumber || user.mobileNumber || '',
+                        organization: prev.organization || user.organization || '',
+                        designation: prev.designation || user.designation || '',
+                        address: prev.address || user.city || ''
+                    }));
+                    setPrefilledFromUser(true);
+                }
+            } catch (e) {
+                console.error('Error parsing cached user data for enrollment pre-fill', e);
+            }
+        }
     }, []);
 
     const sortedUnique = (values) => Array.from(new Set(values.filter(Boolean)))
@@ -262,11 +292,34 @@ const MembershipEnrollment = () => {
                             onSubmit={handleProfileSubmit} 
                             className="bg-white rounded-[3rem] shadow-2xl p-8 md:p-12 space-y-10 border border-[#064e3b]/5"
                         >
-                            <div className="border-b border-gray-100 pb-4">
-                                <h2 className="text-2xl font-serif font-bold text-[#064e3b] flex items-center gap-3">
-                                    <User className="text-[#b47c1c]" /> Step 1: Profile Information Setup
-                                </h2>
-                                <p className="text-gray-500 text-xs mt-1">Please enter your profile details. Fields marked with <span className="text-red-500 font-bold">*</span> are mandatory.</p>
+                            <div className="border-b border-gray-100 pb-4 space-y-3">
+                                <div>
+                                    <h2 className="text-2xl font-serif font-bold text-[#064e3b] flex items-center gap-3">
+                                        <User className="text-[#b47c1c]" /> Step 1: Profile Information Setup
+                                    </h2>
+                                    <p className="text-gray-500 text-xs mt-1">Please enter your profile details. Fields marked with <span className="text-red-500 font-bold">*</span> are mandatory.</p>
+                                </div>
+
+                                {prefilledFromUser ? (
+                                    <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-2xl text-xs font-semibold flex items-center justify-between">
+                                        <span className="flex items-center gap-2">
+                                            <UserCheck size={18} className="text-emerald-600 shrink-0" />
+                                            Signed in as <strong>{formData.firstName} {formData.lastName} ({formData.email})</strong>. Your details are pre-filled below!
+                                        </span>
+                                        <span className="text-[10px] text-emerald-700 font-bold bg-white px-2.5 py-1 rounded-lg border border-emerald-200 shrink-0">
+                                            User Auto-Filled
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <div className="bg-amber-50 border border-amber-200 text-amber-900 p-4 rounded-2xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                        <span>
+                                            <strong>Direct Member Enrollment:</strong> You can apply for ISOR membership directly below without creating a user account first.
+                                        </span>
+                                        <Link to="/user/register" className="text-[#064e3b] font-bold hover:underline shrink-0 text-[11px] flex items-center gap-1">
+                                            Or Register Free User Account First →
+                                        </Link>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Mandatory Fields */}

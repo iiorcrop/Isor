@@ -30,7 +30,8 @@ const HomeJournals = () => {
 
   const useMarquee = journals.length > 4;
   const displayJournals = useMarquee ? [...journals, ...journals, ...journals] : journals;
-  const isLoggedIn = Boolean(localStorage.getItem("memberToken"));
+  const activeToken = localStorage.getItem("userToken") || localStorage.getItem("memberToken");
+  const isLoggedIn = Boolean(activeToken);
 
   return (
     <section className="bg-[#fff9f0] pt-12 pb-10 overflow-hidden border-t border-[#064e3b]/5">
@@ -96,9 +97,9 @@ const HomeJournals = () => {
 
               <div className="text-[#064e3b] text-[10px] font-bold text-center mb-3">
                 {isLoggedIn ? (
-                  <span className="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md">Full Access Member</span>
+                  <span className="text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md">Full Access Granted</span>
                 ) : (
-                  <span className="text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md">2-Page Preview Only</span>
+                  <span className="text-amber-700 bg-amber-50 px-2.5 py-1 rounded-md">Log In for Full Access</span>
                 )}
               </div>
 
@@ -106,7 +107,7 @@ const HomeJournals = () => {
                 <a
                   href={
                     journal.pdfUrl
-                      ? `${getServerUrl(journal.pdfUrl)}?token=${localStorage.getItem("memberToken")}`
+                      ? `${getServerUrl(journal.pdfUrl)}?token=${activeToken}`
                       : "#"
                   }
                   target="_blank"
@@ -116,14 +117,12 @@ const HomeJournals = () => {
                   <Download size={14} /> Download Full PDF
                 </a>
               ) : (
-                <a
-                  href={journal.pdfUrl ? getServerUrl(journal.pdfUrl) : "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-3 rounded-xl border-2 border-amber-600/30 text-amber-900 bg-amber-50/60 font-bold text-xs flex items-center justify-center gap-2 hover:bg-amber-600 hover:text-white transition-all shadow-sm"
+                <Link
+                  to="/user/login"
+                  className="w-full py-3 rounded-xl border-2 border-[#064e3b] text-[#064e3b] font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#064e3b] hover:text-white transition-all shadow-sm"
                 >
-                  <Eye size={14} /> View 2-Page Preview
-                </a>
+                  <Eye size={14} /> Log In for Full Access
+                </Link>
               )}
             </div>
           ))}

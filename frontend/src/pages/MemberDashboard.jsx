@@ -441,30 +441,14 @@ const MemberDashboard = () => {
                                                     </div>
                                                 </div>
 
-                                                {isMemberActive ? (
-                                                    <a 
-                                                        href={journal.pdfUrl ? `${getServerUrl(journal.pdfUrl)}?token=${localStorage.getItem('memberToken') || ''}` : '#'}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="w-full bg-[#064e3b] text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#b47c1c] transition-all shadow-md"
-                                                    >
-                                                        <Download size={14} /> Download Full PDF Journal
-                                                    </a>
-                                                ) : (
-                                                    <div className="space-y-1.5 w-full">
-                                                        <a 
-                                                            href={journal.pdfUrl ? getServerUrl(journal.pdfUrl) : '#'}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="w-full bg-amber-50 text-amber-900 border border-amber-300/80 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-amber-100 transition-all shadow-sm"
-                                                        >
-                                                            <Eye size={14} /> View 2-Page Preview
-                                                        </a>
-                                                        <p className="text-[10px] text-amber-700 font-semibold text-center">
-                                                            Full journal download requires an active approved membership.
-                                                        </p>
-                                                    </div>
-                                                )}
+                                                <a 
+                                                    href={journal.pdfUrl ? `${getServerUrl(journal.pdfUrl)}?token=${localStorage.getItem('memberToken') || localStorage.getItem('userToken') || ''}` : '#'}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="w-full bg-[#064e3b] text-white py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-[#b47c1c] transition-all shadow-md"
+                                                >
+                                                    <Download size={14} /> Download Full PDF Journal
+                                                </a>
                                             </div>
                                         ))}
                                     </div>

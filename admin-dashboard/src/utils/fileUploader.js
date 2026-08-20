@@ -1,30 +1,41 @@
 import axios from 'axios';
 
 /**
- * Uploads a file directly from the browser to the remote file storage server.
- * @param {File} file - Browser File object
- * @returns {Promise<string|null>} The filename/key returned by the storage server
+ * Uploads a file directly from the browser to the remote file storage API.
+ * @param {File} file - The file object selected by the admin user
+ * @returns {Promise<string|null>} The file key/filename returned by the storage server
  */
-export async function uploadToStorageServer(file) {
+export const uploadFileToStorage = async (file) => {
   if (!file) return null;
-  const formData = new FormData();
-  formData.append('file', file);
 
-  const storageUrl = (import.meta.env.VITE_FILE_STORAGE_URL || "https://file.iior-niger.in").replace(/\/+$/, "");
-  const uploadUrl = `${storageUrl}/upload`;
-
-  console.log(`Uploading file directly from browser to file storage: ${uploadUrl} (${file.name})`);
-
-  const response = await axios.post(uploadUrl, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-    timeout: 60000
-  });
-
-  if (!response.data || (!response.data.filename && !response.data.url)) {
-    throw new Error('Remote file storage upload failed: Invalid response format');
+  let storageUrl = (import.meta.env.VITE_FILE_STORAGE_URL || "https://file.iior-niger.in").replace(/\/+$/, "");
+  if (storageUrl.startsWith("http://")) {
+    storageUrl = storageUrl.replace(/^http:\/\//i, "https://");
   }
 
-  const filename = response.data.filename || response.data.url;
-  console.log(`Successfully uploaded file to storage: ${filename}`);
-  return filename;
-}
+  const uploadUrl = `${storageUrl}/upload`;
+  const form = new FormData();
+  form.append("file", file);
+
+  try {
+    const res = await axios.post(uploadUrl, form, {
+      headers: {
+        "Content-[#Type]": "multipart/form-data",
+      },
+      timeout: 60000 // 60 seconds timeout
+    });
+
+    const key = res.data?.filename || res.data?.url || res.data?.key;
+    if (!key) {
+      throw new Error("File storage API returned invalid response format");
+    }
+
+    return key;
+  } catch (err) {
+    console.error("Direct file storage API upload error:", err);
+    throw new Error(err.response?.data?.message || err.message || "Failed to upload file to storage server.");
+  }
+};
+
+// Export alias for backward compatibility
+export const uploadToStorageServer = uploadFileToStorage;
