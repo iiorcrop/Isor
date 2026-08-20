@@ -48,11 +48,14 @@ router.post('/submit', authenticateUser, upload.single('pdf'), async (req, res) 
             return res.status(400).json({ message: 'Title and Description/Abstract are required.' });
         }
 
-        if (!req.file) {
-            return res.status(400).json({ message: 'Manuscript PDF file is required.' });
+        let pdfUrl = req.body.pdfUrl;
+        if (req.file) {
+            pdfUrl = await uploadToStorageServer(req.file);
         }
 
-        const pdfUrl = await uploadToStorageServer(req.file);
+        if (!pdfUrl) {
+            return res.status(400).json({ message: 'Manuscript PDF file is required.' });
+        }
 
         const manuscript = new Manuscript({
             title: title.trim(),
@@ -97,6 +100,8 @@ router.put('/resubmit/:id', authenticateUser, upload.single('pdf'), async (req, 
 
         if (req.file) {
             manuscript.pdfUrl = await uploadToStorageServer(req.file);
+        } else if (req.body.pdfUrl) {
+            manuscript.pdfUrl = req.body.pdfUrl;
         }
 
         manuscript.status = 'Resubmitted';
