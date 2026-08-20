@@ -1,10 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Calendar, MapPin, Tag, Upload, Loader2, CheckCircle2, ArrowLeft, Building2, CreditCard, Copy, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 import { uploadToStorageServer } from '../utils/fileUploader';
+import { fetchLocationByPincode, INDIAN_STATES, normalizeState } from '../utils/pincodeService';
+
+const MANUAL_ENTRY = '__manual__';
+
+const sortedUnique = (arr) => Array.from(new Set(arr.map(s => s && s.trim()).filter(Boolean)))
+    .sort((a, b) => a.localeCompare(b));
 
 const EventRegister = () => {
     const { id } = useParams();
@@ -15,10 +21,102 @@ const EventRegister = () => {
     const [submitting, setSubmitting] = useState(false);
     const [submittedData, setSubmittedData] = useState(null);
     
-    // Dynamic form responses & payment screenshot
-    const [formData, setFormData] = useState({});
+    // Location Data States
+    const [locationData, setLocationData] = useState(null);
+    const [apiLocation, setApiLocation] = useState({ states: [], districts: [], mandals: [] });
+    const [fetchingPincode, setFetchingPincode] = useState(false);
+    const [pincodeError, setPincodeError] = useState('');
+    const [manualDistrict, setManualDistrict] = useState(false);
+    const [manualMandal, setManualMandal] = useState(false);
+
+    // Form data with location default fields
+    const [formData, setFormData] = useState({
+        address: '',
+        pincode: '',
+        state: '',
+        district: '',
+        mandal: ''
+    });
     const [screenshotFile, setScreenshotFile] = useState(null);
     const [copiedField, setCopiedField] = useState('');
+
+    useEffect(() => {
+        // Loaded on demand so location data stays out of the main bundle
+        import('../data/indiaLocations.json').then(mod => {
+            setLocationData(mod.default || mod);
+        }).catch(() => {});
+    }, []);
+
+    const stateOptions = useMemo(() => sortedUnique([
+        ...(locationData ? Object.keys(locationData) : INDIAN_STATES),
+        ...apiLocation.states.map(normalizeState)
+    ]), [locationData, apiLocation.states]);
+
+    const districtOptions = useMemo(() => {
+        const states = locationData || {};
+        const fromData = states[formData.state] ? Object.keys(states[formData.state]) : [];
+        return sortedUnique([...fromData, ...apiLocation.districts]);
+    }, [locationData, formData.state, apiLocation.districts]);
+
+    const mandalOptions = useMemo(() => {
+        const districts = (locationData || {})[formData.state] || {};
+        return sortedUnique([...(districts[formData.district] || []), ...apiLocation.mandals]);
+    }, [locationData, formData.state, formData.district, apiLocation.mandals]);
+
+    const handleStateChange = (value) => {
+        setFormData(prev => ({ ...prev, state: value, district: '', mandal: '' }));
+        setApiLocation(prev => ({ ...prev, districts: [], mandals: [] }));
+        setManualDistrict(false);
+        setManualMandal(false);
+    };
+
+    const handleDistrictChange = (value) => {
+        if (value === MANUAL_ENTRY) {
+            setManualDistrict(true);
+            value = '';
+        }
+        setFormData(prev => ({ ...prev, district: value, mandal: '' }));
+        setApiLocation(prev => ({ ...prev, mandals: [] }));
+        setManualMandal(false);
+    };
+
+    const handleMandalChange = (value) => {
+        if (value === MANUAL_ENTRY) {
+            setManualMandal(true);
+            value = '';
+        }
+        setFormData(prev => ({ ...prev, mandal: value }));
+    };
+
+    const handlePincodeChange = async (pinValue) => {
+        const cleaned = pinValue.replace(/\D/g, '').slice(0, 6);
+        setFormData(prev => ({ ...prev, pincode: cleaned }));
+        setPincodeError('');
+
+        if (cleaned.length === 6) {
+            setFetchingPincode(true);
+            const res = await fetchLocationByPincode(cleaned);
+            setFetchingPincode(false);
+
+            if (res.success) {
+                const districts = res.districts || [];
+                const mandals = res.mandals || [];
+                setApiLocation({ states: res.states || [], districts, mandals });
+                setManualDistrict(false);
+                setManualMandal(false);
+                setFormData(prev => ({
+                    ...prev,
+                    state: normalizeState((res.states && res.states[0]) || res.state) || prev.state,
+                    district: districts.length === 1 ? districts[0] : '',
+                    mandal: mandals.length === 1 ? mandals[0] : ''
+                }));
+            } else {
+                setPincodeError(res.message || 'Could not fetch pincode details.');
+            }
+        } else {
+            setApiLocation({ states: [], districts: [], mandals: [] });
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -31,7 +129,13 @@ const EventRegister = () => {
                 setPaymentSettings(paymentRes.data);
 
                 // Initialize default responses from customFields
-                const initial = {};
+                const initial = {
+                    address: '',
+                    pincode: '',
+                    state: '',
+                    district: '',
+                    mandal: ''
+                };
                 (eventRes.data.customFields || []).forEach(field => {
                     initial[field.name || field.label] = '';
                 });
@@ -58,6 +162,12 @@ const EventRegister = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        const { address, pincode, state, district, mandal } = formData;
+        if (!address || !pincode || !state || !district || !mandal) {
+            alert('Please enter your full address, PIN code, State, District and Mandal / Tehsil / Area.');
+            return;
+        }
 
         if (!event.isFree && event.price > 0 && !screenshotFile) {
             alert('Please upload a screenshot of your payment receipt to complete registration.');
@@ -236,6 +346,141 @@ const EventRegister = () => {
                                 </div>
                             );
                         })}
+                    </div>
+
+                    {/* Location & Communication Address Section */}
+                    <div className="space-y-6 pt-6 border-t border-gray-100">
+                        <div className="space-y-1">
+                            <h3 className="text-xl font-serif font-bold text-[#064e3b] flex items-center gap-2">
+                                <MapPin className="text-[#b47c1c]" size={22} /> Location & Address Details
+                            </h3>
+                            <p className="text-xs text-gray-500">Please provide your complete address and location details.</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Full Address */}
+                            <div className="md:col-span-2 space-y-2">
+                                <label className="text-xs font-bold text-gray-700">
+                                    Full Address <span className="text-red-500">*</span>
+                                </label>
+                                <textarea
+                                    required
+                                    rows={2}
+                                    value={formData.address || ''}
+                                    onChange={e => handleInputChange('address', e.target.value)}
+                                    className="w-full bg-[#fff9f0] border border-[#064e3b]/15 rounded-2xl p-4 text-sm text-gray-800 focus:outline-none focus:border-[#064e3b]"
+                                    placeholder="Street Address, House/Flat No, Landmark"
+                                />
+                            </div>
+
+                            {/* PIN Code */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-700 flex items-center justify-between">
+                                    <span>PIN Code <span className="text-red-500">*</span></span>
+                                    {fetchingPincode && <span className="text-xs text-[#064e3b] font-normal animate-pulse flex items-center gap-1"><Loader2 size={12} className="animate-spin" /> Fetching...</span>}
+                                </label>
+                                <input
+                                    required
+                                    type="text"
+                                    maxLength={6}
+                                    value={formData.pincode || ''}
+                                    onChange={e => handlePincodeChange(e.target.value)}
+                                    className="w-full bg-[#fff9f0] border border-[#064e3b]/15 rounded-2xl p-4 text-sm text-gray-800 focus:outline-none focus:border-[#064e3b]"
+                                    placeholder="Enter 6-digit PIN code"
+                                />
+                                {pincodeError && (
+                                    <p className="text-[11px] text-red-500 font-medium">{pincodeError}</p>
+                                )}
+                            </div>
+
+                            {/* State */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-700">
+                                    State <span className="text-red-500">*</span>
+                                </label>
+                                <select
+                                    required
+                                    value={formData.state || ''}
+                                    onChange={e => handleStateChange(e.target.value)}
+                                    className="w-full bg-[#fff9f0] border border-[#064e3b]/15 rounded-2xl p-4 text-sm text-gray-800 focus:outline-none focus:border-[#064e3b]"
+                                >
+                                    <option value="">Select State</option>
+                                    {stateOptions.map((opt, idx) => (
+                                        <option key={idx} value={opt}>{opt}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* District */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-700">
+                                    District <span className="text-red-500">*</span>
+                                </label>
+                                {manualDistrict ? (
+                                    <>
+                                        <input
+                                            required
+                                            type="text"
+                                            value={formData.district || ''}
+                                            onChange={e => handleInputChange('district', e.target.value)}
+                                            className="w-full bg-[#fff9f0] border border-[#064e3b]/15 rounded-2xl p-4 text-sm text-gray-800 focus:outline-none focus:border-[#064e3b]"
+                                            placeholder="Type your District"
+                                        />
+                                        <button type="button" onClick={() => setManualDistrict(false)} className="text-[11px] font-semibold text-[#064e3b] hover:underline">
+                                            Choose from list instead
+                                        </button>
+                                    </>
+                                ) : (
+                                    <select
+                                        required
+                                        value={formData.district || ''}
+                                        onChange={e => handleDistrictChange(e.target.value)}
+                                        className="w-full bg-[#fff9f0] border border-[#064e3b]/15 rounded-2xl p-4 text-sm text-gray-800 focus:outline-none focus:border-[#064e3b]"
+                                    >
+                                        <option value="">{formData.state ? 'Select District' : 'Select your State first'}</option>
+                                        {districtOptions.map((opt, idx) => (
+                                            <option key={idx} value={opt}>{opt}</option>
+                                        ))}
+                                        <option value={MANUAL_ENTRY}>Other / Not listed</option>
+                                    </select>
+                                )}
+                            </div>
+
+                            {/* Mandal / Tehsil / Area */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-700">
+                                    Mandal / Tehsil / Area <span className="text-red-500">*</span>
+                                </label>
+                                {manualMandal ? (
+                                    <>
+                                        <input
+                                            required
+                                            type="text"
+                                            value={formData.mandal || ''}
+                                            onChange={e => handleInputChange('mandal', e.target.value)}
+                                            className="w-full bg-[#fff9f0] border border-[#064e3b]/15 rounded-2xl p-4 text-sm text-gray-800 focus:outline-none focus:border-[#064e3b]"
+                                            placeholder="Type your Mandal / Tehsil / Area"
+                                        />
+                                        <button type="button" onClick={() => setManualMandal(false)} className="text-[11px] font-semibold text-[#064e3b] hover:underline">
+                                            Choose from list instead
+                                        </button>
+                                    </>
+                                ) : (
+                                    <select
+                                        required
+                                        value={formData.mandal || ''}
+                                        onChange={e => handleMandalChange(e.target.value)}
+                                        className="w-full bg-[#fff9f0] border border-[#064e3b]/15 rounded-2xl p-4 text-sm text-gray-800 focus:outline-none focus:border-[#064e3b]"
+                                    >
+                                        <option value="">{formData.district ? 'Select Mandal / Tehsil / Area' : 'Select your District first'}</option>
+                                        {mandalOptions.map((opt, idx) => (
+                                            <option key={idx} value={opt}>{opt}</option>
+                                        ))}
+                                        <option value={MANUAL_ENTRY}>Other / Not listed</option>
+                                    </select>
+                                )}
+                            </div>
+                        </div>
                     </div>
 
                     {/* Bank Details & Payment Section (If Paid Event) */}

@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Loader2, Calendar, User } from 'lucide-react';
 import ReadMore from '../components/ReadMore';
 import { getServerUrl } from '../utils/urlHelper';
 
-import { Link } from 'react-router-dom';
-
 const DynamicPage = () => {
     const params = useParams();
+    const navigate = useNavigate();
     const slug = (params['*'] || '').replace(/^\/+/, '');
     const [page, setPage] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    const isLoggedIn = !!(localStorage.getItem('userToken') || localStorage.getItem('memberToken'));
 
     useEffect(() => {
         const fetchPage = async () => {
@@ -28,10 +29,14 @@ const DynamicPage = () => {
     const handleContentClick = (e) => {
         const anchor = e.target.closest('a');
         if (anchor) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!isLoggedIn) {
+                navigate('/user/login');
+                return;
+            }
             const rawHref = anchor.getAttribute('href');
             if (rawHref && rawHref !== '#' && !rawHref.startsWith('javascript:')) {
-                e.preventDefault();
-                e.stopPropagation();
                 const fullUrl = getServerUrl(rawHref);
                 window.open(fullUrl, '_blank', 'noopener,noreferrer');
             }
@@ -123,8 +128,14 @@ const DynamicPage = () => {
                                 return (
                                     <a
                                         key={idx}
-                                        href={pdfUrl}
-                                        target="_blank"
+                                        href={isLoggedIn ? pdfUrl : '/user/login'}
+                                        onClick={(e) => {
+                                            if (!isLoggedIn) {
+                                                e.preventDefault();
+                                                navigate('/user/login');
+                                            }
+                                        }}
+                                        target={isLoggedIn ? "_blank" : "_self"}
                                         rel="noopener noreferrer"
                                         className="flex items-center gap-4 p-4 bg-[#f0fdf4] border border-[#064e3b]/10 rounded-2xl hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group"
                                     >
