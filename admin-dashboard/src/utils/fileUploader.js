@@ -20,7 +20,7 @@ export const uploadFileToStorage = async (file) => {
   try {
     const res = await axios.post(uploadUrl, form, {
       headers: {
-        "Content-[#Type]": "multipart/form-data",
+        "Content-Type": "multipart/form-data",
       },
       timeout: 60000 // 60 seconds timeout
     });

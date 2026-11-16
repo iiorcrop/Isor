@@ -38,6 +38,14 @@
   color: #1f2937;
   line-height: 1.75;
 }
+.prose a {
+  color: #064e3b;
+  text-decoration: underline;
+  font-weight: 600;
+}
+.prose a:hover {
+  color: #b47c1c;
+}
 .prose h1, .prose h2, .prose h3 {
   color: #064e3b;
   margin-top: 2rem;
@@ -57,6 +65,68 @@
 .prose th { background-color: #f9fafb; font-weight: 600; }
 .prose img { border-radius: 1rem; margin-top: 2rem; margin-bottom: 2rem; }
 .prose blockquote { border-left: 4px solid #b47c1c; padding-left: 1.5rem; font-style: italic; color: #4b5563; margin: 2rem 0; }
+
+/* Jodit Editor Popups, Dialogs, and Form Controls */
+.jodit-popup,
+.jodit-ui-popup,
+.jodit-dialog {
+  z-index: 99999 !important;
+}
+
+.jodit-popup input,
+.jodit-popup textarea,
+.jodit-popup select,
+.jodit-dialog input,
+.jodit-dialog textarea,
+.jodit-dialog select,
+.jodit-ui-popup input,
+.jodit-ui-popup textarea,
+.jodit-ui-popup select,
+.jodit-ui-form input,
+.jodit-ui-form textarea,
+.jodit-ui-form select,
+.jodit-form input,
+.jodit-form textarea,
+.jodit-form select,
+.jodit-ui-input__input,
+.jodit-ui-text-area__input,
+.jodit-ui-select__input,
+.jodit-input,
+.jodit-container input[type="text"],
+.jodit-container input[type="url"],
+.jodit input[type="text"],
+.jodit input[type="url"],
+.jodit input[type="number"],
+.jodit input[type="email"] {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  caret-color: #000000 !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 6px !important;
+}
+
+.jodit-popup input::placeholder,
+.jodit-popup textarea::placeholder,
+.jodit-dialog input::placeholder,
+.jodit-dialog textarea::placeholder,
+.jodit-ui-popup input::placeholder,
+.jodit-ui-input__input::placeholder {
+  color: #6b7280 !important;
+}
+
+.jodit-popup label,
+.jodit-dialog label,
+.jodit-ui-popup label,
+.jodit-ui-input__label {
+  color: #cbd5e1 !important;
+  font-weight: 600 !important;
+}
+
+.jodit-wysiwyg a {
+  color: #38bdf8 !important;
+  text-decoration: underline !important;
+  font-weight: 600 !important;
+}
 
 
 @layer components {

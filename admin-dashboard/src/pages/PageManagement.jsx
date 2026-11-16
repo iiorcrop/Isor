@@ -334,9 +334,61 @@ const PageManagement = () => {
             <style>{`
                 .jodit-container { border-radius: 1.5rem !important; overflow: hidden; border: 1px solid rgba(255,255,255,0.1) !important; }
                 .jodit-workplace { min-height: 400px !important; }
-                .jodit-popup, .jodit-toolbar-inline, .jodit-ui-popup, .jodit-toolbar-container { z-index: 100 !important; }
+                .jodit-popup, .jodit-toolbar-inline, .jodit-ui-popup, .jodit-toolbar-container, .jodit-dialog { z-index: 100 !important; }
                 .jodit-wysiwyg p:empty { display: none !important; }
                 .jodit-wysiwyg table { margin-bottom: 0.5rem !important; }
+
+                /* Link popup and dialog inputs - ensure black text on white input background */
+                .jodit-popup input,
+                .jodit-popup textarea,
+                .jodit-popup select,
+                .jodit-dialog input,
+                .jodit-dialog textarea,
+                .jodit-dialog select,
+                .jodit-ui-popup input,
+                .jodit-ui-popup textarea,
+                .jodit-ui-popup select,
+                .jodit-ui-form input,
+                .jodit-ui-form textarea,
+                .jodit-ui-form select,
+                .jodit-form input,
+                .jodit-form textarea,
+                .jodit-form select,
+                .jodit-ui-input__input,
+                .jodit-ui-text-area__input,
+                .jodit-ui-select__input,
+                .jodit-input,
+                .jodit-container input[type="text"],
+                .jodit-container input[type="url"],
+                .jodit input[type="text"],
+                .jodit input[type="url"] {
+                    background-color: #ffffff !important;
+                    color: #000000 !important;
+                    caret-color: #000000 !important;
+                    border: 1px solid #cbd5e1 !important;
+                    border-radius: 6px !important;
+                }
+
+                .jodit-popup input::placeholder,
+                .jodit-dialog input::placeholder,
+                .jodit-ui-popup input::placeholder,
+                .jodit-ui-input__input::placeholder {
+                    color: #6b7280 !important;
+                }
+
+                .jodit-popup label,
+                .jodit-dialog label,
+                .jodit-ui-popup label,
+                .jodit-ui-input__label {
+                    color: #cbd5e1 !important;
+                    font-weight: 600 !important;
+                }
+
+                .jodit-wysiwyg a {
+                    color: #38bdf8 !important;
+                    text-decoration: underline !important;
+                    font-weight: 600 !important;
+                }
             `}</style>
 
             <div className="flex justify-between items-center bg-[#1e293b] p-8 rounded-[2rem] border border-white/5 shadow-2xl">
