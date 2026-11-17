@@ -26,7 +26,7 @@ const CommitteeSettings = () => {
 
     const tabs = [
         { id: 'Executive', label: 'Executive Committee', icon: Shield },
-        { id: 'Editorial', label: 'Editorial Committee', icon: BookOpen },
+        { id: 'PastExecutive', label: 'Past Executive Committee', icon: Users },
         { id: 'Advisory', label: 'Advisory Board', icon: Award },
         { id: 'PastPresidents', label: 'Past Presidents', icon: History }
     ];

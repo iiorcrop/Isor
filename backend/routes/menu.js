@@ -6,7 +6,28 @@ const MenuSettings = require('../models/MenuSettings');
 router.get('/', async (req, res) => {
     try {
         let menu = await MenuSettings.findOne();
-        if (!menu) {
+        if (menu) {
+            let updated = false;
+            menu.items.forEach(item => {
+                if (item.children) {
+                    item.children.forEach(sub => {
+                        if (sub.label === 'Editorial Committee' || sub.link === '/committee/Editorial' || sub.link === '/committees/Editorial') {
+                            sub.label = 'Past Executive Committee';
+                            sub.link = '/committee/PastExecutive';
+                            updated = true;
+                        }
+                    });
+                }
+                if (item.label === 'Editorial Committee' || item.link === '/committee/Editorial' || item.link === '/committees/Editorial') {
+                    item.label = 'Past Executive Committee';
+                    item.link = '/committee/PastExecutive';
+                    updated = true;
+                }
+            });
+            if (updated) {
+                await MenuSettings.findByIdAndUpdate(menu._id, { items: menu.items });
+            }
+        } else {
             // Seed default menu if none exists
             menu = await MenuSettings.create({
                 items: [
@@ -16,7 +37,7 @@ router.get('/', async (req, res) => {
                     { label: 'Membership', link: '#', isDropdown: true, children: [{ label: 'Online Enrollment', link: '/membership' }] },
                     { label: 'Committees', link: '#', isDropdown: true, children: [
                         { label: 'Executive Committee', link: '/committee/Executive' },
-                        { label: 'Editorial Committee', link: '/committee/Editorial' },
+                        { label: 'Past Executive Committee', link: '/committee/PastExecutive' },
                         { label: 'Advisory Board', link: '/committee/Advisory' },
                         { label: 'Past Presidents', link: '/committee/PastPresidents' }
                     ] },
@@ -37,7 +58,7 @@ router.get('/', async (req, res) => {
                 { label: 'Membership', link: '#', isDropdown: true, children: [{ label: 'Online Enrollment', link: '/membership' }] },
                 { label: 'Committees', link: '#', isDropdown: true, children: [
                     { label: 'Executive Committee', link: '/committees/Executive' },
-                    { label: 'Editorial Committee', link: '/committees/Editorial' },
+                    { label: 'Past Executive Committee', link: '/committees/PastExecutive' },
                     { label: 'Advisory Board', link: '/committees/Advisory' },
                     { label: 'Past Presidents', link: '/committees/PastPresidents' }
                 ] },

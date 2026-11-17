@@ -14,7 +14,8 @@ const CommitteePage = () => {
 
   const titleMap = {
     Executive: { label: "Executive Committee", icon: Shield, color: "text-blue-600" },
-    Editorial: { label: "Editorial Committee", icon: BookOpen, color: "text-emerald-600" },
+    PastExecutive: { label: "Past Executive Committee", icon: Users, color: "text-emerald-600" },
+    Editorial: { label: "Past Executive Committee", icon: Users, color: "text-emerald-600" },
     Advisory: { label: "Advisory Board", icon: Award, color: "text-amber-600" },
     PastPresidents: { label: "Past Presidents", icon: History, color: "text-purple-600" },
   };

@@ -9,7 +9,7 @@ const committeeMemberSchema = new mongoose.Schema({
     photoUrl: { type: String },
     committeeType: { 
         type: String, 
-        enum: ['Executive', 'Editorial', 'Advisory', 'PastPresidents'], 
+        enum: ['Executive', 'Editorial', 'Advisory', 'PastPresidents', 'PastExecutive'], 
         required: true 
     },
     order: { type: Number, default: 0 },

@@ -112,6 +112,7 @@ const Footer = () => {
             </h3>
             <ul className="space-y-2 text-gray-300 text-[13px]">
               <li><FooterLink to="/committee/Executive">Executive Committee</FooterLink></li>
+              <li><FooterLink to="/committee/PastExecutive">Past Executive Committee</FooterLink></li>
               <li><FooterLink to="/committee/Advisory">Advisory Board</FooterLink></li>
               <li><FooterLink to="/committee/PastPresidents">Past Presidents</FooterLink></li>
               <li><FooterLink to="/awards">Awards & Honours</FooterLink></li>

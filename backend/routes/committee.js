@@ -30,7 +30,13 @@ router.get('/:type', async (req, res) => {
         if (req.params.type.length === 24) {
              return res.status(400).json({ message: "Use PUT for updates" });
         }
-        const members = await Committee.find({ committeeType: req.params.type }).sort({ order: 1, period: -1, createdAt: -1 });
+        if (req.params.type === 'PastExecutive') {
+            await Committee.updateMany({ committeeType: 'Editorial' }, { committeeType: 'PastExecutive' });
+        }
+        const query = req.params.type === 'PastExecutive'
+            ? { committeeType: { $in: ['PastExecutive', 'Editorial'] } }
+            : { committeeType: req.params.type };
+        const members = await Committee.find(query).sort({ order: 1, period: -1, createdAt: -1 });
         res.json(members);
     } catch (err) { res.status(500).json({ message: err.message }); }
 });

@@ -123,7 +123,7 @@ const seedDB = async () => {
                         children: [
                             { label: 'History & Background', link: '/history' },
                             { label: 'Executive Committee', link: '/committee/Executive' },
-                            { label: 'Editorial Board', link: '/committee/Editorial' },
+                            { label: 'Past Executive Committee', link: '/committee/PastExecutive' },
                             { label: 'Constitution', link: '/constitution' },
                             { label: 'Memorandum', link: '/memorandum' }
                         ]
@@ -156,7 +156,7 @@ const seedDB = async () => {
                         isDropdown: true,
                         children: [
                             { label: 'Executive Committee', link: '/committee/Executive' },
-                            { label: 'Editorial Board', link: '/committee/Editorial' },
+                            { label: 'Past Executive Committee', link: '/committee/PastExecutive' },
                             { label: 'Advisory Board', link: '/committee/Advisory' },
                             { label: 'Past Presidents', link: '/committee/PastPresidents' }
                         ]
