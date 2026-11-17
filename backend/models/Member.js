@@ -5,7 +5,7 @@ const memberSchema = new mongoose.Schema({
     enrollmentId: { type: String, unique: true, sparse: true },
     title: { type: String, enum: ['Dr.', 'Mr.', 'Ms.', 'Prof.'], required: true },
     firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
+    lastName: { type: String }, // Optional: some legacy life members have single-word names (enroll route still requires it)
     password: { type: String, required: true },
     designation: { type: String },
     organization: { type: String },
@@ -30,7 +30,7 @@ const memberSchema = new mongoose.Schema({
     },
     membershipYear: { type: String },
     email: { type: String, required: true, unique: true },
-    mobileNumber: { type: String, required: true },
+    mobileNumber: { type: String }, // Optional: legacy life members imported without a mobile (enroll route still requires it)
     phone: { type: String },
     
     // Proposers
