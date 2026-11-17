@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Save, Loader2, FileText, Globe, Search, Plus, Eye, Edit, Trash2, CheckCircle, Upload, Link2, X, FilePlus, Shield, Lock, FileUp, Link } from 'lucide-react';
+import { Save, Loader2, FileText, Globe, Search, Plus, Eye, Edit, Trash2, CheckCircle, Upload, Link2, X, FilePlus, Shield, Lock, FileUp, Link, ExternalLink } from 'lucide-react';
 import JoditEditor from 'jodit-react';
 import { getServerUrl } from '../utils/urlHelper';
 import { uploadToStorageServer } from '../utils/fileUploader';
@@ -83,12 +83,12 @@ const PageManagement = () => {
         }
     };
 
-    const deletePdf = async (filename) => {
-        if (!window.confirm('Delete this PDF?')) return;
-        try {
-            await axios.delete(`${import.meta.env.VITE_API_URL}/pages/delete-pdf/${encodeURIComponent(filename)}`);
-            fetchPdfs();
-        } catch (err) { console.error(err); }
+    const handleRemovePdf = (index) => {
+        if (!window.confirm('Remove this attachment from the page?')) return;
+        setFormData(prev => ({
+            ...prev,
+            pdfs: (prev.pdfs || []).filter((_, i) => i !== index)
+        }));
     };
 
     const copyUrl = (url) => {
@@ -99,10 +99,12 @@ const PageManagement = () => {
     };
 
     const insertPdfLink = (pdf) => {
-        const fullUrl = getServerUrl(pdf.url);
-        const displayName = pdf.filename.replace(/^\d+-/, '').replace(/_/g, ' ');
+        const rawUrl = typeof pdf === 'string' ? pdf : (pdf.url || '');
+        const fullUrl = getServerUrl(rawUrl);
+        const rawFilename = typeof pdf === 'string' ? pdf : (pdf.filename || pdf.name || rawUrl.split('/').pop() || 'Download PDF');
+        const displayName = rawFilename.replace(/^\d+-/, '').replace(/_/g, ' ');
         const linkHtml = `<p><a href="${fullUrl}" target="_blank" rel="noreferrer" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#064e3b;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;">📄 ${displayName}</a></p>`;
-        setFormData(prev => ({ ...prev, content: prev.content + linkHtml }));
+        setFormData(prev => ({ ...prev, content: (prev.content || '') + linkHtml }));
     };
 
     const handleEdit = async (page) => {
@@ -578,13 +580,15 @@ const PageManagement = () => {
                                 <div className="flex items-center gap-3">
                                     <FilePlus size={18} className="text-primary" />
                                     <span className="text-sm font-bold text-white/80">PDF Attachments</span>
-                                    <span className="text-xs text-white/30 bg-white/5 px-2 py-0.5 rounded-full">{pdfs.length} files</span>
+                                    <span className="text-xs bg-primary/20 text-primary border border-primary/30 px-2.5 py-0.5 rounded-full font-bold">
+                                        {(formData.pdfs || []).length} {(formData.pdfs || []).length === 1 ? 'file' : 'files'}
+                                    </span>
                                 </div>
                                 <button
                                     type="button"
                                     onClick={() => pdfInputRef.current?.click()}
                                     disabled={uploadingPdf}
-                                    className="flex items-center gap-2 bg-primary/20 hover:bg-primary/30 text-primary px-4 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+                                    className="flex items-center gap-2 bg-primary/20 hover:bg-primary/30 text-primary px-4 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
                                 >
                                     {uploadingPdf ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
                                     {uploadingPdf ? `Uploading ${uploadProgress}%` : 'Upload PDF'}
@@ -609,8 +613,8 @@ const PageManagement = () => {
                                 onClick={() => pdfInputRef.current?.click()}
                             >
                                 <Upload size={20} className={`mx-auto mb-2 ${dragOver ? 'text-primary' : 'text-white/20'}`} />
-                                <p className="text-xs text-white/30">Drag & drop a PDF here or <span className="text-primary font-semibold">click to browse</span></p>
-                                <p className="text-[10px] text-white/20 mt-1">Max 100 MB · PDF only</p>
+                                <p className="text-xs text-white/50">Drag & drop a PDF here or <span className="text-primary font-semibold">click to browse</span></p>
+                                <p className="text-[10px] text-white/30 mt-1">Max 100 MB · PDF only</p>
                             </div>
 
                             {/* Upload Progress Bar */}
@@ -626,47 +630,73 @@ const PageManagement = () => {
                             )}
 
                             {/* PDF List */}
-                            {pdfs.length > 0 && (
-                                <div className="mx-4 mb-4 space-y-2 max-h-52 overflow-y-auto pr-1">
-                                    {pdfs.map(pdf => (
-                                        <div key={pdf.filename} className="flex items-center gap-3 bg-white/5 hover:bg-white/8 rounded-xl px-4 py-3 group transition-all">
-                                            <FileText size={16} className="text-primary shrink-0" />
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-medium text-white truncate">
-                                                    {pdf.filename.replace(/^\d+-/, '')}
-                                                </p>
-                                                <p className="text-[10px] text-white/30">{(pdf.size / 1024).toFixed(0)} KB</p>
+                            {formData.pdfs && formData.pdfs.length > 0 && (
+                                <div className="mx-4 mb-4 space-y-2 max-h-64 overflow-y-auto pr-1">
+                                    <div className="text-[11px] font-bold text-white/40 uppercase tracking-wider mb-2 px-1">
+                                        Attached Files ({formData.pdfs.length})
+                                    </div>
+                                    {formData.pdfs.map((pdf, idx) => {
+                                        const rawUrl = typeof pdf === 'string' ? pdf : (pdf.url || '');
+                                        const fullUrl = getServerUrl(rawUrl);
+                                        const rawFilename = typeof pdf === 'string' ? pdf : (pdf.filename || pdf.name || rawUrl.split('/').pop() || `Attachment ${idx + 1}.pdf`);
+                                        const displayName = rawFilename.replace(/^\d+-/, '').replace(/_/g, ' ');
+
+                                        return (
+                                            <div key={idx} className="flex items-center gap-3 bg-white/5 hover:bg-white/8 rounded-xl px-4 py-3 group transition-all border border-white/5">
+                                                <FileText size={18} className="text-primary shrink-0" />
+                                                <div className="flex-1 min-w-0">
+                                                    <a 
+                                                        href={fullUrl} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer" 
+                                                        className="text-xs font-semibold text-white hover:text-primary transition-colors truncate block"
+                                                        title="Click to view/download PDF in new tab"
+                                                    >
+                                                        {displayName}
+                                                    </a>
+                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                        <span className="text-[10px] text-white/40">Attachment #{idx + 1}</span>
+                                                        <a 
+                                                            href={fullUrl} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer" 
+                                                            className="text-[10px] text-primary hover:underline flex items-center gap-1 font-medium"
+                                                        >
+                                                            <ExternalLink size={10} /> View PDF
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-1.5 opacity-90 group-hover:opacity-100 transition-all">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => insertPdfLink(pdf)}
+                                                        title="Insert link into page content"
+                                                        className="px-2.5 py-1.5 rounded-lg bg-primary/20 hover:bg-primary/30 text-primary transition-all text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                                                    >
+                                                        Insert
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => copyUrl(rawUrl)}
+                                                        title="Copy URL"
+                                                        className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-all cursor-pointer"
+                                                    >
+                                                        {copiedUrl === rawUrl
+                                                            ? <CheckCircle size={15} className="text-green-400" />
+                                                            : <Link2 size={15} />}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRemovePdf(idx)}
+                                                        title="Remove attachment from this page"
+                                                        className="p-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 text-white/40 hover:text-red-400 transition-all cursor-pointer"
+                                                    >
+                                                        <Trash2 size={15} />
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => insertPdfLink(pdf)}
-                                                    title="Insert link into content"
-                                                    className="p-1.5 rounded-lg bg-primary/10 hover:bg-primary/30 text-primary transition-all text-[10px] font-bold"
-                                                >
-                                                    Insert
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => copyUrl(pdf.url)}
-                                                    title="Copy URL"
-                                                    className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-all"
-                                                >
-                                                    {copiedUrl === pdf.url
-                                                        ? <CheckCircle size={14} className="text-green-400" />
-                                                        : <Link2 size={14} className="text-white/40" />}
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => deletePdf(pdf.filename)}
-                                                    title="Delete PDF"
-                                                    className="p-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 text-white/30 hover:text-red-400 transition-all"
-                                                >
-                                                    <X size={14} />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
