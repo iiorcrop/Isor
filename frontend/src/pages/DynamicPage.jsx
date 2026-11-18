@@ -3,12 +3,14 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { Loader2, Calendar, User } from 'lucide-react';
 import ReadMore from '../components/ReadMore';
+import ArchivesView from '../components/ArchivesView';
 import { getServerUrl } from '../utils/urlHelper';
 
-const DynamicPage = () => {
+const DynamicPage = ({ forcedSlug }) => {
     const params = useParams();
     const navigate = useNavigate();
-    const slug = (params['*'] || '').replace(/^\/+/, '');
+    const rawSlug = forcedSlug || params['*'] || '';
+    const slug = rawSlug.replace(/^\/+/, '');
     const [page, setPage] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -49,7 +51,7 @@ const DynamicPage = () => {
         </div>
     );
 
-    if (!page || !page.content) return (
+    if (!page || (!page.content && (!page.pdfs || page.pdfs.length === 0))) return (
         <div className="min-h-screen bg-[#fff9f0] flex items-center justify-center p-6">
             <div className="max-w-xl mx-auto bg-white p-12 rounded-[3rem] border border-[#064e3b]/10 text-center shadow-xl space-y-4">
                 <h1 className="text-3xl font-serif font-bold text-[#064e3b]">Page Not Found</h1>
@@ -60,6 +62,11 @@ const DynamicPage = () => {
             </div>
         </div>
     );
+
+    // Render specialized modern UI for Archives
+    if (slug.toLowerCase() === 'archives') {
+        return <ArchivesView page={page} />;
+    }
 
     return (
         <div className="bg-[#fff9f0] min-h-screen py-16 px-6">

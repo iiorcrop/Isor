@@ -85,6 +85,7 @@ function App() {
           <Route path="/member-dashboard" element={<MemberDashboard />} />
           <Route path="/verify-certificate" element={<VerifyCertificate />} />
           <Route path="/verify-certificate/:enrollmentId" element={<VerifyCertificate />} />
+          <Route path="/archives" element={<DynamicPage forcedSlug="archives" />} />
           <Route path="/page/*" element={<DynamicPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
